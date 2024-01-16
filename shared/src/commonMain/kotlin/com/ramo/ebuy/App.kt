@@ -25,11 +25,11 @@ import com.ramo.ebuy.global.navigation.MokoModel
 import com.ramo.ebuy.global.navigation.Navigator
 import com.ramo.ebuy.global.navigation.RootComponent
 import com.ramo.ebuy.global.ui.OnLaunchScreenScope
+import com.ramo.ebuy.global.ui.rememberEbuy
 import com.ramo.ebuy.ui.sign.LogInEmailScreen
 import com.ramo.ebuy.ui.sign.LogInScreen
 import com.ramo.ebuy.ui.user.HomeUserScreen
 import com.ramo.ebuy.ui.user.HomeUserViewModel
-import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.KoinApplication
 import org.koin.compose.koinInject
 
@@ -81,7 +81,7 @@ fun SplashScreen(
         Box(contentAlignment = Alignment.Center) {
             Image(
                 modifier = Modifier.width(100.dp),
-                painter = painterResource("ebuy.xml"),
+                imageVector = rememberEbuy(),
                 contentDescription = ""
             )
         }

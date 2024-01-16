@@ -34,9 +34,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ramo.ebuy.global.base.Theme
+import com.ramo.ebuy.global.ui.rememberEbuy
 import com.ramo.ebuy.global.ui.rememberMic
 import com.ramo.ebuy.global.ui.rememberPhotoCamera
-import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 
 @Composable
@@ -66,7 +66,7 @@ fun BarMainScreen(
         Image(
             modifier = Modifier
                 .height(56.dp),
-            painter = painterResource("ebuy.xml"),
+            imageVector = rememberEbuy(),
             contentScale = ContentScale.Fit,
             contentDescription = null,
         )

@@ -40,8 +40,9 @@ import com.ramo.ebuy.global.base.outlinedTextFieldStyle
 import com.ramo.ebuy.global.navigation.MokoModel
 import com.ramo.ebuy.global.navigation.Navigator
 import com.ramo.ebuy.global.navigation.RootComponent
+import com.ramo.ebuy.global.ui.rememberEbuy
+import com.ramo.ebuy.global.ui.rememberGoogle
 import org.jetbrains.compose.resources.ExperimentalResourceApi
-import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 
 @OptIn(ExperimentalResourceApi::class)
@@ -134,7 +135,7 @@ fun LogInScreen(
                         },
                     ) {
                         Row {
-                            Image(painterResource("google.xml"), null, modifier = Modifier.width(20.dp).height(20.dp))
+                            Image(rememberGoogle(), null, modifier = Modifier.width(20.dp).height(20.dp))
                             Spacer(modifier = Modifier.width(35.dp))
                             Text(
                                 text = "continue with Google",
@@ -159,7 +160,7 @@ fun LogInScreen(
                         },
                     ) {
                         Row {
-                            Image(painterResource("facebook.xml"), null, modifier = Modifier.width(20.dp).height(20.dp))
+                            Image(rememberEbuy(), null, modifier = Modifier.width(20.dp).height(20.dp))
                             Spacer(modifier = Modifier.width(35.dp))
                             Text(
                                 text = "continue with Facebook",
