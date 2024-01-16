@@ -1,0 +1,14 @@
+*.iml
+.gradle
+.idea
+.DS_Store
+build
+captures
+.externalNativeBuild
+.cxx
+local.properties
+xcuserdata
+*.log
+src/commonMain/kotlin/com/ramo/myapplication/global/base/ConstSecure.kt
+ConstSecure.kt
+ConstSecure
