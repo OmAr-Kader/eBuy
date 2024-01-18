@@ -4,6 +4,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -34,9 +35,14 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ramo.ebuy.global.base.Theme
+import com.ramo.ebuy.global.ui.rememberArrowBack
 import com.ramo.ebuy.global.ui.rememberEbuy
+import com.ramo.ebuy.global.ui.rememberMenu
 import com.ramo.ebuy.global.ui.rememberMic
 import com.ramo.ebuy.global.ui.rememberPhotoCamera
+import com.ramo.ebuy.global.ui.rememberSearch
+import com.ramo.ebuy.global.ui.rememberShare
+import com.ramo.ebuy.global.ui.rememberShoppingCart
 import org.koin.compose.koinInject
 
 @Composable
@@ -83,8 +89,7 @@ fun BarMainScreen(
                     .height(40.dp)
                     .background(color = theme.backDark, shape = CircleShape)
                     .padding(8.dp),
-                imageVector = Icons.Default.Search,
-                colorFilter = ColorFilter.tint(theme.textColor),
+                imageVector = rememberSearch(theme.textColor),
                 contentScale = ContentScale.Fit,
                 contentDescription = null,
             )
@@ -95,8 +100,7 @@ fun BarMainScreen(
                     .height(40.dp)
                     .background(color = theme.backDark, shape = CircleShape)
                     .padding(8.dp),
-                imageVector = Icons.Default.ShoppingCart,
-                colorFilter = ColorFilter.tint(theme.textColor),
+                imageVector = rememberShoppingCart(theme.textColor),
                 contentScale = ContentScale.Fit,
                 contentDescription = null,
             )
@@ -104,6 +108,99 @@ fun BarMainScreen(
     }
 }
 
+@Composable
+fun BarProductScreen(
+    onClick: (Int) -> Unit,
+    theme: Theme = koinInject(),
+) {
+    val last = remember {
+        mutableFloatStateOf(-150F)
+    }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .background(theme.background)
+            .padding(start = 15.dp, end = 15.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Row {
+            Image(
+                modifier = Modifier
+                    .clickable {
+                        onClick(0)
+                    }
+                    .padding(start = 10.dp)
+                    .height(56.dp),
+                imageVector = rememberArrowBack(theme.textColor),
+                contentScale = ContentScale.Fit,
+                contentDescription = null,
+            )
+            Text("Item", color = theme.textColor)
+        }
+        Row {
+            Image(
+                modifier = Modifier
+                    .clickable {
+                        onClick(1)
+                    }
+                    .width(40.dp)
+                    .height(40.dp)
+                    .background(color = theme.backDark, shape = CircleShape)
+                    .padding(8.dp),
+                imageVector = rememberSearch(theme.textColor),
+                contentScale = ContentScale.Fit,
+                contentDescription = null,
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Image(
+                modifier = Modifier
+                    .clickable {
+                        onClick(2)
+                    }
+                    .width(40.dp)
+                    .height(40.dp)
+                    .background(color = theme.backDark, shape = CircleShape)
+                    .padding(8.dp),
+                imageVector = rememberShoppingCart(theme.textColor),
+                colorFilter = ColorFilter.tint(theme.textColor),
+                contentScale = ContentScale.Fit,
+                contentDescription = null,
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Image(
+                modifier = Modifier
+                    .clickable {
+                        onClick(3)
+                    }
+                    .width(40.dp)
+                    .height(40.dp)
+                    .background(color = theme.backDark, shape = CircleShape)
+                    .padding(8.dp),
+                imageVector = rememberShare(theme.textColor),
+                colorFilter = ColorFilter.tint(theme.textColor),
+                contentScale = ContentScale.Fit,
+                contentDescription = null,
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Image(
+                modifier = Modifier
+                    .clickable {
+                        onClick(4)
+                    }
+                    .width(40.dp)
+                    .height(40.dp)
+                    .background(color = theme.backDark, shape = CircleShape)
+                    .padding(8.dp),
+                imageVector = rememberMenu(theme.textColor),
+                colorFilter = ColorFilter.tint(theme.textColor),
+                contentScale = ContentScale.Fit,
+                contentDescription = null,
+            )
+        }
+    }
+}
 
 @Composable
 fun SearchBarMainScreen(

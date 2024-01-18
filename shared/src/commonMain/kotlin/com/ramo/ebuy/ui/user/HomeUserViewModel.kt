@@ -13,12 +13,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-class HomeUserViewModel(
-    private val project: Project
-) : BaseViewModel() {
+class HomeUserViewModel(project: Project) : BaseViewModel(project) {
 
     private val _uiState = MutableStateFlow(State())
     val uiState = _uiState.asStateFlow()
+
+    fun loadUserData() {
+        fetchUserData {
+            _uiState.update { state ->
+                state.copy(userBase = it)
+            }
+        }
+    }
 
     fun setSelectedPage(it: Int) {
         _uiState.update { state ->
@@ -29,6 +35,7 @@ class HomeUserViewModel(
     data class State(
         val circleCato: List<Category> = cato(),
         val productVer: List<Product> = item(),
+        val userBase: UserBase? = null,
         val selectedPage: Int = 0,
     )
 }

@@ -71,7 +71,7 @@ fun SplashScreen(
     OnLaunchScreenScope {
         kotlinx.coroutines.delay(1000L)
         kotlinx.coroutines.coroutineScope {
-            navigator.navigateTo(RootComponent.Configuration.HomeUserRoute)
+            navigator.navigateHome(RootComponent.Configuration.HomeUserRoute)
         }
     }
     Surface(

@@ -41,7 +41,13 @@ data class Product(
     @SerialName("category")
     val category: Int,
     @SerialName("product_spec")
-    val specs: Array<ProductSpecs>,
+    val specs: List<ProductSpecs>,
+    @SerialName("returns")
+    val returns: Int,
+    @SerialName("payments")
+    val payments: List<Int>,
+    @SerialName("import_charges")
+    val importCharges: Int,
 ) {
     @kotlinx.serialization.Transient
     val timeGap: TimeGap? = fetchTimeGap(discountEnd)
@@ -49,57 +55,30 @@ data class Product(
     @kotlinx.serialization.Transient
     val discountPer: Int = (((price - discount) / ((price + discount) / 2)) * 100).toInt()
     var isFavorite: Boolean = false
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
 
-        other as Product
-
-        if (id != other.id) return false
-        if (name != other.name) return false
-        if (imageUri != other.imageUri) return false
-        if (price != other.price) return false
-        if (discount != other.discount) return false
-        if (discountStart != other.discountStart) return false
-        if (discountEnd != other.discountEnd) return false
-        if (parentCato != other.parentCato) return false
-        if (parentCatoName != other.parentCatoName) return false
-        if (sold != other.sold) return false
-        if (country != other.country) return false
-        if (size != other.size) return false
-        if (condition != other.condition) return false
-        if (quantity != other.quantity) return false
-        if (quantityAvailable != other.quantityAvailable) return false
-        if (tint != other.tint) return false
-        if (category != other.category) return false
-        if (!specs.contentEquals(other.specs)) return false
-        if (timeGap != other.timeGap) return false
-        return discountPer == other.discountPer
-    }
-
-    override fun hashCode(): Int {
-        var result = id.hashCode()
-        result = 31 * result + name.hashCode()
-        result = 31 * result + imageUri.hashCode()
-        result = 31 * result + price.hashCode()
-        result = 31 * result + discount.hashCode()
-        result = 31 * result + discountStart.hashCode()
-        result = 31 * result + discountEnd.hashCode()
-        result = 31 * result + parentCato
-        result = 31 * result + parentCatoName.hashCode()
-        result = 31 * result + sold
-        result = 31 * result + country
-        result = 31 * result + size.hashCode()
-        result = 31 * result + condition.hashCode()
-        result = 31 * result + quantity
-        result = 31 * result + quantityAvailable
-        result = 31 * result + tint.hashCode()
-        result = 31 * result + category
-        result = 31 * result + specs.contentHashCode()
-        result = 31 * result + (timeGap?.hashCode() ?: 0)
-        result = 31 * result + discountPer
-        return result
-    }
+    constructor() : this(
+        0L,
+        "",
+        "",
+        0F,
+        0F,
+        0L,
+        0L,
+        -1,
+        "",
+        0,
+        0,
+        "",
+        "",
+        0,
+        0,
+        "",
+        0,
+        emptyList<ProductSpecs>(),
+        -1,
+        emptyList(),
+        -1
+    )
 }
 
 @Serializable
@@ -107,5 +86,15 @@ data class ProductSpecs(
     @SerialName("label")
     val label: String,
     @SerialName("spec")
-    val spec: String,
+    val spec: List<String>,
+)
+
+@Serializable
+data class DeliveryProcess(
+    @SerialName("from")
+    val from: String,
+    @SerialName("up_to")
+    val upTo: String,
+    @SerialName("specProcess")
+    val location: List<String>,
 )

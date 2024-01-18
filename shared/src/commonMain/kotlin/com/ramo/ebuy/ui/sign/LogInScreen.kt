@@ -45,8 +45,6 @@ import com.ramo.ebuy.global.ui.rememberGoogle
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.koin.compose.koinInject
 
-@OptIn(ExperimentalResourceApi::class)
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun LogInScreen(
     navigator: Navigator,
@@ -61,7 +59,7 @@ fun LogInScreen(
         },
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().background(color = theme.background).verticalScroll(rememberScrollState())
+            modifier = Modifier.fillMaxSize().padding(it).background(color = theme.background).verticalScroll(rememberScrollState())
         ) {
             Column(
                 modifier = Modifier
@@ -198,7 +196,6 @@ fun LogInScreen(
 
 
 
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun LogInEmailScreen(
     navigator: Navigator,
@@ -218,7 +215,7 @@ fun LogInEmailScreen(
         },
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().background(color = theme.background).verticalScroll(rememberScrollState())
+            modifier = Modifier.fillMaxSize().padding(it).background(color = theme.background).verticalScroll(rememberScrollState())
         ) {
             Column(
                 modifier = Modifier

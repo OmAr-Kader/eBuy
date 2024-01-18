@@ -27,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ramo.ebuy.di.Project
@@ -35,6 +36,7 @@ import com.ramo.ebuy.global.navigation.MokoModel
 import com.ramo.ebuy.global.navigation.Navigator
 import com.ramo.ebuy.global.ui.AddItem
 import com.ramo.ebuy.global.ui.HotBar
+import com.ramo.ebuy.global.ui.OnLaunchScreen
 import com.ramo.ebuy.global.ui.VerticalListSingleTitle
 import com.ramo.ebuy.global.ui.VerticalListTitle
 import com.ramo.ebuy.global.ui.collapse.CollapsingToolbar
@@ -52,6 +54,7 @@ import com.ramo.ebuy.ui.common.GridCircleCato
 import com.ramo.ebuy.ui.common.ProductList
 import com.ramo.ebuy.ui.common.ProfileItem
 import com.ramo.ebuy.ui.common.SearchBarMainScreen
+import com.seiko.imageloader.rememberImagePainter
 import org.koin.compose.koinInject
 
 @Composable
@@ -90,7 +93,7 @@ fun HomeUserScreen(
         Box(Modifier.padding(it)) {
             when (state.selectedPage) {
                 0 -> HomeScreen(viewModel)
-                1 -> ProfileScreen()
+                1 -> ProfileScreen(viewModel)
             }
         }
     }
@@ -162,8 +165,16 @@ fun HomeScreen(
 @Composable
 fun ProfileScreen(
     //navigator: Navigator,
+    viewModel: HomeUserViewModel,
     theme: Theme = koinInject()
 ) {
+    val state by viewModel.uiState.collectAsState()
+    OnLaunchScreen {
+        viewModel.loadUserData()
+    }
+    val painter = state.userBase?.imageUri?.let {
+        rememberImagePainter(url = it)
+    }
     Column(Modifier.fillMaxSize()) {
         BarMainScreen(-112)
         Spacer(modifier = Modifier.height(10.dp))
@@ -181,12 +192,21 @@ fun ProfileScreen(
                         color = theme.backDark,
                         shape = CircleShape,
                     ) {
-                        Image(
-                            modifier = Modifier.size(70.dp).padding(top = 10.dp),
-                            imageVector = rememberProfile(theme.backDarkSec),
-                            contentDescription = "",
-                            colorFilter = ColorFilter.tint(theme.backDarkSec)
-                        )
+                        painter?.let {
+                            Image(
+                                modifier = Modifier.size(70.dp).padding(top = 10.dp),
+                                painter = it,
+                                contentScale = ContentScale.Fit,
+                                contentDescription = "",
+                            )
+                        } ?: run {
+                            Image(
+                                modifier = Modifier.size(70.dp).padding(top = 10.dp),
+                                imageVector = rememberProfile(theme.backDarkSec),
+                                contentDescription = "",
+                                colorFilter = ColorFilter.tint(theme.backDarkSec)
+                            )
+                        }
                     }
                     Spacer(modifier = Modifier.height(15.dp))
                     Text(modifier = Modifier.padding(), text = "User Name", color = theme.textColor, fontSize = 16.sp)

@@ -34,6 +34,7 @@ kotlin {
                 optIn("org.jetbrains.compose.resources.ExperimentalResourceApi")
                 optIn("androidx.compose.material3.ExperimentalMaterial3Api")
                 optIn("androidx.compose.foundation.layout.ExperimentalLayoutApi")
+                optIn("androidx.compose.foundation.ExperimentalFoundationApi")
             }
         }
         commonMain.dependencies {
