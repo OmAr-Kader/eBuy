@@ -58,6 +58,10 @@ import com.ramo.ebuy.global.util.hotBarIcons
 import com.seiko.imageloader.rememberImagePainter
 import org.koin.compose.koinInject
 
+//@Composable
+fun Modifier.fillWidthIfZero(/*@FloatRange(from = 0.0, to = 1.0)*/ size: DpSize) =
+    this.then(if (size.width == 0.dp) fillMaxWidth().height(size.height) else size(size))
+
 @Composable
 fun OnLaunchScreen(invoke: () -> Unit) {
     val isLaunched = remember {
@@ -320,7 +324,8 @@ fun RowScope.AddItem(
 @Composable
 fun ImagesPageView(
     list: List<String>,
-    size: DpSize
+    size: DpSize,
+    onClick: (Int) -> Unit
 ) {
     val pagerState = rememberPagerState(pageCount = { list.size })
     Column(
@@ -333,13 +338,15 @@ fun ImagesPageView(
         Spacer(modifier = Modifier.height(13.dp))
         HorizontalPager(
             state = pagerState,
-            modifier = Modifier.size(size)
+            modifier = Modifier.fillWidthIfZero(size)
                 .background(MaterialTheme.colorScheme.background)
                 .clip(RoundedCornerShape(20.dp)),
         ) {
             val painter = rememberImagePainter(url = list[it])
             Image(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().clickable {
+                    onClick(it)
+                },
                 painter = painter,
                 contentScale = ContentScale.Crop,
                 contentDescription = "",

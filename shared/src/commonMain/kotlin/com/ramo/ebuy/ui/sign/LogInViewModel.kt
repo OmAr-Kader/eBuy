@@ -7,8 +7,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 class LogInViewModel(
-    private val project: Project
-) : BaseViewModel() {
+    project: Project
+) : BaseViewModel(project) {
 
     private val _uiState = MutableStateFlow(State())
     val uiState = _uiState.asStateFlow()

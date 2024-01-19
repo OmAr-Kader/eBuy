@@ -4,14 +4,18 @@ import com.ramo.ebuy.global.util.TimeGap
 import com.ramo.ebuy.global.util.fetchTimeGap
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Serializable
 data class Product(
+    @SerialName("id")
     val id: Long,
+    @SerialName("product_code")
+    val productCode: String,
     @SerialName("name")
     val name: String,
-    @SerialName("imageUri")
-    val imageUri: String,
+    @SerialName("image_uris")
+    val imageUris: List<String>,
     @SerialName("price")
     val price: Float,
     @SerialName("discount")
@@ -24,35 +28,13 @@ data class Product(
     val parentCato: Int,
     @SerialName("parentCatoName")
     val parentCatoName: String,
-    @SerialName("sold")
-    val sold: Int,
-    @SerialName("country")
-    val country: Int,
-    @SerialName("size")
-    val size: String,
     @SerialName("condition")
     val condition: String,
-    @SerialName("quantity")
-    val quantity: Int,
-    @SerialName("quantity_available")
-    val quantityAvailable: Int,
-    @SerialName("tint")
-    val tint: String,
-    @SerialName("category")
-    val category: Int,
-    @SerialName("product_spec")
-    val specs: List<ProductSpecs>,
-    @SerialName("returns")
-    val returns: Int,
-    @SerialName("payments")
-    val payments: List<Int>,
-    @SerialName("import_charges")
-    val importCharges: Int,
 ) {
-    @kotlinx.serialization.Transient
+    @Transient
     val timeGap: TimeGap? = fetchTimeGap(discountEnd)
 
-    @kotlinx.serialization.Transient
+    @Transient
     val discountPer: Int = (((price - discount) / ((price + discount) / 2)) * 100).toInt()
     var isFavorite: Boolean = false
 
@@ -60,27 +42,57 @@ data class Product(
         0L,
         "",
         "",
+        emptyList<String>(),
         0F,
         0F,
         0L,
         0L,
         -1,
         "",
-        0,
-        0,
-        "",
-        "",
-        0,
-        0,
-        "",
-        0,
-        emptyList<ProductSpecs>(),
-        -1,
-        emptyList(),
-        -1
+            "",
     )
 }
 
+@Serializable
+data class ProductBaseSpecs(
+    @SerialName("product_id")
+    val productID: Long,
+    @SerialName("publisher_id")
+    val publisherId: Long,
+    @SerialName("country_product")
+    val countryProduct: Int,
+    @SerialName("platform")
+    val platform: String,
+    @SerialName("age_rate")
+    val ageRate: String,
+    @SerialName("release_year")
+    val releaseYear: Long,
+    @SerialName("mpn")
+    val mpn: String,
+    @SerialName("tint")
+    val tint: List<Int>,
+    @SerialName("product_spec")
+    val specs: List<ProductSpecs>,
+    @SerialName("extra_product_spec")
+    val specsExtra: List<ProductSpecs>,
+) {
+    constructor() : this(
+        0L,
+        0L,
+        0,
+        "",
+        "",
+        0L,
+        "",
+        emptyList(),
+        emptyList<ProductSpecs>(),
+        emptyList<ProductSpecs>(),
+    )
+}
+
+/**
+ * Embedded For [ProductBaseSpecs]
+ */
 @Serializable
 data class ProductSpecs(
     @SerialName("label")
@@ -90,11 +102,22 @@ data class ProductSpecs(
 )
 
 @Serializable
-data class DeliveryProcess(
-    @SerialName("from")
-    val from: String,
-    @SerialName("up_to")
-    val upTo: String,
-    @SerialName("specProcess")
-    val location: List<String>,
+data class ProductAvailability(
+    @SerialName("product_id")
+    val productID: Long,
+    @SerialName("product_ava_code")
+    val productAvaCode: ProductAvaCode,
+)
+
+/**
+ * Embedded For [ProductAvailability]
+ */
+@Serializable
+data class ProductAvaCode(
+    @SerialName("spec_code")
+    val specCode: String,
+    @SerialName("quantity")
+    val quantity: Int,
+    @SerialName("quantity_available")
+    val quantityAvailable: Int,
 )

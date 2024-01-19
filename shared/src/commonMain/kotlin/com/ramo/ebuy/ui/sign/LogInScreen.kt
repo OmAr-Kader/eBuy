@@ -1,6 +1,5 @@
 package com.ramo.ebuy.ui.sign
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -42,7 +41,6 @@ import com.ramo.ebuy.global.navigation.Navigator
 import com.ramo.ebuy.global.navigation.RootComponent
 import com.ramo.ebuy.global.ui.rememberEbuy
 import com.ramo.ebuy.global.ui.rememberGoogle
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.koin.compose.koinInject
 
 @Composable
@@ -248,8 +246,8 @@ fun LogInEmailScreen(
                         OutlinedTextField(
                             modifier = Modifier.fillMaxWidth(),
                             value = state.email,
-                            onValueChange = {
-                                viewModel.setEmail(it)
+                            onValueChange = { email ->
+                                viewModel.setEmail(email)
                             },
                             shape = RoundedCornerShape(12.dp),
                             placeholder = { Text(text = "Enter Email", fontSize = 14.sp) },
@@ -261,8 +259,8 @@ fun LogInEmailScreen(
                         OutlinedTextField(
                             modifier = Modifier.fillMaxWidth(),
                             value = state.password,
-                            onValueChange = {
-                                viewModel.setPassword(it)
+                            onValueChange = { pass ->
+                                viewModel.setPassword(pass)
                             },
                             shape = RoundedCornerShape(12.dp),
                             placeholder = { Text(text = "Enter Password") },

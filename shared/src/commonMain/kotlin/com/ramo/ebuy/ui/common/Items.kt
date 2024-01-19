@@ -51,7 +51,7 @@ fun ProductItem(
     onClick: (Product) -> Unit,
     theme: Theme = koinInject(),
 ) {
-    val painter = rememberImagePainter(url = item.imageUri)
+    val painter = rememberImagePainter(url = item.imageUris.firstOrNull() ?: "")
     Column(
         modifier = Modifier
             .width(170.dp)
@@ -129,7 +129,7 @@ fun ProductMainSearchItem(
     onClick: (Product) -> Unit,
     theme: Theme = koinInject(),
 ) {
-    val painter = rememberImagePainter(url = item.imageUri)
+    val painter = rememberImagePainter(url = item.imageUris.firstOrNull() ?: "")
     Row(
         modifier = Modifier.clickable {
             onClick(item)
