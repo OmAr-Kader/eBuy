@@ -1,8 +1,11 @@
 package com.ramo.ebuy.ui.sign
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -30,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,6 +43,8 @@ import com.ramo.ebuy.global.base.outlinedTextFieldStyle
 import com.ramo.ebuy.global.navigation.MokoModel
 import com.ramo.ebuy.global.navigation.Navigator
 import com.ramo.ebuy.global.navigation.RootComponent
+import com.ramo.ebuy.global.ui.AnimatedText
+import com.ramo.ebuy.global.ui.rememberArrowBack
 import com.ramo.ebuy.global.ui.rememberEbuy
 import com.ramo.ebuy.global.ui.rememberGoogle
 import org.koin.compose.koinInject
@@ -46,8 +52,11 @@ import org.koin.compose.koinInject
 @Composable
 fun LogInScreen(
     navigator: Navigator,
+    project: Project = koinInject(),
     theme: Theme = koinInject(),
+    viewModel: LogInViewModel = MokoModel { LogInViewModel(project) }
 ) {
+    val state by viewModel.uiState.collectAsState()
     val scaffoldState = remember { SnackbarHostState() }
     Scaffold(
         snackbarHost = {
@@ -65,12 +74,35 @@ fun LogInScreen(
                     .height(170.dp)
             ) {
                 Spacer(modifier = Modifier.height(20.dp))
-                Text(
-                    text = "Sign in",
-                    modifier = Modifier.padding(horizontal = 50.dp),
-                    color = theme.textColor,
-                    fontSize = 25.sp,
-                )
+                Box {
+                    Column {
+                        AnimatedVisibility(
+                            visible = state.isRegister
+                        ) {
+                            Image(
+                                modifier = Modifier
+                                    .clickable {
+                                        viewModel.setIsRegister(false)
+                                    }
+                                    .padding(start = 10.dp)
+                                    .height(56.dp),
+                                imageVector = rememberArrowBack(theme.textColor),
+                                contentScale = ContentScale.Fit,
+                                contentDescription = null,
+                            )
+                        }
+                    }
+                    AnimatedText(
+                        if (state.isRegister) "Sign in" else "Register"
+                    ) { str ->
+                        Text(
+                            text = str,
+                            modifier = Modifier.padding(horizontal = 60.dp),
+                            color = theme.textColor,
+                            fontSize = 25.sp,
+                        )
+                    }
+                }
                 Spacer(modifier = Modifier.height(30.dp))
                 Text(
                     text = "Hello",
@@ -177,14 +209,18 @@ fun LogInScreen(
                             color = theme.primary,
                         ),
                         onClick = {
-
+                            viewModel.setIsRegister(!state.isRegister)
                         },
                     ) {
-                        Text(
-                            text = "Create an account",
-                            color = theme.textColor,
-                            fontSize = 18.sp,
-                        )
+                        AnimatedText(
+                            targetState = if (state.isRegister) "Create an account" else "Login",
+                        ) { targetCount ->
+                            Text(
+                                text = targetCount,
+                                color = theme.textColor,
+                                fontSize = 18.sp,
+                            )
+                        }
                     }
                 }
             }
@@ -192,14 +228,12 @@ fun LogInScreen(
     }
 }
 
-
-
 @Composable
 fun LogInEmailScreen(
     navigator: Navigator,
     project: Project = koinInject(),
     theme: Theme = koinInject(),
-    viewModel: LogInViewModel = MokoModel { LogInViewModel(project) }
+    viewModel: LogInEmailViewModel = MokoModel { LogInEmailViewModel(project) }
 ) {
     val state by viewModel.uiState.collectAsState()
     val scaffoldState = remember { SnackbarHostState() }
@@ -220,12 +254,25 @@ fun LogInEmailScreen(
                     .fillMaxWidth()
             ) {
                 Spacer(modifier = Modifier.height(20.dp))
-                Text(
-                    text = "Sign in",
-                    modifier = Modifier.padding(horizontal = 50.dp),
-                    color = theme.textColor,
-                    fontSize = 25.sp,
-                )
+                Box {
+                    Image(
+                        modifier = Modifier
+                            .clickable {
+                                navigator.goBack()
+                            }
+                            .padding(start = 10.dp)
+                            .height(56.dp),
+                        imageVector = rememberArrowBack(theme.textColor),
+                        contentScale = ContentScale.Fit,
+                        contentDescription = null,
+                    )
+                    Text(
+                        text = "Sign in",
+                        modifier = Modifier.padding(horizontal = 60.dp),
+                        color = theme.textColor,
+                        fontSize = 25.sp,
+                    )
+                }
                 Spacer(modifier = Modifier.height(30.dp))
                 Text(
                     text = "Welcome",

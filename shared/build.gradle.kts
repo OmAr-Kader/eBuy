@@ -35,6 +35,7 @@ kotlin {
                 optIn("androidx.compose.material3.ExperimentalMaterial3Api")
                 optIn("androidx.compose.foundation.layout.ExperimentalLayoutApi")
                 optIn("androidx.compose.foundation.ExperimentalFoundationApi")
+                optIn("com.arkivanov.decompose.ExperimentalDecomposeApi")
             }
         }
         commonMain.dependencies {
@@ -65,7 +66,7 @@ kotlin {
             implementation(libs.supabase.storage)
             implementation(libs.settings.russhwolf)
             implementation(libs.napier)
-
+            implementation(libs.mp.file.picker)
             api(libs.moko.mvvm.core)
             api(libs.moko.mvvm.compose)
             api(libs.moko.mvvm.flow)

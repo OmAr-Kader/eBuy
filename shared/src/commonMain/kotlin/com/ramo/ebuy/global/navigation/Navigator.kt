@@ -5,10 +5,10 @@ import com.arkivanov.decompose.ComponentContext
 class Navigator(
     componentContext: ComponentContext,
     private val onNavigateToScreen: (RootComponent.Configuration) -> Unit,
-    private val onDisplayScreen:  (RootComponent.Configuration) -> Unit,
+    private val onDisplayScreen: (RootComponent.Configuration) -> Unit,
+    private val onReplaceScreen: (RootComponent.Configuration) -> Unit,
     private val onGoBack: () -> Unit
-
-): ComponentContext by componentContext {
+) : ComponentContext by componentContext {
 
     /*private var _text = MutableValue("")
     val text: Value<String> = _text
@@ -17,7 +17,9 @@ class Navigator(
     fun navigateHome(route: RootComponent.Configuration) {
         onDisplayScreen(route)
     }
-
+    fun navigateToReplace(route: RootComponent.Configuration) {
+        onReplaceScreen(route)
+    }
     fun navigateTo(route: RootComponent.Configuration) {
         onNavigateToScreen(route)
     }

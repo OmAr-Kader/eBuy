@@ -1495,7 +1495,7 @@ fun rememberRecentViewed(color: Color): ImageVector {
                 close()
             }
             path(
-                fill = SolidColor(Color(0xFF000000)),
+                fill = SolidColor(color),
                 fillAlpha = 1.0f,
                 stroke = null,
                 strokeAlpha = 1.0f,
@@ -2166,6 +2166,288 @@ fun rememberArrowBack(color: Color): ImageVector {
                 reflectiveQuadToRelative(-0.375f, 0.937f)
                 quadToRelative(-0.417f, 0.375f, -0.938f, 0.375f)
                 quadToRelative(-0.521f, 0f, -0.937f, -0.375f)
+                close()
+            }
+        }.build()
+    }
+}
+
+@Composable
+fun rememberClose(color: Color): ImageVector {
+    return remember {
+        ImageVector.Builder(
+            name = "close",
+            defaultWidth = 40.0.dp,
+            defaultHeight = 40.0.dp,
+            viewportWidth = 40.0f,
+            viewportHeight = 40.0f
+        ).apply {
+            path(
+                fill = SolidColor(color),
+                fillAlpha = 1f,
+                stroke = null,
+                strokeAlpha = 1f,
+                strokeLineWidth = 1.0f,
+                strokeLineCap = StrokeCap.Butt,
+                strokeLineJoin = StrokeJoin.Miter,
+                strokeLineMiter = 1f,
+                pathFillType = PathFillType.NonZero
+            ) {
+                moveTo(20f, 21.875f)
+                lineToRelative(-8.5f, 8.5f)
+                quadToRelative(-0.417f, 0.375f, -0.938f, 0.375f)
+                quadToRelative(-0.52f, 0f, -0.937f, -0.375f)
+                quadToRelative(-0.375f, -0.417f, -0.375f, -0.937f)
+                quadToRelative(0f, -0.521f, 0.375f, -0.938f)
+                lineToRelative(8.542f, -8.542f)
+                lineToRelative(-8.542f, -8.5f)
+                quadToRelative(-0.375f, -0.375f, -0.375f, -0.916f)
+                quadToRelative(0f, -0.542f, 0.375f, -0.917f)
+                quadToRelative(0.417f, -0.417f, 0.937f, -0.417f)
+                quadToRelative(0.521f, 0f, 0.938f, 0.417f)
+                lineToRelative(8.5f, 8.5f)
+                lineToRelative(8.5f, -8.5f)
+                quadToRelative(0.417f, -0.375f, 0.938f, -0.375f)
+                quadToRelative(0.52f, 0f, 0.937f, 0.375f)
+                quadToRelative(0.375f, 0.417f, 0.375f, 0.938f)
+                quadToRelative(0f, 0.52f, -0.375f, 0.937f)
+                lineTo(21.833f, 20f)
+                lineToRelative(8.542f, 8.542f)
+                quadToRelative(0.375f, 0.375f, 0.396f, 0.916f)
+                quadToRelative(0.021f, 0.542f, -0.396f, 0.917f)
+                quadToRelative(-0.375f, 0.375f, -0.917f, 0.375f)
+                quadToRelative(-0.541f, 0f, -0.916f, -0.375f)
+                close()
+            }
+        }.build()
+    }
+}
+
+@Composable
+fun rememberCorrect(color: Color = Color.Green): ImageVector {
+    return remember {
+        ImageVector.Builder(
+            name = "Correct",
+            defaultWidth = 256.dp,
+            defaultHeight = 256.dp,
+            viewportWidth = 256f,
+            viewportHeight = 256f
+        ).apply {
+            path(
+                fill = SolidColor(color),
+                fillAlpha = 1.0f,
+                stroke = null,
+                strokeAlpha = 1.0f,
+                strokeLineWidth = 1.0f,
+                strokeLineCap = StrokeCap.Butt,
+                strokeLineJoin = StrokeJoin.Miter,
+                strokeLineMiter = 1.0f,
+                pathFillType = PathFillType.NonZero
+            ) {
+                moveTo(128f, 10f)
+                curveTo(62.8f, 10f, 10f, 62.8f, 10f, 128f)
+                curveToRelative(0f, 65.2f, 52.8f, 118f, 118f, 118f)
+                curveToRelative(65.2f, 0f, 118f, -52.8f, 118f, -118f)
+                curveTo(246f, 62.8f, 193.2f, 10f, 128f, 10f)
+                lineTo(128f, 10f)
+                lineTo(128f, 10f)
+                close()
+                moveTo(201.5f, 99f)
+                lineToRelative(-82.6f, 79.6f)
+                curveToRelative(-1.1f, 1.1f, -2.3f, 2f, -3.7f, 2.6f)
+                curveToRelative(-5.2f, 3.7f, -12.4f, 3.2f, -17.1f, -1.4f)
+                lineToRelative(-35.4f, -35.5f)
+                curveToRelative(-5.2f, -5.2f, -5.2f, -13.6f, 0f, -18.8f)
+                curveToRelative(5.2f, -5.2f, 13.6f, -5.2f, 18.8f, 0f)
+                lineToRelative(26.6f, 26.6f)
+                lineToRelative(74.6f, -72f)
+                curveToRelative(5.2f, -5.2f, 13.6f, -5.2f, 18.8f, 0f)
+                curveTo(206.7f, 85.4f, 206.7f, 93.9f, 201.5f, 99f)
+                lineTo(201.5f, 99f)
+                lineTo(201.5f, 99f)
+                close()
+            }
+        }.build()
+    }
+}
+
+
+@Composable
+fun rememberWrong(color: Color = Color.Red): ImageVector {
+    return remember {
+        ImageVector.Builder(
+            name = "Wrong",
+            defaultWidth = 256.dp,
+            defaultHeight = 256.dp,
+            viewportWidth = 256f,
+            viewportHeight = 256f
+        ).apply {
+            path(
+                fill = SolidColor(color),
+                fillAlpha = 1.0f,
+                stroke = null,
+                strokeAlpha = 1.0f,
+                strokeLineWidth = 1.0f,
+                strokeLineCap = StrokeCap.Butt,
+                strokeLineJoin = StrokeJoin.Miter,
+                strokeLineMiter = 1.0f,
+                pathFillType = PathFillType.NonZero
+            ) {
+                moveTo(128f, 9.9f)
+                curveTo(62.8f, 9.9f, 10f, 62.8f, 10f, 128f)
+                curveToRelative(0f, 65.2f, 52.8f, 118.1f, 118f, 118.1f)
+                curveToRelative(65.2f, 0f, 118f, -52.9f, 118f, -118.1f)
+                curveTo(246f, 62.8f, 193.2f, 9.9f, 128f, 9.9f)
+                close()
+                moveTo(181.2f, 154.9f)
+                curveToRelative(7.2f, 7.2f, 7.8f, 18.3f, 1.4f, 24.6f)
+                curveToRelative(-6.4f, 6.4f, -17.4f, 5.7f, -24.6f, -1.4f)
+                lineToRelative(-27.8f, -27.8f)
+                lineToRelative(-27.8f, 27.8f)
+                curveToRelative(-7.2f, 7.2f, -18.3f, 7.8f, -24.6f, 1.4f)
+                curveToRelative(-6.4f, -6.4f, -5.7f, -17.5f, 1.4f, -24.6f)
+                lineToRelative(27.8f, -27.8f)
+                lineTo(79.4f, 99.3f)
+                curveToRelative(-7.2f, -7.2f, -7.8f, -18.3f, -1.4f, -24.7f)
+                curveToRelative(6.4f, -6.4f, 17.4f, -5.7f, 24.6f, 1.5f)
+                lineToRelative(27.8f, 27.8f)
+                lineToRelative(27.8f, -27.8f)
+                curveToRelative(7.2f, -7.2f, 18.3f, -7.9f, 24.6f, -1.5f)
+                curveToRelative(6.4f, 6.4f, 5.7f, 17.5f, -1.4f, 24.7f)
+                lineToRelative(-27.8f, 27.8f)
+                lineTo(181.2f, 154.9f)
+                close()
+            }
+        }.build()
+    }
+}
+
+@Composable
+fun rememberAdd(color: Color): ImageVector {
+    return remember {
+        ImageVector.Builder(
+            name = "Add",
+            defaultWidth = 256.dp,
+            defaultHeight = 256.dp,
+            viewportWidth = 256f,
+            viewportHeight = 256f
+        ).apply {
+            path(
+                fill = SolidColor(color),
+                fillAlpha = 1.0f,
+                stroke = null,
+                strokeAlpha = 1.0f,
+                strokeLineWidth = 1.0f,
+                strokeLineCap = StrokeCap.Butt,
+                strokeLineJoin = StrokeJoin.Miter,
+                strokeLineMiter = 1.0f,
+                pathFillType = PathFillType.NonZero
+            ) {
+                moveTo(118.9f, 10.1f)
+                curveTo(102.2f, 11.8f, 89.7f, 15.2f, 76f, 22f)
+                curveToRelative(-12f, 5.9f, -20.6f, 12f, -30.4f, 21.5f)
+                curveTo(35.5f, 53.3f, 28.2f, 63.4f, 21.9f, 76f)
+                curveToRelative(-5.8f, 11.9f, -9.4f, 23.6f, -11.4f, 37.4f)
+                curveToRelative(-0.8f, 5.4f, -0.8f, 23.6f, 0f, 29.1f)
+                curveToRelative(3.3f, 22.9f, 12.1f, 43.4f, 26.1f, 60.4f)
+                curveToRelative(32.6f, 39.6f, 86.6f, 53.7f, 134.2f, 35.1f)
+                curveToRelative(30.5f, -11.9f, 55.2f, -36.7f, 67.2f, -67.3f)
+                curveToRelative(4.9f, -12.6f, 7.4f, -24.7f, 7.9f, -38.8f)
+                curveToRelative(1.1f, -31.9f, -10.8f, -62.7f, -33.1f, -85.8f)
+                curveToRelative(-10.2f, -10.5f, -20.1f, -17.7f, -33f, -24f)
+                curveToRelative(-11.6f, -5.7f, -22.3f, -9.1f, -35.3f, -11.1f)
+                curveTo(139.9f, 10.3f, 122.9f, 9.7f, 118.9f, 10.1f)
+                close()
+                moveTo(133f, 55.7f)
+                curveToRelative(1f, 0.6f, 2.2f, 1.9f, 2.8f, 2.9f)
+                lineToRelative(1.1f, 1.8f)
+                lineToRelative(0.1f, 29.2f)
+                lineToRelative(0.1f, 29.2f)
+                lineToRelative(29.2f, 0.1f)
+                lineToRelative(29.2f, 0.1f)
+                lineToRelative(1.8f, 1.1f)
+                curveToRelative(1f, 0.6f, 2.3f, 1.9f, 3f, 3f)
+                curveToRelative(1f, 1.6f, 1.2f, 2.4f, 1.2f, 4.9f)
+                curveToRelative(0f, 3.6f, -1.2f, 5.9f, -4.1f, 7.8f)
+                lineToRelative(-1.9f, 1.2f)
+                lineToRelative(-29.2f, 0.1f)
+                lineToRelative(-29.2f, 0.1f)
+                lineToRelative(-0.1f, 29.2f)
+                lineToRelative(-0.1f, 29.3f)
+                lineToRelative(-1.4f, 2f)
+                curveToRelative(-3.7f, 5.3f, -11.5f, 5.3f, -15.2f, 0f)
+                lineToRelative(-1.4f, -2f)
+                lineToRelative(-0.1f, -29.3f)
+                lineToRelative(-0.1f, -29.2f)
+                lineToRelative(-29.2f, -0.1f)
+                lineTo(60.2f, 137f)
+                lineToRelative(-2f, -1.4f)
+                curveToRelative(-2.7f, -1.9f, -3.9f, -4.3f, -3.9f, -7.8f)
+                curveToRelative(0f, -3.4f, 1.2f, -5.7f, 4.1f, -7.5f)
+                lineToRelative(1.9f, -1.2f)
+                lineToRelative(29.2f, -0.1f)
+                lineToRelative(29.2f, -0.1f)
+                verticalLineTo(90.4f)
+                curveToRelative(0f, -18.5f, 0.2f, -28.8f, 0.5f, -30f)
+                curveToRelative(0.6f, -2.1f, 3.5f, -5.2f, 5.6f, -5.8f)
+                curveTo(127.2f, 53.9f, 131f, 54.3f, 133f, 55.7f)
+                close()
+            }
+        }.build()
+    }
+}
+
+@Composable
+fun rememberEdit(color: Color): ImageVector {
+    return remember {
+        ImageVector.Builder(
+            name = "edit",
+            defaultWidth = 40.0.dp,
+            defaultHeight = 40.0.dp,
+            viewportWidth = 40.0f,
+            viewportHeight = 40.0f
+        ).apply {
+            path(
+                fill = SolidColor(color),
+                fillAlpha = 1f,
+                stroke = null,
+                strokeAlpha = 1f,
+                strokeLineWidth = 1.0f,
+                strokeLineCap = StrokeCap.Butt,
+                strokeLineJoin = StrokeJoin.Miter,
+                strokeLineMiter = 1f,
+                pathFillType = PathFillType.NonZero
+            ) {
+                moveTo(7.958f, 32.042f)
+                horizontalLineToRelative(1.875f)
+                lineTo(27f, 14.875f)
+                lineTo(25.083f, 13f)
+                lineTo(7.958f, 30.167f)
+                close()
+                moveTo(32.583f, 13f)
+                lineToRelative(-5.625f, -5.583f)
+                lineToRelative(1.875f, -1.875f)
+                quadToRelative(0.75f, -0.75f, 1.875f, -0.75f)
+                reflectiveQuadToRelative(1.875f, 0.791f)
+                lineToRelative(1.875f, 1.875f)
+                quadToRelative(0.75f, 0.75f, 0.75f, 1.855f)
+                quadToRelative(0f, 1.104f, -0.75f, 1.854f)
+                close()
+                moveTo(6.625f, 34.667f)
+                quadToRelative(-0.583f, 0f, -0.958f, -0.375f)
+                reflectiveQuadToRelative(-0.375f, -0.917f)
+                verticalLineToRelative(-3.792f)
+                quadToRelative(0f, -0.25f, 0.104f, -0.479f)
+                quadToRelative(0.104f, -0.229f, 0.312f, -0.437f)
+                lineTo(25.125f, 9.25f)
+                lineToRelative(5.625f, 5.625f)
+                lineToRelative(-19.458f, 19.417f)
+                quadToRelative(-0.167f, 0.208f, -0.417f, 0.291f)
+                quadToRelative(-0.25f, 0.084f, -0.5f, 0.084f)
+                close()
+                moveToRelative(19.417f, -20.75f)
+                lineTo(25.083f, 13f)
+                lineTo(27f, 14.875f)
                 close()
             }
         }.build()

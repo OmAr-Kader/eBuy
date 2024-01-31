@@ -17,8 +17,6 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
 
 @Composable
 inline fun <reified T: ViewModel> MokoModel(crossinline builder: () -> T): T {
@@ -70,5 +68,4 @@ abstract class BaseViewModel(
         val imageUri: String,
         val isBusiness: Boolean,
     )
-
 }

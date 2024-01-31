@@ -7,7 +7,7 @@ import com.ramo.ebuy.global.util.item
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class ProductViewModel(project: Project) : BaseViewModel(project) {
+class ProductDetailsViewModel(project: Project) : BaseViewModel(project) {
 
     private val _uiState = MutableStateFlow(State())
     val uiState = _uiState.asStateFlow()

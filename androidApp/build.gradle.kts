@@ -18,7 +18,7 @@ android {
     }
     buildToolsVersion = "34.0.0"
     composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
+        kotlinCompilerExtensionVersion = "1.5.8"
     }
     packaging {
         resources {
@@ -39,6 +39,17 @@ android {
     }
     java {
         toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+    }
+    kotlin {
+        sourceSets {
+            all {
+                languageSettings {
+                    //optIn("kotlin.RequiresOptIn")
+                    optIn("com.arkivanov.decompose.ExperimentalDecomposeApi")
+                    optIn("androidx.compose.foundation.layout.ExperimentalLayoutApi")
+                }
+            }
+        }
     }
 }
 

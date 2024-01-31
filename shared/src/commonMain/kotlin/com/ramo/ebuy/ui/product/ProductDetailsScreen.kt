@@ -8,11 +8,11 @@ import com.ramo.ebuy.global.navigation.Navigator
 import org.koin.compose.koinInject
 
 @Composable
-fun ProductScreen(
+fun ProductDetailsScreen(
     navigator: Navigator,
     project: Project = koinInject(),
     theme: Theme = koinInject(),
-    viewModel: ProductViewModel = MokoModel { ProductViewModel(project) }
+    viewModel: ProductDetailsViewModel = MokoModel { ProductDetailsViewModel(project) }
 ) {
     //DropdownMenu()
 

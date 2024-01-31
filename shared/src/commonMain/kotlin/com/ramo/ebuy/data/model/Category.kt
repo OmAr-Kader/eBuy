@@ -17,4 +17,12 @@ data class Category(
     val parentId: Int,
 ) {
     var haveChildren: Boolean = false
+
+    fun List<Category>.setHaveChildren() {
+        toMutableList().find {
+            it.parentId == this@Category.id
+        }.let {
+            haveChildren = it != null
+        }
+    }
 }

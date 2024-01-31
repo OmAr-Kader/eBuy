@@ -8,18 +8,29 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -28,21 +39,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.ramo.ebuy.data.model.Product
-import com.seiko.imageloader.rememberImagePainter
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
-import androidx.compose.material3.Surface
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.vector.ImageVector
 import com.ramo.ebuy.data.model.Category
+import com.ramo.ebuy.data.model.Product
 import com.ramo.ebuy.global.base.Theme
+import com.seiko.imageloader.rememberImagePainter
 import org.koin.compose.koinInject
 
 @Composable
@@ -73,7 +73,7 @@ fun ProductItem(
         )
         Text(
             modifier = Modifier.fillMaxWidth(),
-            text = item.name,
+            text = item.title,
             color = theme.textHintColor,
             fontSize = 16.sp,
             maxLines = 3,
@@ -83,7 +83,7 @@ fun ProductItem(
         item.timeGap?.let {
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = "$" + item.discount.toString(),
+                text = "$" + item.offer.toString(),
                 color = theme.textColor,
                 fontSize = 18.sp,
                 maxLines = 1,
@@ -150,7 +150,7 @@ fun ProductMainSearchItem(
         ) {
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = item.name,
+                text = item.title,
                 color = theme.textColor,
                 fontSize = 14.sp,
                 maxLines = 3,
@@ -167,7 +167,7 @@ fun ProductMainSearchItem(
             item.timeGap?.let {
                 Text(
                     modifier = Modifier.fillMaxWidth(),
-                    text = "$" + item.discount.toString(),
+                    text = "$" + item.offer.toString(),
                     color = theme.textColor,
                     fontSize = 14.sp,
                     maxLines = 1,
@@ -204,7 +204,7 @@ fun ProductMainSearchItem(
                             .clickable {
                                 favorite(item)
                             },
-                        imageVector = if (item.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        imageVector = Icons.Default.Favorite,//if (item.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                         colorFilter = ColorFilter.tint(theme.primary),
                         contentScale = ContentScale.Fit,
                         contentDescription = "Expandable Category Image",
@@ -230,7 +230,7 @@ fun ProductMainSearchItem(
                             .clickable {
                                 favorite(item)
                             },
-                        imageVector = if (item.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        imageVector = Icons.Default.Favorite,//if (item.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                         colorFilter = ColorFilter.tint(theme.primary),
                         contentScale = ContentScale.Fit,
                         contentDescription = "Expandable Category Image",
@@ -244,34 +244,55 @@ fun ProductMainSearchItem(
 @Composable
 fun ExpandableCatoItem(
     catoName: String,
+    isTheProduct: Boolean,
+    haveChildren: Boolean,
     isExpanded: Boolean,
     theme: Theme = koinInject(),
+    onClick: () -> Unit,
+    expend: (Boolean) -> Unit,
 ) {
-    Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        Modifier.clip(RoundedCornerShape(10.dp)).background(if (isTheProduct) theme.priAlpha else theme.background),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
         val animated = animateFloatAsState(
             targetValue = if (isExpanded) 180F else 0F,
             label = "round"
         )
-        Text(
-            modifier = Modifier.height(50.dp).weight(1F),
-            text = catoName,
-            color = theme.textColor,
-            fontSize = 14.sp,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        Button(onClick = {
-            isExpanded != isExpanded
-        }, colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)) {
-            Image(
+        Column(
+            Modifier.padding(start = 2.dp).defaultMinSize(minHeight = 50.dp).weight(1F).clickable {
+                onClick()
+            }, verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                modifier = Modifier,
+                text = catoName,
+                color = theme.textColor,
+                fontSize = 14.sp,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+        if (haveChildren) {
+            Button(onClick = {
+                expend(isExpanded)
+            }, colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)) {
+                Image(
+                    modifier = Modifier
+                        .width(40.dp)
+                        .height(40.dp)
+                        .rotate(animated.value),
+                    imageVector = Icons.Default.ArrowDropDown,
+                    colorFilter = ColorFilter.tint(theme.textColor),
+                    contentScale = ContentScale.Fit,
+                    contentDescription = "Expandable Category Image",
+                )
+            }
+        } else {
+            Spacer(
                 modifier = Modifier
-                    .width(30.dp)
-                    .height(30.dp)
-                    .rotate(animated.value),
-                imageVector = Icons.Default.ArrowDropDown,
-                colorFilter = ColorFilter.tint(theme.textColor),
-                contentScale = ContentScale.Fit,
-                contentDescription = "Expandable Category Image",
+                    .width(40.dp)
+                    .height(40.dp)
             )
         }
     }
@@ -320,8 +341,8 @@ fun GridCatoItem(
 @Composable
 fun GridCircleCatoItem(
     cato: Category,
-    onClick: (Category) -> Unit,
     theme: Theme = koinInject(),
+    onClick: (Category) -> Unit,
 ) {
     val painter = rememberImagePainter(
         url = cato.imageUri,

@@ -1,0 +1,984 @@
+package com.ramo.ebuy.ui.product
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.ramo.ebuy.data.model.ProductSpecs
+import com.ramo.ebuy.di.Project
+import com.ramo.ebuy.di.Stater
+import com.ramo.ebuy.global.base.Theme
+import com.ramo.ebuy.global.base.outlinedTextFieldStyle
+import com.ramo.ebuy.global.navigation.MokoModel
+import com.ramo.ebuy.global.navigation.Navigator
+import com.ramo.ebuy.global.navigation.RootComponent
+import com.ramo.ebuy.global.ui.CalendarYearView
+import com.ramo.ebuy.global.ui.rememberArrowBack
+import com.ramo.ebuy.global.ui.rememberHelp
+import com.ramo.ebuy.global.util.conditions
+import com.ramo.ebuy.global.util.currentTime
+import com.ramo.ebuy.global.util.margeYear
+import com.ramo.ebuy.global.util.offerSubTitle
+import com.ramo.ebuy.global.util.ratings
+import com.ramo.ebuy.global.util.splitTime
+import com.ramo.ebuy.ui.common.ExpandableCato
+import org.koin.compose.koinInject
+
+@Composable
+fun ProductConditionMainScreen(
+    navigator: Navigator,
+    theme: Theme = koinInject(),
+    project: Project = koinInject(),
+    stater: Stater = koinInject(),
+    viewModel: ProductSellingViewModel = MokoModel {
+        ProductSellingViewModel(project, stater.stateProductSellingModel.copy()) {
+            apply {
+                stater.stateProductSelling = this@apply
+            }
+        }
+    }
+) {
+    val state by viewModel.uiState.collectAsState()
+    val scaffoldState = remember { SnackbarHostState() }
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(scaffoldState) {
+                Snackbar(it, containerColor = theme.backDarkSec, contentColor = theme.textColor)
+            }
+        },
+    ) { pad ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(pad)
+                .background(color = theme.background)
+        ) {
+            ProductSellingSpecsHeadBarBack("Add more details", theme) {
+                navigator.goBack()
+            }
+            Text(
+                modifier = Modifier.padding(5.dp),
+                text = "Select Condition of your Item",
+                color = theme.textColor,
+                fontSize = 24.sp,
+            )
+            Column {
+                conditions.forEach {
+                    ProductSpecItemRadio(it, it == state.product.condition, theme) {
+                        viewModel.setConditionMain(it)
+                        navigator.navigateToReplace(RootComponent.Configuration.ProductSellingRoute)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ProductSellingPriceScreen(
+    navigator: Navigator,
+    theme: Theme = koinInject(),
+    project: Project = koinInject(),
+    stater: Stater = koinInject(),
+    viewModel: ProductSellingViewModel = MokoModel {
+        ProductSellingViewModel(project, stater.stateProductSellingModel.copy()) {
+            apply {
+                stater.stateProductSelling = this@apply
+            }
+        }
+    }
+) {
+    val state by viewModel.uiState.collectAsState()
+    val scaffoldState = remember { SnackbarHostState() }
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(scaffoldState) {
+                Snackbar(it, containerColor = theme.backDarkSec, contentColor = theme.textColor)
+            }
+        },
+    ) { pad ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(pad)
+                .background(color = theme.background)
+        ) {
+            ProductSellingSpecsHeadBar("Pricing", theme) {
+                viewModel.donePressed()
+                navigator.goBack()
+            }
+            ProductSellingSpecEditItem(
+                "Price",
+                state.product.priceEditStr,
+                KeyboardType.Number, theme
+            ) {
+                viewModel.setPrice(it)
+            }
+            ProductSellingSpecCheckableTitle("Offer", offerSubTitle, state.product.offerValid, state.product.priceValid, theme) {
+                viewModel.isOffer(it)
+            }
+            if (state.product.offerValid) {
+                ProductSellingSpecEditItem("Minimum offer amount", state.product.offer.toString(), KeyboardType.Number, theme) {
+                    viewModel.setOffer(it)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ProductSellingTitleScreen(
+    navigator: Navigator,
+    theme: Theme = koinInject(),
+    project: Project = koinInject(),
+    stater: Stater = koinInject(),
+    viewModel: ProductSellingViewModel = MokoModel {
+        ProductSellingViewModel(project, stater.stateProductSellingModel.copy()) {
+            apply {
+                stater.stateProductSelling = this@apply
+            }
+        }
+    }
+) {
+    val state by viewModel.uiState.collectAsState()
+    val scaffoldState = remember { SnackbarHostState() }
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(scaffoldState) {
+                Snackbar(it, containerColor = theme.backDarkSec, contentColor = theme.textColor)
+            }
+        },
+    ) { pad ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(pad)
+                .background(color = theme.background)
+        ) {
+            ProductSellingSpecsHeadBar("Title", theme) {
+                if (state.product.productCode.length > 80) {
+                    return@ProductSellingSpecsHeadBar
+                }
+                viewModel.donePressed()
+                navigator.goBack()
+            }
+            ProductSellingSpecEditItemFull(
+                "Title",
+                state.product.title,
+                KeyboardType.Text,
+                80,
+                theme
+            ) {
+                viewModel.setTitle(it)
+            }
+        }
+    }
+}
+
+@Composable
+fun ProductSellingCategoryScreen(
+    navigator: Navigator,
+    theme: Theme = koinInject(),
+    project: Project = koinInject(),
+    stater: Stater = koinInject(),
+    viewModel: ProductSellingViewModel = MokoModel {
+        ProductSellingViewModel(project, stater.stateProductSellingModel.copy()) {
+            apply {
+                stater.stateProductSelling = this@apply
+            }
+        }
+    }
+) {
+    val state by viewModel.uiState.collectAsState()
+    Scaffold { pad ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(pad)
+                .background(color = theme.background)
+        ) {
+            ProductSellingSpecsHeadBar("Category", theme) {
+                viewModel.donePressed()
+                navigator.goBack()
+            }
+            Row(
+                Modifier
+                    .defaultMinSize(minHeight = 70.dp)
+                    .fillMaxWidth()
+                    .padding(horizontal = 10.dp, vertical = 5.dp),
+            ) {
+                Text(modifier = Modifier.width(130.dp), text = "Product Category", color = theme.textGrayColor)
+                Text(state.product.parentCatoFull, color = theme.textColor)
+            }
+            ExpandableCato(-1, state.listCategory, state.product.parentCategories) {
+                viewModel.setCategory(it)
+            }
+        }
+    }
+}
+
+@Composable
+fun ProductSellingSpecsScreen(
+    navigator: Navigator,
+    theme: Theme = koinInject(),
+    project: Project = koinInject(),
+    stater: Stater = koinInject(),
+    viewModel: ProductSellingViewModel = MokoModel {
+        ProductSellingViewModel(project, stater.subStateProductSellingModel.copy()) {
+            apply {
+                stater.stateProductSelling = this@apply
+            }
+        }
+    }
+) {
+    val state by viewModel.uiState.collectAsState()
+    Scaffold { pad ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(pad)
+                .background(color = theme.background)
+        ) {
+            ProductSellingSpecsHeadBar("Item Specifics", theme) {
+                viewModel.donePressed()
+                navigator.goBack()
+            }
+            LazyColumn {
+                ProductSellingSpecForEditItem("Condition", state.product.condition, theme) {
+                    navigator.navigateTo(RootComponent.Configuration.ProductSellingConditionRoute)
+                }
+                ProductSellingSpecForEditItem("Made in", state.productSpecs.countryProductStr, theme) {
+                    navigator.navigateTo(RootComponent.Configuration.ProductSellingMadeInRoute)
+                }
+                ProductSellingSpecForEditItem("Platform", state.productSpecs.platform, theme) {
+                    navigator.navigateTo(RootComponent.Configuration.ProductSellingPlatformRoute)
+                }
+                ProductSellingSpecForEditItem("Rating", state.product.ageRateStr, theme) {
+                    navigator.navigateTo(RootComponent.Configuration.ProductSellingRatingRoute)
+                }
+                ProductSellingSpecForEditItem("Release Year", state.productSpecs.releaseYearOnly, theme) {
+                    navigator.navigateTo(RootComponent.Configuration.ProductSellingReleaseYearRoute)
+                }
+                ProductSellingSpecForEditItem("MPN", state.productSpecs.mpn, theme) {
+                    navigator.navigateTo(RootComponent.Configuration.ProductSellingMPNRoute)
+                }
+                ProductSellingSpecForEditItem("UPC", state.product.productCode, theme) {
+                    navigator.navigateTo(RootComponent.Configuration.ProductSellingUPCRoute)
+                }
+                itemsIndexed(state.productSpecs.specs) { i, it ->
+                    ProductSellingSpecForEdit(it.label, it.spec, theme) {
+                        viewModel.setCustomSpecIndex(i)
+                        navigator.navigateTo(RootComponent.Configuration.ProductSellingCustomSpecRoute)
+                    }
+                }
+                items(state.productSpecs.specsExtra) {
+                    ProductSellingSpecForEdit(it.labelExtra, it.specExtra.joinToString(separator = "\n"), theme) {
+
+                    }
+                }
+                item {
+                    Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(modifier = Modifier.clickable {
+                            viewModel.setCustomSpecIndex(-1)
+                            navigator.navigateTo(RootComponent.Configuration.ProductSellingCustomSpecRoute)
+                        }.padding(15.dp), text = "ADD CUSTOM SPECIFIC", color = theme.primary)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ProductSellingConditionScreen(
+    navigator: Navigator,
+    theme: Theme = koinInject(),
+    project: Project = koinInject(),
+    stater: Stater = koinInject(),
+    viewModel: ProductSellingViewModel = MokoModel {
+        ProductSellingViewModel(project, stater.subStateProductSellingModel.copy()) {
+            apply {
+                stater.subStateProductSelling = this@apply
+            }
+        }
+    }
+) {
+    val state by viewModel.uiState.collectAsState()
+    Scaffold { pad ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(pad)
+                .background(color = theme.background)
+        ) {
+            ProductSellingSpecsHeadBarBackHelp("Condition", theme) {
+                navigator.goBack()
+            }
+            Text(
+                modifier = Modifier.padding(5.dp),
+                text = "Select Condition of your Item",
+                color = theme.textColor,
+                fontSize = 24.sp,
+            )
+            Column {
+                conditions.forEach {
+                    ProductSpecItemRadio(it, it == state.product.condition, theme) {
+                        viewModel.setCondition(it)
+                        navigator.goBack()
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ProductSellingMadeInScreen(
+    navigator: Navigator,
+    theme: Theme = koinInject(),
+    project: Project = koinInject(),
+    stater: Stater = koinInject(),
+    viewModel: ProductSellingViewModel = MokoModel {
+        ProductSellingViewModel(project, stater.subStateProductSellingModel.copy()) {
+            apply {
+                stater.subStateProductSelling = this@apply
+            }
+        }
+    }
+) {
+    val state by viewModel.uiState.collectAsState()
+    Scaffold { pad ->
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(pad)
+                .background(color = theme.background)
+        ) {
+            ProductSellingSpecsHeadBarBackHelp("Made In", theme) {
+                navigator.goBack()
+            }
+            /** Try That Later
+             *https://github.com/philipplackner/SearchFieldCompose/blob/master/app/src/main/java/com/plcoding/searchfieldcompose/MainViewModel.kt
+             */
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth().padding(10.dp),
+                value = state.countrySearch,
+                onValueChange = { change ->
+                    viewModel.setCountrySearch(change)
+                },
+                shape = RoundedCornerShape(25.dp),
+                placeholder = { Text(text = "Search For Product Country", fontSize = 14.sp) },
+                label = { Text(text = "Product Country", fontSize = 14.sp) },
+                maxLines = 1,
+                colors = theme.outlinedTextFieldStyle(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+            )
+            LazyColumn(Modifier.fillMaxWidth().padding(horizontal = 15.dp)) {
+                items(state.countryList) {
+                    val isSelect = it.id == state.productSpecs.countryProduct
+                    Row(Modifier.clickable {
+                        viewModel.setMadeIn(it.id)
+                        navigator.goBack()
+                    }.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = it.display,
+                            color = if (isSelect) theme.primary else theme.textColor,
+                            fontSize = 20.sp,
+                        )
+                    }
+                }
+            }
+
+        }
+    }
+}
+
+@Composable
+fun ProductSellingPlatformScreen(
+    navigator: Navigator,
+    theme: Theme = koinInject(),
+    project: Project = koinInject(),
+    stater: Stater = koinInject(),
+    viewModel: ProductSellingViewModel = MokoModel {
+        ProductSellingViewModel(project, stater.subStateProductSellingModel.copy()) {
+            apply {
+                stater.subStateProductSelling = this@apply
+            }
+        }
+    }
+) {
+    @Suppress("UNUSED_VARIABLE") val state by viewModel.uiState.collectAsState()
+    Scaffold { pad ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(pad)
+                .background(color = theme.background)
+        ) {
+            ProductSellingSpecsHeadBarBackHelp("Platform", theme) {
+                navigator.goBack()
+            }
+        }
+    }
+}
+
+@Composable
+fun ProductSellingRatingScreen(
+    navigator: Navigator,
+    theme: Theme = koinInject(),
+    project: Project = koinInject(),
+    stater: Stater = koinInject(),
+    viewModel: ProductSellingViewModel = MokoModel {
+        ProductSellingViewModel(project, stater.subStateProductSellingModel.copy()) {
+            apply {
+                stater.subStateProductSelling = this@apply
+            }
+        }
+    }
+) {
+    val state by viewModel.uiState.collectAsState()
+    Scaffold { pad ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(pad)
+                .background(color = theme.background)
+        ) {
+            ProductSellingSpecsHeadBarBackHelp("Product Age Rating", theme) {
+                navigator.goBack()
+            }
+            Text(
+                modifier = Modifier.padding(5.dp),
+                text = "Select Product Rating",
+                color = theme.textColor,
+                fontSize = 24.sp,
+            )
+            Column {
+                ratings.forEach { rate ->
+                    ProductSpecItemRadio(rate.display, state.product.ageRate == rate.id, theme) {
+                        viewModel.setAgeRate(rate.id)
+                        navigator.goBack()
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ProductSellingReleaseYearScreen(
+    navigator: Navigator,
+    theme: Theme = koinInject(),
+    project: Project = koinInject(),
+    stater: Stater = koinInject(),
+    viewModel: ProductSellingViewModel = MokoModel {
+        ProductSellingViewModel(project, stater.subStateProductSellingModel.copy()) {
+            apply {
+                stater.subStateProductSelling = this@apply
+            }
+        }
+    }
+) {
+    val state by viewModel.uiState.collectAsState()
+    val maxYear = currentTime.year
+    val year = if (state.productSpecs.releaseYear == 0L) maxYear else splitTime(state.productSpecs.releaseYear).year
+    Scaffold { pad ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(pad)
+                .background(color = theme.background)
+        ) {
+            ProductSellingSpecsHeadBarBackHelp("Release Year", theme) {
+                navigator.goBack()
+            }
+            Text(
+                modifier = Modifier.padding(5.dp),
+                text = "Select Product Release Year",
+                color = theme.textColor,
+                fontSize = 24.sp,
+            )
+            CalendarYearView(selectedYear = year, maxYear = maxYear, minYear = 1970, theme = theme) {
+                viewModel.setReleaseYear(margeYear(it))
+                navigator.goBack()
+            }
+        }
+    }
+}
+
+@Composable
+fun ProductSellingCustomSpecScreen(
+    navigator: Navigator,
+    theme: Theme = koinInject(),
+    project: Project = koinInject(),
+    stater: Stater = koinInject(),
+    viewModel: ProductSellingViewModel = MokoModel {
+        ProductSellingViewModel(project, stater.subStateProductSellingModel.copy()) {
+            apply {
+                stater.subStateProductSelling = this@apply
+            }
+        }
+    }
+) {
+    val state by viewModel.uiState.collectAsState()
+    val customSpec = remember {
+        mutableStateOf(
+            if (state.customSpecIndex == -1) {
+                ProductSpecs()
+            } else {
+                state.productSpecs.specs.getOrElse(state.customSpecIndex) {
+                    ProductSpecs()
+                }
+            }
+        )
+    }
+    Scaffold { pad ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(pad)
+                .background(color = theme.background)
+        ) {
+            ProductSellingSpecsHeadBar("Custom Specific", theme) {
+                viewModel.addOrEditCustomSpec(customSpec.value)
+                navigator.goBack()
+            }
+            Spacer(Modifier.height(10.dp))
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                value = customSpec.value.label,
+                onValueChange = { change ->
+                    customSpec.value = customSpec.value.copy(label = change)
+                },
+                shape = RoundedCornerShape(12.dp),
+                placeholder = { Text(text = "Enter Spec Title", fontSize = 14.sp) },
+                label = { Text(text = "Spec Title", fontSize = 14.sp) },
+                isError = customSpec.value.label.length > 40,
+                supportingText = {
+                    Text(
+                        text = "${customSpec.value.label.length} / 40",
+                        modifier = Modifier.fillMaxWidth(),
+                        color = theme.textHintColor,
+                        textAlign = TextAlign.End,
+                    )
+                },
+                colors = theme.outlinedTextFieldStyle(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+            )
+            Spacer(Modifier.height(10.dp))
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                value = customSpec.value.spec,
+                onValueChange = { change ->
+                    customSpec.value = customSpec.value.copy(label = change)
+                },
+                shape = RoundedCornerShape(12.dp),
+                placeholder = { Text(text = "Enter Spec", fontSize = 14.sp) },
+                label = { Text(text = "Spec", fontSize = 14.sp) },
+                isError = customSpec.value.spec.length > 40,
+                supportingText = {
+                    Text(
+                        text = "${customSpec.value.spec.length} / 40",
+                        modifier = Modifier.fillMaxWidth(),
+                        color = theme.textHintColor,
+                        textAlign = TextAlign.End,
+                    )
+                },
+                maxLines = 1,
+                colors = theme.outlinedTextFieldStyle(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+            )
+            Spacer(Modifier.height(10.dp))
+            if (state.customSpecIndex != -1) {
+                Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(modifier = Modifier.clickable {
+                        viewModel.setDeleteCustomSpec(state.customSpecIndex)
+                        navigator.goBack()
+                    }.padding(15.dp), text = "DELETE", color = theme.error)
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun ProductSellingMPNScreen(
+    navigator: Navigator,
+    theme: Theme = koinInject(),
+    project: Project = koinInject(),
+    stater: Stater = koinInject(),
+    viewModel: ProductSellingViewModel = MokoModel {
+        ProductSellingViewModel(project, stater.subStateProductSellingModel.copy()) {
+            apply {
+                stater.subStateProductSelling = this@apply
+            }
+        }
+    }
+) {
+    val state by viewModel.uiState.collectAsState()
+    Scaffold { pad ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(pad)
+                .background(color = theme.background)
+        ) {
+            ProductSellingSpecsHeadBar("MPN", theme) {
+                if (state.product.productCode.length > 65) {
+                    return@ProductSellingSpecsHeadBar
+                }
+                viewModel.donePressed()
+                navigator.goBack()
+            }
+            ProductSellingSpecEditItemFull(
+                "Manufacturer Part Number",
+                state.productSpecs.mpn,
+                KeyboardType.Text,
+                65,
+                theme
+            ) {
+                viewModel.setMPN(it)
+            }
+        }
+    }
+}
+
+
+@Composable
+fun ProductSellingUPCScreen(
+    navigator: Navigator,
+    theme: Theme = koinInject(),
+    project: Project = koinInject(),
+    stater: Stater = koinInject(),
+    viewModel: ProductSellingViewModel = MokoModel {
+        ProductSellingViewModel(project, stater.subStateProductSellingModel.copy()) {
+            apply {
+                stater.subStateProductSelling = this@apply
+            }
+        }
+    }
+) {
+    val state by viewModel.uiState.collectAsState()
+    Scaffold { pad ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(pad)
+                .background(color = theme.background)
+        ) {
+            ProductSellingSpecsHeadBar("UPC", theme) {
+                if (state.product.productCode.length > 12) {
+                    return@ProductSellingSpecsHeadBar
+                }
+                viewModel.donePressed()
+                navigator.goBack()
+            }
+            ProductSellingSpecEditItemFull(
+                "Universal Product Codes ",
+                state.product.productCode,
+                KeyboardType.Text,
+                12,
+                theme
+            ) {
+                viewModel.setUPC(it)
+            }
+        }
+    }
+}
+
+@Composable
+fun ProductSpecItemRadio(text: String, isSelect: Boolean, theme: Theme, onClick: () -> Unit) {
+    Row(Modifier.clickable { onClick() }.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
+        RadioButton(selected = isSelect, onClick = null)
+        Spacer(Modifier.width(10.dp))
+        Text(
+            text = text,
+            color = theme.textColor,
+            fontSize = 20.sp,
+        )
+    }
+}
+
+fun LazyListScope.ProductSellingSpecForEditItem(specTitle: String, spec: String, theme: Theme, onClick: () -> Unit) = item {
+    /*if (spec.isEmpty()) {
+        return
+    }*/
+    Column(
+        Modifier
+            .clickable {
+                onClick()
+            }
+            .padding(horizontal = 10.dp, vertical = 15.dp)
+    ) {
+        Text(modifier = Modifier.width(130.dp), text = specTitle, color = theme.textColor)
+        Text(spec, color = theme.primary)
+    }
+}
+
+
+@Composable
+fun ProductSellingSpecForEdit(specTitle: String, spec: String, theme: Theme, onClick: () -> Unit) {
+    /*if (spec.isEmpty()) {
+        return
+    }*/
+    Column(
+        Modifier
+            .clickable {
+                onClick()
+            }
+            .padding(horizontal = 10.dp, vertical = 15.dp)
+    ) {
+        Text(modifier = Modifier.width(130.dp), text = specTitle, color = theme.textColor)
+        Text(spec, color = theme.primary)
+    }
+}
+
+@Composable
+fun ProductSellingSpecCheckableTitle(spec: String, subSpec: String, checked: Boolean, enabled: Boolean, theme: Theme, onChange: (Boolean) -> Unit) {
+    Row(modifier = Modifier.padding(10.dp)) {
+        Column(modifier = Modifier.weight(1F)) {
+            Text(spec, color = theme.textColor)
+            Text(subSpec, color = theme.textGrayColor, fontSize = 14.sp)
+        }
+        Column(
+            modifier = Modifier
+                .width(70.dp)
+                .padding(10.dp)
+        ) {
+            Switch(enabled = enabled, checked = checked, onCheckedChange = onChange)
+        }
+    }
+}
+
+
+@Composable
+fun ProductSellingSpecEditItem(specTitle: String, spec: String, keyType: KeyboardType, theme: Theme, onChange: (String) -> Unit) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 10.dp, vertical = 5.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(modifier = Modifier.width(130.dp), text = specTitle, color = theme.textGrayColor)
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = spec,
+            onValueChange = { change ->
+                onChange(change)
+            },
+            shape = RoundedCornerShape(12.dp),
+            placeholder = { Text(text = "Enter $specTitle", fontSize = 14.sp) },
+            //label = { Text(text = specTitle, fontSize = 14.sp) },
+            maxLines = 1,
+            colors = theme.outlinedTextFieldStyle(),
+            keyboardOptions = KeyboardOptions(keyboardType = keyType),
+        )
+    }
+}
+
+
+@Composable
+fun ProductSellingSpecEditItemFull(specTitle: String, spec: String, keyType: KeyboardType, error: Int, theme: Theme, onChange: (String) -> Unit) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 10.dp, vertical = 5.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = spec,
+            onValueChange = { change ->
+                onChange(change)
+            },
+            shape = RoundedCornerShape(12.dp),
+            placeholder = { Text(text = "Enter $specTitle", fontSize = 14.sp) },
+            isError = spec.length > error,
+            supportingText = {
+                Text(
+                    text = "${spec.length} / $error",
+                    modifier = Modifier.fillMaxWidth(),
+                    color = theme.textHintColor,
+                    textAlign = TextAlign.End,
+                )
+            },
+            //label = { Text(text = specTitle, fontSize = 14.sp) },
+            colors = theme.outlinedTextFieldStyle(),
+            keyboardOptions = KeyboardOptions(keyboardType = keyType),
+        )
+    }
+}
+
+
+@Composable
+fun ProductSellingSpecsHeadBar(
+    //navigator: Navigator,
+    text: String,
+    theme: Theme,
+    onClick: () -> Unit,
+) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .padding(horizontal = 5.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically
+    ) {
+        Image(
+            modifier = Modifier
+                .width(40.dp)
+                .height(40.dp)
+                .background(color = theme.backDark, shape = CircleShape)
+                .padding(8.dp),
+            imageVector = rememberHelp(theme.textColor),
+            contentScale = ContentScale.Fit,
+            contentDescription = null,
+        )
+        Text(
+            modifier = Modifier.padding(horizontal = 5.dp),
+            text = text,
+            color = theme.textColor,
+            fontSize = 20.sp,
+        )
+        Box(
+            modifier = Modifier
+                .width(80.dp)
+                .height(50.dp)
+                .clickable {
+                    onClick()
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Done",
+                color = theme.primary,
+                fontSize = 20.sp,
+            )
+        }
+    }
+    Spacer(modifier = Modifier.height(10.dp))
+}
+
+
+@Composable
+fun ProductSellingSpecsHeadBarBack(
+    text: String,
+    theme: Theme,
+    onClick: () -> Unit,
+) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .padding(horizontal = 5.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically
+    ) {
+        Image(
+            modifier = Modifier
+                .width(40.dp)
+                .height(40.dp)
+                .background(color = theme.background, shape = CircleShape)
+                .clickable {
+                    onClick()
+                }
+                .padding(8.dp),
+            imageVector = rememberArrowBack(theme.textColor),
+            contentScale = ContentScale.Fit,
+            contentDescription = null,
+        )
+        Text(
+            text = text,
+            color = theme.textColor,
+            fontSize = 20.sp,
+        )
+        Spacer(
+            modifier = Modifier
+                .width(40.dp)
+                .height(40.dp)
+        )
+    }
+    Spacer(modifier = Modifier.height(10.dp))
+}
+
+@Composable
+fun ProductSellingSpecsHeadBarBackHelp(
+    text: String,
+    theme: Theme,
+    onBackClick: () -> Unit,
+) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .padding(horizontal = 5.dp), verticalAlignment = Alignment.CenterVertically
+    ) {
+        Image(
+            modifier = Modifier
+                .width(40.dp)
+                .height(40.dp)
+                .background(color = theme.background, shape = CircleShape)
+                .clickable {
+                    onBackClick()
+                }
+                .padding(8.dp),
+            imageVector = rememberArrowBack(theme.textColor),
+            contentScale = ContentScale.Fit,
+            contentDescription = null,
+        )
+        Spacer(Modifier.width(15.dp))
+        Text(
+            modifier = Modifier.weight(1F),
+            text = text,
+            color = theme.textColor,
+            fontSize = 20.sp,
+        )
+        Image(
+            modifier = Modifier
+                .width(40.dp)
+                .height(40.dp)
+                .background(color = theme.backDark, shape = CircleShape)
+                .padding(8.dp),
+            imageVector = rememberHelp(theme.textColor),
+            contentScale = ContentScale.Fit,
+            contentDescription = null,
+        )
+    }
+    Spacer(modifier = Modifier.height(10.dp))
+}

@@ -13,6 +13,27 @@ class LogInViewModel(
     private val _uiState = MutableStateFlow(State())
     val uiState = _uiState.asStateFlow()
 
+    fun setIsRegister(it: Boolean) {
+        _uiState.update { state ->
+            state.copy(isRegister = it)
+        }
+    }
+
+    data class State(
+        val isErrorPressed: Boolean = false,
+        val isRegister: Boolean = false,
+    )
+
+}
+
+
+class LogInEmailViewModel(
+    project: Project
+) : BaseViewModel(project) {
+
+    private val _uiState = MutableStateFlow(State())
+    val uiState = _uiState.asStateFlow()
+
     fun setEmail(it: String) {
         _uiState.update { state ->
             state.copy(email = it)

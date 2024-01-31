@@ -46,10 +46,9 @@ E-commerce built in Kotlin Multiplatform Mobile using Supabase auth, realtime, d
 - Task 4.1.3: Write tests for checkout
 
 ## Epic 5: Payment Access Layer
-### Story 5.1: Check Payment Status
-- Task 5.1.1: 
-- Task 5.1.2: 
-- Task 5.1.3: 
+### Story 5.1: Check Payment methods Status
+- Task 5.1.1: Implement Unverified Payment designs
+- Task 5.1.2: Implement Payment methods validation
 
 ---
 ---

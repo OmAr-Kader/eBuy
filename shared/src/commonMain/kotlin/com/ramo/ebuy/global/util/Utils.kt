@@ -18,10 +18,17 @@ import com.ramo.ebuy.global.ui.rememberSearch
 import com.ramo.ebuy.global.ui.rememberSell
 import com.ramo.ebuy.global.ui.rememberSetting
 import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
 import kotlinx.datetime.toLocalDateTime
-import kotlin.time.Duration.Companion.milliseconds
+
+val Long.toYearString: String
+    get() {
+        return Instant.fromEpochMilliseconds(this).toLocalDateTime(TimeZone.currentSystemDefault()).year.toString()
+    }
 
 
 inline fun <C, R> List<C>.ifNotEmpty(defaultValue: List<C>.() -> R): R? = if (isNotEmpty()) defaultValue() else null
@@ -42,21 +49,10 @@ inline val String.firstCapital: String
         String(it)
     }
 
-internal val Long.fetchHour: Int
-    get() = java.util.Calendar.getInstance().apply {
-        timeInMillis = this@fetchHour
-    }[java.util.Calendar.HOUR_OF_DAY]
-
-internal val Long.fetchMinute: Int
-    get() = java.util.Calendar.getInstance().apply {
-        timeInMillis = this@fetchMinute
-    }[java.util.Calendar.MINUTE]
-
-
 internal val fetchTimeGap: (time: Long) -> TimeGap?
     get() = { time ->
-        Instant.fromEpochMilliseconds(time).epochSeconds.milliseconds.inWholeMilliseconds.let { end ->
-            Clock.System.now().epochSeconds.milliseconds.inWholeMilliseconds.let { now ->
+        Instant.fromEpochMilliseconds(time).toEpochMilliseconds().let { end ->
+            Clock.System.now().toEpochMilliseconds().let { now ->
                 if (end > now) {
                     Instant.fromEpochMilliseconds(
                         end - now
@@ -66,6 +62,33 @@ internal val fetchTimeGap: (time: Long) -> TimeGap?
                 } else null
             }
         }
+    }
+
+internal val currentTime: TimeSplitter
+    get() {
+        return Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).let {
+            TimeSplitter(year = it.year, month = it.monthNumber, day = it.dayOfMonth, hour = it.hour)
+        }
+    }
+
+internal val splitTime: (time: Long) -> TimeSplitter
+    get() = { time ->
+        Instant.fromEpochMilliseconds(
+            time
+        ).toLocalDateTime(TimeZone.currentSystemDefault()).let {
+            TimeSplitter(year = it.year, month = it.monthNumber, day = it.dayOfMonth, hour = it.hour)
+        }
+    }
+
+internal val margeYear: (year: Int) -> Long
+    get() = { year ->
+        val currentMoment: Instant = Clock.System.now()
+        val datetimeInUtc: LocalDateTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+        currentMoment.minus(
+            datetimeInUtc.year - year,
+            DateTimeUnit.YEAR,
+            TimeZone.currentSystemDefault()
+        ).toEpochMilliseconds()
     }
 
 inline val profileData: List<String>
@@ -148,25 +171,47 @@ inline val Int.bottomBarIcons: androidx.compose.ui.graphics.vector.ImageVector
     }
 
 
+inline val offerSubTitle: String
+    get() = "Buyers interested in your item can make you offers you can accept, counter, or decline."
+
+inline val conditions: List<String>
+    get() = listOf("Brand New", "Like New", "Very Good", "Good", "Acceptable")
+
 fun cato(): List<Category> {
     return buildList {
         add(Category(1, "TECH", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/93/619094/1.jpg?2560", 1, -1))
         add(Category(2, "TELEVISIONS", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/77/359744/1.jpg?4978", 1, 1))
         add(Category(3, "TUBE", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/47/796613/1.jpg?7826", 1, 2))
-        add(Category(4, "LCD", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/74/956483/1.jpg?9747", 1, 2))
+        add(Category(4, "LED", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/74/956483/1.jpg?9747", 1, 2))
         add(Category(5, "PLASMA", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/40/357284/1.jpg?5906", 1, 2))
-        add(Category(6, "PORTABLE ELECTRONICS", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/18/313084/1.jpg?0214", 1, 1))
+        add(Category(6, "ELECTRONICS", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/18/313084/1.jpg?0214", 1, 1))
         add(Category(7, "MP3 PLAYERS", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/77/491602/1.jpg?1949", 1, 6))
         add(Category(8, "FLASH", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/22/411581/1.jpg?9349", 1, 7))
         add(Category(9, "CD PLAYERS", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/37/850302/1.jpg?4989", 1, 6))
         add(Category(10, "2 WAY RADIOS", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/55/159784/1.jpg?3043", 1, 6))
-        add(Category(4, "LCD", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/74/956483/1.jpg?9747", 1, 2))
-        add(Category(5, "PLASMA", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/40/357284/1.jpg?5906", 1, 2))
-        add(Category(6, "PORTABLE ELECTRONICS", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/18/313084/1.jpg?0214", 1, 1))
-        add(Category(7, "MP3 PLAYERS", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/77/491602/1.jpg?1949", 1, 6))
-        add(Category(8, "FLASH", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/22/411581/1.jpg?9349", 1, 7))
+        add(Category(11, "LCD", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/74/956483/1.jpg?9747", 1, 2))
+        add(Category(12, "IPS", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/40/357284/1.jpg?5906", 1, 2))
+        add(Category(13, "PORTABLE ELECTRONICS", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/18/313084/1.jpg?0214", 1, 1))
     }
 }
+
+fun countries(): List<Country> {
+    return buildList {
+        add(Country(0, "US", "USA America United State"))
+        add(Country(1, "Egypt", "Egypt Cairo Giza"))
+    }
+}
+
+inline val ratings: List<AgeRate>
+    get() {
+        return listOf(
+            AgeRate(0, "G – General Audiences"),
+            AgeRate(1, "PG – Parental Guidance Suggested"),
+            AgeRate(2, "PG-13 – Parents Strongly Cautioned"),
+            AgeRate(3, "R – Restricted"),
+            AgeRate(4, "NC-17 – Adults Only"),
+        )
+    }
 
 fun item(): List<Product> {
     return buildList {
@@ -174,143 +219,186 @@ fun item(): List<Product> {
             Product(
                 id = 7384,
                 productCode = "viris",
-                name = "Shelton Patterson",
+                title = "Shelton Patterson",
                 imageUris = listOf("https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/93/619094/1.jpg?2560"),
                 price = 8.9f,
-                discount = 10.11f,
-                discountStart = 6110,
-                discountEnd = 3498,
+                auction = -1f,
+                offer = 10.11f,
+                auctionStart = 6110,
+                auctionEnd = 3498,
                 parentCato = 1291,
-                parentCatoName = "Adan Goodwin",
+                parentCategories = listOf("Adan Goodwin"),
                 condition = "New",
+                scheduled = -1L,
+                status = 1,
+                ageRate = 0,
             )
         )
         add(
             Product(
                 id = 9589,
                 productCode = "expetenda",
-                name = "Cherry Mayer",
+                title = "Cherry Mayer",
                 imageUris = listOf("https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/77/359744/1.jpg?4978"),
                 price = 16.17f,
-                discount = 18.19f,
-                discountStart = 8687,
-                discountEnd = 6307,
+                auction = -1f,
+                offer = 18.19f,
+                auctionStart = 8687,
+                auctionEnd = 6307,
                 parentCato = 4482,
-                parentCatoName = "Kathryn Alston",
+                parentCategories = listOf("Adan Goodwin"),
                 condition = "New",
+                scheduled = -1L,
+                status = 1,
+                ageRate = 0,
             )
         )
         add(
             Product(
                 id = 9122,
                 productCode = "himenaeos",
-                name = "Kerri Burnett",
+                title = "Kerri Burnett",
                 imageUris = listOf("https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/77/359744/1.jpg?4978"),
                 price = 24.25f,
-                discount = 26.27f,
-                discountStart = 4193,
-                discountEnd = 1261,
+                auction = -1f,
+                offer = 26.27f,
+                auctionStart = 4193,
+                auctionEnd = 1261,
                 parentCato = 4362,
-                parentCatoName = "Mona Owen",
+                parentCategories = listOf("Adan Goodwin"),
                 condition = "New",
+                scheduled = -1L,
+                status = 1,
+                ageRate = 0,
             )
         )
         add(
             Product(
                 id = 7449,
                 productCode = "voluptatum",
-                name = "Heather Ramirez",
+                title = "Heather Ramirez",
                 imageUris = listOf("https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/47/796613/1.jpg?7826"),
                 price = 32.33f,
-                discount = 34.35f,
-                discountStart = 6303,
-                discountEnd = 6759,
+                auction = -1f,
+                offer = 34.35f,
+                auctionStart = 6303,
+                auctionEnd = 6759,
                 parentCato = 8497,
-                parentCatoName = "Eliza Frank",
+                parentCategories = listOf("Adan Goodwin"),
                 condition = "New",
+                scheduled = -1L,
+                status = 1,
+                ageRate = 0,
             )
         )
         add(
             Product(
                 id = 5132,
                 productCode = "expetenda",
-                name = "Amelia Lewis",
+                title = "Amelia Lewis",
                 imageUris = listOf("https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/74/956483/1.jpg?9747"),
                 price = 40.41f,
-                discount = 42.43f,
-                discountStart = 1155,
-                discountEnd = 6576,
+                auction = -1f,
+                offer = 42.43f,
+                auctionStart = 1155,
+                auctionEnd = 6576,
                 parentCato = 9036,
-                parentCatoName = "Kareem Smith",
+                parentCategories = listOf("Adan Goodwin"),
                 condition = "New",
-
-                )
+                scheduled = -1L,
+                status = 1,
+                ageRate = 0,
+            )
         )
         add(
             Product(
                 id = 6330,
                 productCode = "molestiae",
-                name = "Rachel Langley",
+                title = "Rachel Langley",
                 imageUris = listOf("https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/40/357284/1.jpg?5906"),
                 price = 48.49f,
-                discount = 50.51f,
-                discountStart = 9625,
-                discountEnd = 2549,
+                auction = -1f,
+                offer = 50.51f,
+                auctionStart = 9625,
+                auctionEnd = 2549,
                 parentCato = 5189,
-                parentCatoName = "Garth Barron",
+                parentCategories = listOf("Adan Goodwin"),
                 condition = "New",
+                scheduled = -1L,
+                status = 1,
+                ageRate = 0,
             )
         )
         add(
             Product(
                 id = 3740,
                 productCode = "disputationi",
-                name = "Stephen Ewing",
+                title = "Stephen Ewing",
                 imageUris = listOf("https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/18/313084/1.jpg?0214"),
                 price = 56.57f,
-                discount = 58.59f,
-                discountStart = 3306,
-                discountEnd = 4182,
+                auction = -1f,
+                offer = 58.59f,
+                auctionStart = 3306,
+                auctionEnd = 4182,
                 parentCato = 3158,
-                parentCatoName = "Nora Britt",
+                parentCategories = listOf("Adan Goodwin"),
                 condition = "New",
-
-                )
+                scheduled = -1L,
+                status = 1,
+                ageRate = 0,
+            )
         )
         add(
             Product(
                 id = 7305,
                 productCode = "dicunt",
-                name = "Tamara Lawrence",
+                title = "Tamara Lawrence",
                 imageUris = listOf("https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/77/491602/1.jpg?1949"),
                 price = 64.65f,
-                discount = 66.67f,
-                discountStart = 3883,
-                discountEnd = 3322,
+                auction = -1f,
+                offer = 66.67f,
+                auctionStart = 3883,
+                auctionEnd = 3322,
                 parentCato = 5627,
-                parentCatoName = "Lawanda Burt",
+                parentCategories = listOf("Adan Goodwin"),
                 condition = "New",
+                scheduled = -1L,
+                status = 1,
+                ageRate = 0,
             )
         )
         add(
             Product(
                 id = 3485,
                 productCode = "elit",
-                name = "Hershel Hooper",
+                title = "Hershel Hooper",
                 imageUris = listOf("https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/22/411581/1.jpg?9349"),
                 price = 72.73f,
-                discount = 74.75f,
-                discountStart = 1490,
-                discountEnd = 2468,
+                auction = -1f,
+                offer = 74.75f,
+                auctionStart = 1490,
+                auctionEnd = 2468,
                 parentCato = 5768,
-                parentCatoName = "Graham Thompson",
+                parentCategories = listOf("Adan Goodwin"),
                 condition = "New",
+                scheduled = -1L,
+                status = 1,
+                ageRate = 0,
             )
         )
     }
 }
 
 
+data class Country(val id: Int, val display: String, val searchable: String)
+
+data class AgeRate(val id: Int, val display: String)
+
 data class TimeGap(val days: Int, val hours: Int)
+
+data class TimeSplitter(val year: Int, val month: Int, val day: Int, val hour: Int) {
+
+    constructor(year: Int) : this(year, 1, 1, 4)
+}
 
 data class HotBarData(val icon: String, val label: String)

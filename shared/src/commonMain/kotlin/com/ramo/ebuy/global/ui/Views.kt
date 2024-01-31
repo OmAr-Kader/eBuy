@@ -1,5 +1,10 @@
 package com.ramo.ebuy.global.ui
 
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -19,8 +24,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -37,6 +45,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,6 +65,7 @@ import com.ramo.ebuy.global.base.Theme
 import com.ramo.ebuy.global.util.bottomBarIcons
 import com.ramo.ebuy.global.util.hotBarIcons
 import com.seiko.imageloader.rememberImagePainter
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 //@Composable
@@ -84,6 +94,22 @@ fun OnLaunchScreenScope(invoke: suspend kotlinx.coroutines.CoroutineScope.() -> 
     }
 }
 
+@Composable
+fun <S> AnimatedText(
+    targetState: S,
+    content: @Composable AnimatedContentScope.(targetState: S) -> Unit
+) {
+    androidx.compose.animation.AnimatedContent(
+        targetState = targetState,
+        transitionSpec = {
+            fadeIn(animationSpec = tween(durationMillis = 500)) togetherWith
+                    fadeOut(animationSpec = tween(durationMillis = 500))
+        },
+        contentAlignment = Alignment.Center,
+        label = "$targetState",
+        content = content
+    )
+}
 
 @Composable
 fun CardButton(
@@ -403,3 +429,112 @@ fun DotsIndicator(
         }
     }
 }
+
+//https://github.com/DogusTeknoloji/compose-date-picker
+@Composable
+fun CalendarYearView(
+    selectedYear: Int,
+    minYear: Int,
+    maxYear: Int,
+    theme: Theme,
+    setYear: (Int) -> Unit,
+) {
+    val years = IntRange(minYear, maxYear).toList().reversed()
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    val selectedIndex = years.indexOf(selectedYear)
+    LazyColumn(
+        state = listState,
+        modifier = Modifier
+            .height(300.dp)
+            .fillMaxWidth()
+            .padding(20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        items(years) { year ->
+            Text(text = year.toString(),
+                fontSize = if (year == selectedYear) 35.sp else 30.sp,
+                color = if (year == selectedYear) theme.primary else theme.textColor,
+                modifier = Modifier
+                    .padding(vertical = 10.dp)
+                    .clickable {
+                        setYear(year)
+                    })
+        }
+        scope.launch {
+            listState.animateScrollToItem(selectedIndex)
+        }
+    }
+}
+
+@Composable
+fun TextPickerView(
+    selectedYear: Int,
+    minYear: Int,
+    maxYear: Int,
+    themeColor: Color,
+    setYear: (Int) -> Unit,
+) {
+    val years = IntRange(minYear, maxYear).toList().reversed()
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+    val selectedIndex = years.indexOf(selectedYear)
+    LazyColumn(
+        state = listState,
+        modifier = Modifier
+            .height(300.dp)
+            .fillMaxWidth()
+            .padding(20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        items(years) { year ->
+            Text(text = year.toString(),
+                fontSize = if (year == selectedYear) 35.sp else 30.sp,
+                color = if (year == selectedYear) themeColor else Color.Black,
+                modifier = Modifier
+                    .padding(vertical = 10.dp)
+                    .clickable {
+                        setYear(year)
+                    })
+        }
+        scope.launch {
+            listState.animateScrollToItem(selectedIndex)
+        }
+    }
+}
+
+/*
+@Composable
+fun LayoutMeasure(
+    onSize: (Size) -> Unit,
+    mainContent: @Composable () -> Unit,
+) {
+    val dimensionScope = remember{DimensionScopeImpl()}
+
+    Layout(
+        modifier = Modifier.fillMaxWidth(),
+        content = mainContent
+    ) { measurables: List<Measurable>, constraints: Constraints ->
+        val placeables = measurables.map { measurable: Measurable ->
+            measurable.measure(constraints)
+        }
+        val maxWidth = placeables.maxOf { it.width }
+        val maxHeight = placeables.maxOf { it.height }
+        val size = Size(maxWidth.toFloat(), maxHeight.toFloat())
+        if (dimensionScope.size.width != size.width) {
+            dimensionScope.size = size
+            onSize(dimensionScope.size)
+        }
+        layout(maxWidth, maxHeight) {
+            placeables.forEach { placeable: Placeable ->
+                placeable.placeRelative(0, 0)
+            }
+        }
+    }
+}
+
+interface DimensionScope {
+    var size: Size
+}
+class DimensionScopeImpl(override var size: Size = Size.Zero) : DimensionScope
+*/

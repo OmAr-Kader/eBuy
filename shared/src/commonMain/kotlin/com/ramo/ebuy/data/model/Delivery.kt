@@ -2,6 +2,7 @@ package com.ramo.ebuy.data.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Serializable
 data class DeliveryProcess(
@@ -10,35 +11,55 @@ data class DeliveryProcess(
     @SerialName("shipping_id")
     val shippingID: Long,
     @SerialName("from")
-    val fromDate: String,
+    val fromDate: Int,
     @SerialName("up_to")
-    val upToDate: String,
+    val upToDate: Int,
     @SerialName("size_phys")
     val size: String,
     @SerialName("delivery_cost")
-    val deliveryCost: Int,
+    val deliveryCost: Float,
     @SerialName("pub_country")
     val publisher: String,
-    @SerialName("specProcess")
+    @SerialName("location")
     val location: List<String>,
     @SerialName("returns")
     val returns: Int,
     @SerialName("payments")
     val payments: List<Int>,
+    @SerialName("service")
+    val service: Int,
     @SerialName("import_charges")
     val importCharges: Int,
 ) {
-    constructor() : this(
+
+    @Transient
+    val serviceStr = when(service) {
+        0 -> "USPS"
+        else -> "FEDEX"
+    }
+
+    @Transient
+    val durationStr = "$fromDate - $upToDate business days"
+
+    @Transient
+    val deliveryCostValid: Boolean = deliveryCost != -1F
+
+    @Transient
+    val deliveryStr: String = if (deliveryCostValid) "$ $deliveryCost" else " "
+
+    constructor(productID: Long) : this(
+        productID = productID,
         0L,
-        0L,
+        3,
+        5,
         "",
-        "",
-        "",
-        0,
+        -1F,
         "",
         emptyList(),
         -1,
         emptyList(),
+        0,
         -1,
     )
 }
+
