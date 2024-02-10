@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -51,7 +52,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
@@ -60,7 +60,6 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.graphics.ColorUtils
 import com.ramo.ebuy.global.base.Theme
 import com.ramo.ebuy.global.util.bottomBarIcons
 import com.ramo.ebuy.global.util.hotBarIcons
@@ -149,12 +148,11 @@ fun CardButton(
 }
 
 
-@Composable
-fun HotBar(
+fun LazyListScope.HotBar(
     hotData: List<String>,
-    theme: Theme = koinInject(),
+    theme: Theme,
     onClick: (Int) -> Unit
-) {
+) = item {
     LazyRow(contentPadding = PaddingValues(5.dp)) {
         itemsIndexed(hotData) { i, it ->
             Surface(
@@ -209,13 +207,11 @@ fun ScrollableBar(
     }
 }
 
-
-@Composable
-fun VerticalListTitle(
+fun LazyListScope.VerticalListTitle(
     title: String,
-    theme: Theme = koinInject(),
+    theme: Theme,
     onClick: () -> Unit,
-) {
+) = item {
     Row(
         modifier = Modifier.fillMaxWidth().height(50.dp).padding(start = 15.dp, end = 15.dp).clickable {
             onClick()
@@ -243,12 +239,11 @@ fun VerticalListTitle(
     }
 }
 
-@Composable
-fun VerticalListSingleTitle(
+fun LazyListScope.VerticalListSingleTitle(
     title: String,
-    theme: Theme = koinInject(),
+    theme: Theme,
     onClick: () -> Unit,
-) {
+) = item {
     Row(
         modifier = Modifier.fillMaxWidth().height(50.dp).padding(start = 15.dp, end = 15.dp).clickable {
             onClick()
@@ -351,13 +346,14 @@ fun RowScope.AddItem(
 fun ImagesPageView(
     list: List<String>,
     size: DpSize,
+    theme: Theme = koinInject(),
     onClick: (Int) -> Unit
 ) {
     val pagerState = rememberPagerState(pageCount = { list.size })
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.background),
+            .background(theme.background),
         //verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -365,7 +361,7 @@ fun ImagesPageView(
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.fillWidthIfZero(size)
-                .background(MaterialTheme.colorScheme.background)
+                .background(theme.background)
                 .clip(RoundedCornerShape(20.dp)),
         ) {
             val painter = rememberImagePainter(url = list[it])
@@ -382,13 +378,8 @@ fun ImagesPageView(
         DotsIndicator(
             totalDots = pagerState.pageCount,
             selectedIndex = pagerState.currentPage,
-            selectedColor = MaterialTheme.colorScheme.secondary,
-            unSelectedColor = Color(
-                ColorUtils.setAlphaComponent(
-                    MaterialTheme.colorScheme.secondary.toArgb(),
-                    150
-                )
-            )
+            selectedColor = theme.textHintColor,
+            unSelectedColor = theme.textHintAlpha
         )
     }
 }
@@ -406,23 +397,13 @@ fun DotsIndicator(
             .wrapContentHeight()
 
     ) {
-
         items(totalDots) { index ->
-            if (index == selectedIndex) {
-                Box(
-                    modifier = Modifier
-                        .size(5.dp)
-                        .clip(CircleShape)
-                        .background(selectedColor)
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .size(5.dp)
-                        .clip(CircleShape)
-                        .background(unSelectedColor)
-                )
-            }
+            Box(
+                modifier = Modifier
+                    .size(7.dp)
+                    .clip(CircleShape)
+                    .background(if (index == selectedIndex) selectedColor else unSelectedColor)
+            )
             if (index != totalDots - 1) {
                 Spacer(modifier = Modifier.padding(horizontal = 2.dp))
             }
@@ -502,6 +483,8 @@ fun TextPickerView(
         }
     }
 }
+
+
 
 /*
 @Composable

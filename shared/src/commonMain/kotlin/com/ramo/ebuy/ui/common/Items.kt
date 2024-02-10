@@ -341,8 +341,8 @@ fun GridCatoItem(
 @Composable
 fun GridCircleCatoItem(
     cato: Category,
-    theme: Theme = koinInject(),
     onClick: (Category) -> Unit,
+    theme: Theme = koinInject(),
 ) {
     val painter = rememberImagePainter(
         url = cato.imageUri,

@@ -18,7 +18,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,6 +26,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -110,34 +110,34 @@ fun BarMainScreen(
 
 @Composable
 fun BarProductScreen(
-    onClick: (Int) -> Unit,
     theme: Theme = koinInject(),
+    onClick: (Int) -> Unit,
 ) {
-    val last = remember {
-        mutableFloatStateOf(-150F)
-    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp)
             .background(theme.background)
-            .padding(start = 15.dp, end = 15.dp),
+            .padding(start = 10.dp, end = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Row {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Image(
                 modifier = Modifier
+                    .width(48.dp)
+                    .height(48.dp)
+                    .clip(CircleShape)
                     .clickable {
                         onClick(0)
                     }
-                    .padding(start = 10.dp)
-                    .height(56.dp),
+                    .padding(7.dp),
                 imageVector = rememberArrowBack(theme.textColor),
                 contentScale = ContentScale.Fit,
                 contentDescription = null,
             )
-            Text("Item", color = theme.textColor)
+            Spacer(Modifier.width(5.dp))
+            Text("Item", color = theme.textColor, fontSize = 22.sp)
         }
         Row {
             Image(
@@ -148,6 +148,7 @@ fun BarProductScreen(
                     .width(40.dp)
                     .height(40.dp)
                     .background(color = theme.backDark, shape = CircleShape)
+                    .clip(CircleShape)
                     .padding(8.dp),
                 imageVector = rememberSearch(theme.textColor),
                 contentScale = ContentScale.Fit,
@@ -162,6 +163,7 @@ fun BarProductScreen(
                     .width(40.dp)
                     .height(40.dp)
                     .background(color = theme.backDark, shape = CircleShape)
+                    .clip(CircleShape)
                     .padding(8.dp),
                 imageVector = rememberShoppingCart(theme.textColor),
                 colorFilter = ColorFilter.tint(theme.textColor),
@@ -177,6 +179,7 @@ fun BarProductScreen(
                     .width(40.dp)
                     .height(40.dp)
                     .background(color = theme.backDark, shape = CircleShape)
+                    .clip(CircleShape)
                     .padding(8.dp),
                 imageVector = rememberShare(theme.textColor),
                 colorFilter = ColorFilter.tint(theme.textColor),
@@ -192,6 +195,7 @@ fun BarProductScreen(
                     .width(40.dp)
                     .height(40.dp)
                     .background(color = theme.backDark, shape = CircleShape)
+                    .clip(CircleShape)
                     .padding(8.dp),
                 imageVector = rememberMenu(theme.textColor),
                 colorFilter = ColorFilter.tint(theme.textColor),

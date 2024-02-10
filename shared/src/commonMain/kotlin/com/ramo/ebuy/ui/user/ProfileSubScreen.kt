@@ -23,10 +23,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ramo.ebuy.global.base.Theme
-import com.ramo.ebuy.global.ui.OnLaunchScreen
+import com.ramo.ebuy.global.ui.OnLaunchScreenScope
 import com.ramo.ebuy.global.ui.rememberProfile
 import com.ramo.ebuy.global.util.profileData
 import com.ramo.ebuy.global.util.profileIcons
+import com.ramo.ebuy.global.util.urlCheckIfEmpty
 import com.ramo.ebuy.ui.common.BarMainScreen
 import com.ramo.ebuy.ui.common.ProfileItem
 import com.seiko.imageloader.rememberImagePainter
@@ -40,12 +41,13 @@ fun ProfileSubScreen(
     theme: Theme = koinInject()
 ) {
     val state by viewModel.uiState.collectAsState()
-    OnLaunchScreen {
+    OnLaunchScreenScope {
         viewModel.loadUserData()
     }
-    val painter = state.userBase?.imageUri?.let {
+    val painter = state.user?.image.urlCheckIfEmpty?.let {
         rememberImagePainter(url = it)
     }
+
     Column(Modifier.fillMaxSize()) {
         BarMainScreen(-112)
         Spacer(modifier = Modifier.height(10.dp))

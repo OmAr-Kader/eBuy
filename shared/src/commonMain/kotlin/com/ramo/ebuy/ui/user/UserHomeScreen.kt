@@ -26,12 +26,17 @@ fun HomeUserScreen(
     navigator: Navigator,
     project: Project = koinInject(),
     theme: Theme = koinInject(),
-    koinState: Stater = koinInject(),
-    viewModel: HomeViewModel = MokoModel { HomeViewModel(project, koinState) }
+    stater: Stater = koinInject(),
+    viewModel: HomeViewModel = MokoModel {
+        HomeViewModel(project, stater.stateHomeModel.copy()) {
+            apply {
+                stater.stateHomeViewModel = this@apply
+            }
+        }
+    }
 ) {
     val state by viewModel.uiState.collectAsState()
     val scaffoldState = remember { SnackbarHostState() }
-
     Scaffold(
         snackbarHost = {
             SnackbarHost(scaffoldState) {
@@ -57,7 +62,7 @@ fun HomeUserScreen(
     ) {
         Box(Modifier.padding(it)) {
             when (state.selectedPage) {
-                0 -> HomeSubScreen(viewModel)
+                0 -> HomeSubScreen(navigator, viewModel)
                 1 -> ProfileSubScreen(viewModel)
                 4 -> SellingSubScreen(navigator)
             }

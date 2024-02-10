@@ -1,17 +1,21 @@
 package com.ramo.ebuy.global.base
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.ColorUtils
 
 data class Theme(
     val isDarkMode: Boolean,
@@ -30,6 +34,12 @@ data class Theme(
     val pri: Color
 ) {
     val priAlpha: Color = Color(pri.red, pri.green, pri.blue, 0.25F)
+    val textHintAlpha = Color(
+        ColorUtils.setAlphaComponent(
+            textHintColor.toArgb(),
+            150
+        )
+    )
 }
 
 fun generateTheme(isDarkMode: Boolean): Theme {
@@ -38,7 +48,7 @@ fun generateTheme(isDarkMode: Boolean): Theme {
             isDarkMode = true,
             isDarkStatusBarText = false,
             primary = Color(red = 109, green = 157, blue = 241),
-            secondary = Color(red = 22, green = 22, blue = 22),
+            secondary = Color(red = 65, green = 130, blue = 237),
             background = Color.Black,
             backDark = Color(25, 25, 25),
             backDarkSec = Color(143, 143, 143),
@@ -55,7 +65,7 @@ fun generateTheme(isDarkMode: Boolean): Theme {
             isDarkMode = false,
             isDarkStatusBarText = true,
             primary = Color(red = 109, green = 157, blue = 241),
-            secondary = Color(red = 22, green = 22, blue = 22),
+            secondary = Color(red = 65, green = 130, blue = 237),
             background = Color.White,
             backDark = Color(230, 230, 230),
             backDarkSec = Color(112, 112, 112),
@@ -76,12 +86,21 @@ fun MyApplicationTheme(
     theme: Theme,
     content: @Composable () -> Unit
 ) {
-    val colors = lightColorScheme(
-        primary = theme.primary,
-        secondary = theme.secondary,
-        background = theme.background,
-        onBackground = theme.textHintColor,
-    )
+    val colors = if (isSystemInDarkTheme()) {
+        darkColorScheme(
+            primary = theme.primary,
+            secondary = theme.secondary,
+            background = theme.background,
+            onBackground = theme.textHintColor,
+        )
+    } else {
+        lightColorScheme(
+            primary = theme.primary,
+            secondary = theme.secondary,
+            background = theme.background,
+            onBackground = theme.textHintColor,
+        )
+    }
     val typography = Typography(
         bodyMedium = TextStyle(
             fontFamily = FontFamily.Default,

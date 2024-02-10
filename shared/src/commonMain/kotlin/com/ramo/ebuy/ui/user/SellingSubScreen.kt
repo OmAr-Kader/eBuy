@@ -31,7 +31,6 @@ import com.ramo.ebuy.global.navigation.Navigator
 import com.ramo.ebuy.global.navigation.RootComponent
 import org.koin.compose.koinInject
 
-//List an item
 @Composable
 fun SellingSubScreen(
     navigator: Navigator,

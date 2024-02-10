@@ -42,7 +42,7 @@ data class Product(
     @SerialName("age_rating")
     val ageRate: Int,
     @SerialName("item_status")
-    val status: Int, // underReview = 0 - rejected = -1  - accepted = 1
+    val status: Int, // underReview = 1 - rejected = -1  - accepted = 2 - asReference = 0
     @Transient
     val priceEditStr: String = if (price != -1F) price.toString() else "",
     @Transient
@@ -109,10 +109,14 @@ data class ProductBaseSpecs(
     val subTitle: String,
     @SerialName("publisher_id")
     val publisherId: Long,
+    @SerialName("condition_details")
+    val conditionDetails: String,
     @SerialName("country_product")
     val countryProduct: Int,
     @SerialName("platform")
     val platform: String,
+    @SerialName("description_url")
+    val descriptionUrl: String,
     @SerialName("release_year")
     val releaseYear: Long,
     @SerialName("mpn")
@@ -132,7 +136,9 @@ data class ProductBaseSpecs(
         productID = productID,
         "",
         0L,
+        conditionDetails = "",
         0,
+        "",
         "",
         0L,
         "",
@@ -159,10 +165,24 @@ data class ProductSpecs(
  */
 @Serializable
 data class ProductSpecsExtra(
-    @SerialName("label")
+    @SerialName("label_extra")
     val labelExtra: String,
-    @SerialName("spec")
-    val specExtra: List<String>,
+    @SerialName("specs_extra")
+    val specExtra: List<SpecExtra>,
+    @Transient
+    val dummy: Int = 0,
+) {
+    constructor() : this("", emptyList())
+}
+
+@Serializable
+data class SpecExtra(
+    @SerialName("spec_label")
+    var labelSpec: String,
+    @SerialName("spec_price")
+    var plusPriceSpec: Float,
+    @Transient
+    var priceSpecEditStr: String = if (plusPriceSpec != -1F) plusPriceSpec.toString() else "",
 )
 
 @Serializable

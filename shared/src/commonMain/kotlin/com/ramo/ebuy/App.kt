@@ -3,11 +3,17 @@ package com.ramo.ebuy
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,7 +23,6 @@ import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.slid
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.stackAnimation
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import com.ramo.ebuy.di.Project
-import com.ramo.ebuy.di.Stater
 import com.ramo.ebuy.di.initApp
 import com.ramo.ebuy.global.base.MyApplicationTheme
 import com.ramo.ebuy.global.base.Theme
@@ -26,10 +31,15 @@ import com.ramo.ebuy.global.navigation.Navigator
 import com.ramo.ebuy.global.navigation.RootComponent
 import com.ramo.ebuy.global.ui.OnLaunchScreenScope
 import com.ramo.ebuy.global.ui.rememberEbuy
+import com.ramo.ebuy.global.ui.rememberWifiOff
+import com.ramo.ebuy.ui.admin.AdminHomeScreen
+import com.ramo.ebuy.ui.admin.CategoryCreatingScreen
 import com.ramo.ebuy.ui.product.ProductConditionMainScreen
 import com.ramo.ebuy.ui.product.ProductDetailsScreen
 import com.ramo.ebuy.ui.product.ProductSellingCategoryScreen
 import com.ramo.ebuy.ui.product.ProductSellingConditionScreen
+import com.ramo.ebuy.ui.product.ProductSellingCustomSpecExtraListScreen
+import com.ramo.ebuy.ui.product.ProductSellingCustomSpecExtraScreen
 import com.ramo.ebuy.ui.product.ProductSellingCustomSpecScreen
 import com.ramo.ebuy.ui.product.ProductSellingMPNScreen
 import com.ramo.ebuy.ui.product.ProductSellingMadeInScreen
@@ -41,10 +51,12 @@ import com.ramo.ebuy.ui.product.ProductSellingScreen
 import com.ramo.ebuy.ui.product.ProductSellingSpecsScreen
 import com.ramo.ebuy.ui.product.ProductSellingTitleScreen
 import com.ramo.ebuy.ui.product.ProductSellingUPCScreen
+import com.ramo.ebuy.ui.product.ProductShippingCostScreen
+import com.ramo.ebuy.ui.product.ProductShippingScreen
 import com.ramo.ebuy.ui.sign.LogInEmailScreen
 import com.ramo.ebuy.ui.sign.LogInScreen
 import com.ramo.ebuy.ui.user.HomeUserScreen
-import com.ramo.ebuy.ui.user.HomeViewModel
+import io.github.jan.supabase.gotrue.SessionStatus
 import org.koin.compose.KoinApplication
 import org.koin.compose.koinInject
 
@@ -67,10 +79,10 @@ fun Main(root: RootComponent) {
                     when (val instance = child.instance) {
                         is RootComponent.Screen.SplashRoute -> SplashScreen(instance.component)
                         is RootComponent.Screen.LogInRoute -> LogInScreen(instance.component)
-                        is RootComponent.Screen.LogInEmailRoute -> LogInEmailScreen(instance.component)
+                        is RootComponent.Screen.LogInEmailRoute -> LogInEmailScreen(instance.component, instance.isRegister)
                         is RootComponent.Screen.HomeUserRoute -> HomeUserScreen(instance.component)
                         is RootComponent.Screen.ProductDetailsRoute -> ProductDetailsScreen(instance.component)
-                        is RootComponent.Screen.ProductSellingRoute -> ProductSellingScreen(instance.component)
+                        is RootComponent.Screen.ProductSellingRoute -> ProductSellingScreen(instance.component, instance.isAdmin)
                         is RootComponent.Screen.ProductConditionMainRoute -> ProductConditionMainScreen(instance.component)
                         is RootComponent.Screen.ProductSellingPriceRoute -> ProductSellingPriceScreen(instance.component)
                         is RootComponent.Screen.ProductSellingTitleRoute -> ProductSellingTitleScreen(instance.component)
@@ -84,6 +96,12 @@ fun Main(root: RootComponent) {
                         is RootComponent.Screen.ProductSellingCustomSpecRoute -> ProductSellingCustomSpecScreen(instance.component)
                         is RootComponent.Screen.ProductSellingMPNRoute -> ProductSellingMPNScreen(instance.component)
                         is RootComponent.Screen.ProductSellingUPCRoute -> ProductSellingUPCScreen(instance.component)
+                        is RootComponent.Screen.ProductSellingCustomSpecExtraRoute -> ProductSellingCustomSpecExtraScreen(instance.component)
+                        is RootComponent.Screen.ProductSellingCustomSpecExtraListRoute -> ProductSellingCustomSpecExtraListScreen(instance.component)
+                        is RootComponent.Screen.ProductShippingRoute -> ProductShippingScreen(instance.component)
+                        is RootComponent.Screen.ProductShippingCostRoute -> ProductShippingCostScreen(instance.component)
+                        is RootComponent.Screen.CategoryCreatingRoute -> CategoryCreatingScreen(instance.component)
+                        is RootComponent.Screen.AdminHomeRoute -> AdminHomeScreen(instance.component)
                     }
                 }
             }
@@ -95,25 +113,72 @@ fun Main(root: RootComponent) {
 fun SplashScreen(
     navigator: Navigator,
     project: Project = koinInject(),
-    koinState: Stater = koinInject(),
-    @Suppress("UNUSED_PARAMETER") viewModel: HomeViewModel = MokoModel { HomeViewModel(project, koinState) },
-) {
-    OnLaunchScreenScope {
-        kotlinx.coroutines.delay(1000L)
-        kotlinx.coroutines.coroutineScope {
-            navigator.navigateHome(RootComponent.Configuration.HomeUserRoute)
-        }
+    theme: Theme = koinInject(),
+    viewModel: AppViewModel = MokoModel {
+        AppViewModel(project)
     }
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background,
-    ) {
-        Box(contentAlignment = Alignment.Center) {
-            Image(
-                modifier = Modifier.width(100.dp),
-                imageVector = rememberEbuy(),
-                contentDescription = ""
-            )
+) {
+    val state by viewModel.uiState.collectAsState()
+
+    OnLaunchScreenScope {
+        viewModel.init()
+    }
+    when(val sessionStatus = state.sessionStatus) {
+        is SessionStatus.Authenticated -> {
+            viewModel.fetchUser(sessionStatus.session).let { user ->
+                if (user != null) {
+                    if (user.userType == 1) {
+                        navigator.navigateTo(RootComponent.Configuration.AdminHomeRoute)
+                    } else {
+                        navigator.navigateHome(RootComponent.Configuration.HomeUserRoute)
+                    }
+                } else {
+                    navigator.navigateHome(RootComponent.Configuration.LogInRoute)
+                }
+            }
+        }
+        is SessionStatus.NotAuthenticated -> {
+            navigator.navigateHome(RootComponent.Configuration.LogInRoute)
+        }
+        is SessionStatus.NetworkError -> {
+            Scaffold { pad ->
+                Surface(
+                    modifier = Modifier.fillMaxSize().padding(pad),
+                    color = MaterialTheme.colorScheme.background,
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Column {
+                            Image(
+                                modifier = Modifier.width(100.dp),
+                                imageVector = rememberEbuy(),
+                                contentDescription = ""
+                            )
+                            Spacer(Modifier.height(15.dp))
+                            Image(
+                                modifier = Modifier.width(50.dp),
+                                imageVector = rememberWifiOff(theme.textGrayColor),
+                                contentDescription = ""
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        is SessionStatus.LoadingFromStorage -> {
+            Scaffold { pad ->
+                Surface(
+                    modifier = Modifier.fillMaxSize().padding(pad),
+                    color = MaterialTheme.colorScheme.background,
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Image(
+                            modifier = Modifier.width(100.dp),
+                            imageVector = rememberEbuy(),
+                            contentDescription = ""
+                        )
+                    }
+                }
+            }
         }
     }
 }

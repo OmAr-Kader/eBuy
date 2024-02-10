@@ -2,6 +2,8 @@ package com.ramo.ebuy.ui.common
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -14,14 +16,29 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateMap
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.ramo.ebuy.data.model.Category
 import com.ramo.ebuy.data.model.Product
 import androidx.compose.foundation.lazy.grid.itemsIndexed as itemIndexedGird
 
-@Composable
-fun ProductList(list: List<Product>, onClick: (Product) -> Unit) {
+fun LazyListScope.CatoList(catoList: List<Category>, repeatableCategory: Int, repeatableCato: Int, onClick: (Category) -> Unit) {
+    items(repeatableCategory) { i ->
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceAround,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            val w = i * repeatableCato
+            repeat(repeatableCato) { sub ->
+                GridCircleCatoItem(catoList[w + sub], onClick)
+            }
+        }
+    }
+}
+
+fun LazyListScope.ProductList(list: List<Product>, onClick: (Product) -> Unit) = item {
     LazyRow {
         items(list) { item ->
             ProductItem(item, onClick)
@@ -82,15 +99,15 @@ fun ProductMainSearch(
 
 @Composable
 fun ExpandableCato(
-    id: Int,
+    id: Long,
     list: List<Category>,
     productCato: List<String>,
     onClick: (Category) -> Unit,
 ) {
     var isShow = remember {
-        mutableStateMapOf<Int, Boolean>()
+        mutableStateMapOf<Long, Boolean>()
     }
-    val fetchCato = { iD: Int ->
+    val fetchCato = { iD: Long ->
         list.toMutableList().filter { it.parentId == iD }
     }
     LaunchedEffect(key1 = Unit) {
@@ -109,12 +126,12 @@ fun ExpandableCato(
 
 
 fun LazyListScope.ExpandableCatoList(
-    id: Int,
+    id: Long,
     productCato: List<String>,
     padding: Int,
-    isShow: SnapshotStateMap<Int, Boolean>,
+    isShow: SnapshotStateMap<Long, Boolean>,
     onClick: (Category) -> Unit,
-    fetchCato: (id: Int) -> List<Category>
+    fetchCato: (id: Long) -> List<Category>
 ) {
     fetchCato(id).forEach {
         val isExpand = isShow[it.id] == true

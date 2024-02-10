@@ -2,31 +2,58 @@ package com.ramo.ebuy.ui.user
 
 import com.ramo.ebuy.data.model.Category
 import com.ramo.ebuy.data.model.Product
+import com.ramo.ebuy.data.model.User
 import com.ramo.ebuy.di.Project
-import com.ramo.ebuy.di.Stater
 import com.ramo.ebuy.global.navigation.BaseViewModel
 import com.ramo.ebuy.global.util.cato
 import com.ramo.ebuy.global.util.item
+import io.github.jan.supabase.gotrue.SessionStatus
+import io.github.jan.supabase.gotrue.auth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromJsonElement
 
-class HomeViewModel(project: Project, private val stater: Stater) : BaseViewModel(project) {
+class HomeViewModel(project: Project, state: StateHomeViewModel, private val paste: StateHomeViewModel.() -> StateHomeViewModel) : BaseViewModel(project) {
 
-    private val _uiState = MutableStateFlow(stater.stateHomeModel.copy())
+    private val _uiState = MutableStateFlow(state)
     val uiState = _uiState.asStateFlow()
 
     fun loadUserData() {
-        fetchUserData {
-            _uiState.update { state ->
-                state.copy(userBase = it).apply { stater.stateHomeModel.paste(userBase = it) }
+        if (uiState.value.user != null) {
+            return
+        }
+        project.supaBase.auth.currentSessionOrNull()?.user?.let { user ->
+            return@let user.userMetadata?.also {
+                setUser(Json.decodeFromJsonElement<User?>(it)?.copy(id = user.id))
             }
+        } ?: run {
+            project.supaBase.auth.sessionStatus.onEach { session ->
+                when (session) {
+                    is SessionStatus.Authenticated -> {
+                        session.session.user?.let { user ->
+                            user.userMetadata?.also {
+                                setUser(Json.decodeFromJsonElement<User?>(it)?.copy(id = user.id))
+                            }
+                        }
+                    } else -> {}
+                }
+            }.launchIn(this)
+        }
+    }
+
+    private fun setUser(us: User?) {
+        _uiState.update { state ->
+            state.copy(user = us).paste()
         }
     }
 
     fun setSelectedPage(it: Int) {
         _uiState.update { state ->
-            state.copy(selectedPage = it).apply { stater.stateHomeModel.paste(selectedPage = it) }
+            state.copy(selectedPage = it).paste()
         }
     }
 
@@ -52,23 +79,9 @@ class HomeViewModel(project: Project, private val stater: Stater) : BaseViewMode
 }
 
 data class StateHomeViewModel(
-    var circleCato: List<Category> = cato(),
-    var productVer: List<Product> = item(),
-    var userBase: BaseViewModel.UserBase? = null,
-    var selectedPage: Int = 0,
-    var repeatableCato: Int = 0,
-) {
-    fun paste(
-        circleCato: List<Category>? = null,
-        productVer: List<Product>? = null,
-        userBase: BaseViewModel.UserBase? = null,
-        selectedPage: Int? = null,
-        repeatableCato: Int? = null
-    ) {
-        this@StateHomeViewModel.circleCato = circleCato ?: this@StateHomeViewModel.circleCato
-        this@StateHomeViewModel.productVer = productVer ?: this@StateHomeViewModel.productVer
-        this@StateHomeViewModel.userBase = userBase ?: this@StateHomeViewModel.userBase
-        this@StateHomeViewModel.selectedPage = selectedPage ?: this@StateHomeViewModel.selectedPage
-        this@StateHomeViewModel.repeatableCato = repeatableCato ?: this@StateHomeViewModel.repeatableCato
-    }
-}
+    val circleCato: List<Category> = cato(),
+    val productVer: List<Product> = item(),
+    val user: User? = null,
+    val selectedPage: Int = 0,
+    val repeatableCato: Int = 0,
+)

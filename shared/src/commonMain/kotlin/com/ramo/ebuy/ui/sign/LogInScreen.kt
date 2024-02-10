@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -30,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,8 +47,9 @@ import com.ramo.ebuy.global.navigation.Navigator
 import com.ramo.ebuy.global.navigation.RootComponent
 import com.ramo.ebuy.global.ui.AnimatedText
 import com.ramo.ebuy.global.ui.rememberArrowBack
-import com.ramo.ebuy.global.ui.rememberEbuy
+import com.ramo.ebuy.global.ui.rememberFacebook
 import com.ramo.ebuy.global.ui.rememberGoogle
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 @Composable
@@ -74,7 +77,7 @@ fun LogInScreen(
                     .height(170.dp)
             ) {
                 Spacer(modifier = Modifier.height(20.dp))
-                Box {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Column {
                         AnimatedVisibility(
                             visible = state.isRegister
@@ -93,11 +96,11 @@ fun LogInScreen(
                         }
                     }
                     AnimatedText(
-                        if (state.isRegister) "Sign in" else "Register"
+                        if (state.isRegister) "Register" else "Sign in"
                     ) { str ->
                         Text(
                             text = str,
-                            modifier = Modifier.padding(horizontal = 60.dp),
+                            modifier = Modifier.padding(horizontal = 10.dp),
                             color = theme.textColor,
                             fontSize = 25.sp,
                         )
@@ -138,7 +141,7 @@ fun LogInScreen(
                             color = theme.primary,
                         ),
                         onClick = {
-                            navigator.navigateTo(RootComponent.Configuration.LogInEmailRoute)
+                            navigator.navigateTo(RootComponent.Configuration.LogInEmailRoute(state.isRegister))
                         },
                     ) {
                         Text(
@@ -188,7 +191,7 @@ fun LogInScreen(
                         },
                     ) {
                         Row {
-                            Image(rememberEbuy(), null, modifier = Modifier.width(20.dp).height(20.dp))
+                            Image(rememberFacebook(), null, modifier = Modifier.width(20.dp).height(20.dp))
                             Spacer(modifier = Modifier.width(35.dp))
                             Text(
                                 text = "continue with Facebook",
@@ -213,7 +216,7 @@ fun LogInScreen(
                         },
                     ) {
                         AnimatedText(
-                            targetState = if (state.isRegister) "Create an account" else "Login",
+                            targetState = if (!state.isRegister) "Create an account" else "Login",
                         ) { targetCount ->
                             Text(
                                 text = targetCount,
@@ -231,14 +234,16 @@ fun LogInScreen(
 @Composable
 fun LogInEmailScreen(
     navigator: Navigator,
+    isRegister: Boolean,
     project: Project = koinInject(),
     theme: Theme = koinInject(),
     viewModel: LogInEmailViewModel = MokoModel { LogInEmailViewModel(project) }
 ) {
+    val scope = rememberCoroutineScope()
     val state by viewModel.uiState.collectAsState()
     val scaffoldState = remember { SnackbarHostState() }
 
-    val isEmailOrPasswordEmpty = state.email.isEmpty() || state.password.isEmpty()
+    val isEmailOrPasswordEmpty = state.email.isEmpty() || state.password.length < 6
     Scaffold(
         snackbarHost = {
             SnackbarHost(scaffoldState) {
@@ -254,7 +259,7 @@ fun LogInEmailScreen(
                     .fillMaxWidth()
             ) {
                 Spacer(modifier = Modifier.height(20.dp))
-                Box {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Image(
                         modifier = Modifier
                             .clickable {
@@ -267,7 +272,7 @@ fun LogInEmailScreen(
                         contentDescription = null,
                     )
                     Text(
-                        text = "Sign in",
+                        text = if (isRegister) "Register" else "Sign in",
                         modifier = Modifier.padding(horizontal = 60.dp),
                         color = theme.textColor,
                         fontSize = 25.sp,
@@ -290,6 +295,21 @@ fun LogInEmailScreen(
                         modifier = Modifier
                             .width(300.dp),
                     ) {
+                        if (isRegister) {
+                            OutlinedTextField(
+                                modifier = Modifier.fillMaxWidth(),
+                                value = state.name,
+                                onValueChange = { name ->
+                                    viewModel.setName(name)
+                                },
+                                shape = RoundedCornerShape(12.dp),
+                                placeholder = { Text(text = "Enter Your Name", fontSize = 14.sp) },
+                                label = { Text(text = "Name", fontSize = 14.sp) },
+                                singleLine = true,
+                                colors = theme.outlinedTextFieldStyle(),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                            )
+                        }
                         OutlinedTextField(
                             modifier = Modifier.fillMaxWidth(),
                             value = state.email,
@@ -299,7 +319,7 @@ fun LogInEmailScreen(
                             shape = RoundedCornerShape(12.dp),
                             placeholder = { Text(text = "Enter Email", fontSize = 14.sp) },
                             label = { Text(text = "Email", fontSize = 14.sp) },
-                            maxLines = 1,
+                            singleLine = true,
                             colors = theme.outlinedTextFieldStyle(),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                         )
@@ -312,7 +332,7 @@ fun LogInEmailScreen(
                             shape = RoundedCornerShape(12.dp),
                             placeholder = { Text(text = "Enter Password") },
                             label = { Text(text = "Password") },
-                            maxLines = 1,
+                            singleLine = true,
                             colors = theme.outlinedTextFieldStyle(),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                         )
@@ -329,14 +349,46 @@ fun LogInEmailScreen(
                                 color = if (isEmailOrPasswordEmpty) theme.backDark else theme.primary,
                             ),
                             onClick = {
-                                navigator.navigateTo(RootComponent.Configuration.HomeUserRoute)
+                                if (isRegister) {
+                                    viewModel.createNewUser(invoke = {
+                                        scope.launch {
+                                            navigator.navigateTo(RootComponent.Configuration.HomeUserRoute)
+                                        }
+                                    }) {
+                                        scope.launch {
+                                            scaffoldState.showSnackbar("Failed")
+                                        }
+                                    }
+                                } else {
+                                    viewModel.loginUser(invoke = {
+                                        scope.launch {
+                                            navigator.navigateTo(RootComponent.Configuration.HomeUserRoute)
+                                        }
+                                    }) {
+                                        scope.launch {
+                                            scaffoldState.showSnackbar("Failed")
+                                        }
+                                    }
+                                }
                             },
                         ) {
-                            Text(
-                                text = "Sign in",
-                                color = if (isEmailOrPasswordEmpty) theme.backDarkSec else theme.textForPrimaryColor,
-                                fontSize = 18.sp,
-                            )
+                            if (state.isProcess) {
+                                Box(
+                                    modifier = Modifier.fillMaxSize().padding(5.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier,
+                                        color = theme.textForPrimaryColor,
+                                    )
+                                }
+                            } else {
+                                Text(
+                                    text = if (isRegister) "Register" else "Sign in",
+                                    color = if (isEmailOrPasswordEmpty) theme.backDarkSec else theme.textForPrimaryColor,
+                                    fontSize = 18.sp,
+                                )
+                            }
                         }
                     }
                 }

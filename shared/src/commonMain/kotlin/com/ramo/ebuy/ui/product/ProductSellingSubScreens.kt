@@ -42,6 +42,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ramo.ebuy.data.model.ProductSpecs
+import com.ramo.ebuy.data.model.ProductSpecsExtra
+import com.ramo.ebuy.data.model.SpecExtra
 import com.ramo.ebuy.di.Project
 import com.ramo.ebuy.di.Stater
 import com.ramo.ebuy.global.base.Theme
@@ -51,6 +53,8 @@ import com.ramo.ebuy.global.navigation.Navigator
 import com.ramo.ebuy.global.navigation.RootComponent
 import com.ramo.ebuy.global.ui.CalendarYearView
 import com.ramo.ebuy.global.ui.rememberArrowBack
+import com.ramo.ebuy.global.ui.rememberDeleteForever
+import com.ramo.ebuy.global.ui.rememberEdit
 import com.ramo.ebuy.global.ui.rememberHelp
 import com.ramo.ebuy.global.util.conditions
 import com.ramo.ebuy.global.util.currentTime
@@ -103,7 +107,7 @@ fun ProductConditionMainScreen(
                 conditions.forEach {
                     ProductSpecItemRadio(it, it == state.product.condition, theme) {
                         viewModel.setConditionMain(it)
-                        navigator.navigateToReplace(RootComponent.Configuration.ProductSellingRoute)
+                        navigator.navigateToReplace(RootComponent.Configuration.ProductSellingRoute(false))
                     }
                 }
             }
@@ -208,6 +212,15 @@ fun ProductSellingTitleScreen(
             ) {
                 viewModel.setTitle(it)
             }
+            ProductSellingSpecEditItemFull(
+                "Sub Title (Optional)",
+                state.product.title,
+                KeyboardType.Text,
+                55,
+                theme
+            ) {
+                viewModel.setSubTitle(it)
+            }
         }
     }
 }
@@ -306,11 +319,6 @@ fun ProductSellingSpecsScreen(
                     ProductSellingSpecForEdit(it.label, it.spec, theme) {
                         viewModel.setCustomSpecIndex(i)
                         navigator.navigateTo(RootComponent.Configuration.ProductSellingCustomSpecRoute)
-                    }
-                }
-                items(state.productSpecs.specsExtra) {
-                    ProductSellingSpecForEdit(it.labelExtra, it.specExtra.joinToString(separator = "\n"), theme) {
-
                     }
                 }
                 item {
@@ -608,7 +616,7 @@ fun ProductSellingCustomSpecScreen(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
                 value = customSpec.value.spec,
                 onValueChange = { change ->
-                    customSpec.value = customSpec.value.copy(label = change)
+                    customSpec.value = customSpec.value.copy(spec = change)
                 },
                 shape = RoundedCornerShape(12.dp),
                 placeholder = { Text(text = "Enter Spec", fontSize = 14.sp) },
@@ -639,6 +647,243 @@ fun ProductSellingCustomSpecScreen(
     }
 }
 
+@Composable
+fun ProductSellingCustomSpecExtraScreen(
+    navigator: Navigator,
+    theme: Theme = koinInject(),
+    project: Project = koinInject(),
+    stater: Stater = koinInject(),
+    viewModel: ProductSellingViewModel = MokoModel {
+        ProductSellingViewModel(project, stater.subStateProductSellingModel.copy()) {
+            apply {
+                stater.stateProductSelling = this@apply
+            }
+        }
+    }
+) {
+    val state by viewModel.uiState.collectAsState()
+    Scaffold { pad ->
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(pad)
+                .background(color = theme.background)
+        ) {
+            ProductSellingSpecsHeadBarBackHelp("Listed Specs", theme) {
+                navigator.goBack()
+            }
+            Spacer(Modifier.height(10.dp))
+            LazyColumn(Modifier.fillMaxWidth().padding(horizontal = 15.dp)) {
+                itemsIndexed(state.productSpecs.specsExtra) { i, it ->
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 10.dp, vertical = 5.dp)
+                    ) {
+                        Text(modifier = Modifier.width(130.dp), text = it.labelExtra, color = theme.textGrayColor)
+                        Text(modifier = Modifier.weight(1F), text = it.specExtra.joinToString("\n"){ it1 -> it1.labelSpec }, color = theme.textColor)
+                        Image(
+                            modifier = Modifier
+                                .width(40.dp)
+                                .height(40.dp)
+                                .clickable {
+                                    viewModel.setCustomSpecExtraIndex(i)
+                                    navigator.navigateTo(RootComponent.Configuration.ProductSellingCustomSpecExtraListRoute)
+                                }
+                                .padding(8.dp),
+                            imageVector = rememberEdit(theme.textHintColor),
+                            contentScale = ContentScale.Fit,
+                            contentDescription = null,
+                        )
+                        Spacer(Modifier.height(10.dp))
+                    }
+                }
+                item {
+                    Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(modifier = Modifier.clickable {
+                            viewModel.setCustomSpecExtraIndex(-1)
+                            navigator.navigateTo(RootComponent.Configuration.ProductSellingCustomSpecExtraListRoute)
+                        }.padding(15.dp), text = "ADD LISTED SPECIFIC", color = theme.primary)
+                    }
+                }
+            }
+
+        }
+    }
+}
+
+@Composable
+fun ProductSellingCustomSpecExtraListScreen(
+    navigator: Navigator,
+    theme: Theme = koinInject(),
+    project: Project = koinInject(),
+    stater: Stater = koinInject(),
+    viewModel: ProductSellingViewModel = MokoModel {
+        ProductSellingViewModel(project, stater.subStateProductSellingModel.copy()) {
+            apply {
+                stater.subStateProductSelling = this@apply
+            }
+        }
+    }
+) {
+    val state by viewModel.uiState.collectAsState()
+    val customSpecExtra = remember {
+        mutableStateOf(
+            if (state.customSpecExtraIndex == -1) {
+                ProductSpecsExtra("", listOf(SpecExtra("", -1F,"")))
+            } else {
+                state.productSpecs.specsExtra.getOrElse(state.customSpecExtraIndex) {
+                    ProductSpecsExtra("", listOf(SpecExtra("", -1F,"")))
+                }
+            }
+        )
+    }
+    Scaffold { pad ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(pad)
+                .background(color = theme.background)
+        ) {
+            ProductSellingSpecsHeadBar("Custom Listed Specific", theme) {
+                viewModel.addOrEditCustomSpecExtra(customSpecExtra.value)
+                navigator.goBack()
+            }
+            ProductSellingSpecItem("Price", state.product.priceStr, theme)
+            Spacer(Modifier.height(10.dp))
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                value = customSpecExtra.value.labelExtra,
+                onValueChange = { change ->
+                    customSpecExtra.value = customSpecExtra.value.copy(labelExtra = change)
+                },
+                shape = RoundedCornerShape(12.dp),
+                placeholder = { Text(text = "Enter Spec Title", fontSize = 14.sp) },
+                label = { Text(text = "Spec Title", fontSize = 14.sp) },
+                isError = customSpecExtra.value.labelExtra.length > 40,
+                supportingText = {
+                    Text(
+                        text = "${customSpecExtra.value.labelExtra.length} / 40",
+                        modifier = Modifier.fillMaxWidth(),
+                        color = theme.textHintColor,
+                        textAlign = TextAlign.End,
+                    )
+                },
+                colors = theme.outlinedTextFieldStyle(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+            )
+            Spacer(Modifier.height(10.dp))
+            LazyColumn {
+                itemsIndexed(customSpecExtra.value.specExtra) { i, spec ->
+                    Row(
+                        Modifier
+                            .defaultMinSize(minHeight = 70.dp)
+                            .fillMaxWidth()
+                            .padding(horizontal = 10.dp, vertical = 5.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        OutlinedTextField(
+                            modifier = Modifier.weight(1F).padding(horizontal = 5.dp),
+                            value = spec.priceSpecEditStr,
+                            onValueChange = { change ->
+                                customSpecExtra.value.specExtra.toMutableList().apply {
+                                    getOrNull(i)?.apply f@{
+                                        change.toFloatOrNull()?.let { it1 ->
+                                            plusPriceSpec = it1
+                                        }
+                                        priceSpecEditStr = change
+                                    }
+                                }.also {
+                                    customSpecExtra.value = customSpecExtra.value.copy(specExtra = it, dummy = customSpecExtra.value.dummy + 1)
+                                }
+                            },
+                            shape = RoundedCornerShape(12.dp),
+                            placeholder = { Text(text = "Spec Price", fontSize = 14.sp) },
+                            label = { Text(text = "Spec Price", fontSize = 14.sp) },
+                            isError = spec.priceSpecEditStr.length > 12,
+                            supportingText = {
+                                Text(
+                                    text = "${spec.priceSpecEditStr.length} / 12",
+                                    modifier = Modifier.fillMaxWidth(),
+                                    color = theme.textHintColor,
+                                    textAlign = TextAlign.End,
+                                )
+                            },
+                            maxLines = 1,
+                            colors = theme.outlinedTextFieldStyle(),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        )
+                        OutlinedTextField(
+                            modifier = Modifier.weight(1F).padding(horizontal = 5.dp),
+                            value = spec.labelSpec,
+                            onValueChange = { change ->
+                                customSpecExtra.value.specExtra.toMutableList().apply {
+                                    getOrNull(i)?.labelSpec = change
+                                }.also {
+                                    customSpecExtra.value = customSpecExtra.value.copy(specExtra = it, dummy = customSpecExtra.value.dummy + 1)
+                                }
+                            },
+                            shape = RoundedCornerShape(12.dp),
+                            placeholder = { Text(text = "Spec Label", fontSize = 14.sp) },
+                            label = { Text(text = "Spec Label", fontSize = 14.sp) },
+                            isError = spec.labelSpec.length > 40,
+                            supportingText = {
+                                Text(
+                                    text = "${spec.labelSpec.length} / 40",
+                                    modifier = Modifier.fillMaxWidth(),
+                                    color = theme.textHintColor,
+                                    textAlign = TextAlign.End,
+                                )
+                            },
+                            maxLines = 1,
+                            colors = theme.outlinedTextFieldStyle(),
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                        )
+                        Box(contentAlignment = Alignment.Center) {
+                            Image(
+                                modifier = Modifier
+                                    .width(40.dp)
+                                    .height(40.dp).clickable {
+                                        customSpecExtra.value.specExtra.toMutableList().apply {
+                                            removeAt(i)
+                                        }.also {
+                                            customSpecExtra.value = customSpecExtra.value.copy(specExtra = it)
+                                        }
+                                    }
+                                    .background(color = theme.backDark, shape = CircleShape)
+                                    .padding(8.dp),
+                                imageVector = rememberDeleteForever(theme.textColor),
+                                contentScale = ContentScale.Fit,
+                                contentDescription = null,
+                            )
+                        }
+                    }
+                }
+                item {
+                    Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(modifier = Modifier.clickable {
+                            customSpecExtra.value.specExtra.toMutableList().apply {
+                                add(SpecExtra("", -1F))
+                            }.also {
+                                customSpecExtra.value = customSpecExtra.value.copy(specExtra = it)
+                            }
+                        }.padding(15.dp), text = "ADD SECTION", color = theme.primary)
+                    }
+                }
+            }
+            Spacer(Modifier.height(10.dp))
+            if (state.customSpecIndex != -1) {
+                Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(modifier = Modifier.clickable {
+                        viewModel.setDeleteCustomSpecExtra(state.customSpecIndex)
+                        navigator.goBack()
+                    }.padding(15.dp), text = "DELETE", color = theme.error)
+                }
+            }
+        }
+    }
+}
 
 @Composable
 fun ProductSellingMPNScreen(
@@ -738,7 +983,110 @@ fun ProductSpecItemRadio(text: String, isSelect: Boolean, theme: Theme, onClick:
     }
 }
 
+@Composable
+fun ProductShippingScreen(
+    navigator: Navigator,
+    theme: Theme = koinInject(),
+    project: Project = koinInject(),
+    stater: Stater = koinInject(),
+    viewModel: ProductSellingViewModel = MokoModel {
+        ProductSellingViewModel(project, stater.subStateProductSellingModel.copy()) {
+            apply {
+                stater.stateProductSelling = this@apply
+            }
+        }
+    }
+) {
+    val state by viewModel.uiState.collectAsState()
+    Scaffold { pad ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(pad)
+                .background(color = theme.background)
+        ) {
+            ProductSellingSpecsHeadBar("Item Specifics", theme) {
+                viewModel.donePressed()
+                navigator.goBack()
+            }
+            LazyColumn {
+                ProductSellingSpecForEditItem("Package Details", state.deliveryProcess.size, theme) {
+
+                }
+                ProductSellingSpecForSubEditItem("Shipping Service", state.deliveryProcess.shippingService, state.deliveryProcess.durationStr, theme) {
+
+                }
+                ProductSellingSpecForEditItem("Shipping Coast", state.deliveryProcess.deliveryCostStr, theme) {
+                    navigator.navigateTo(RootComponent.Configuration.ProductShippingCostRoute)
+                }
+                ProductSellingSpecForEditItem("Delivery Location", state.deliveryProcess.location, theme) {
+
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ProductShippingCostScreen(
+    navigator: Navigator,
+    theme: Theme = koinInject(),
+    project: Project = koinInject(),
+    stater: Stater = koinInject(),
+    viewModel: ProductSellingViewModel = MokoModel {
+        ProductSellingViewModel(project, stater.subStateProductSellingModel.copy()) {
+            apply {
+                stater.subStateProductSelling = this@apply
+            }
+        }
+    }
+) {
+    val state by viewModel.uiState.collectAsState()
+    val scaffoldState = remember { SnackbarHostState() }
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(scaffoldState) {
+                Snackbar(it, containerColor = theme.backDarkSec, contentColor = theme.textColor)
+            }
+        },
+    ) { pad ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(pad)
+                .background(color = theme.background)
+        ) {
+            ProductSellingSpecsHeadBar("Shipping Cost", theme) {
+                viewModel.donePressed()
+                navigator.goBack()
+            }
+            ProductSellingSpecEditItem(
+                "Cost",
+                state.deliveryProcess.deliveryCostEditStr,
+                KeyboardType.Number, theme
+            ) {
+                viewModel.setDeliveryCost(it)
+            }
+        }
+    }
+}
+
 fun LazyListScope.ProductSellingSpecForEditItem(specTitle: String, spec: String, theme: Theme, onClick: () -> Unit) = item {
+    /*if (spec.isEmpty()) {
+        return
+    }*/
+    Column(
+        Modifier
+            .clickable {
+                onClick()
+            }
+            .padding(horizontal = 10.dp, vertical = 15.dp)
+    ) {
+        Text(text = specTitle, color = theme.textColor)
+        Text(spec, color = theme.primary)
+    }
+}
+fun LazyListScope.ProductSellingSpecForSubEditItem(specTitle: String, spec: String, specSub: String, theme: Theme, onClick: () -> Unit) = item {
     /*if (spec.isEmpty()) {
         return
     }*/
@@ -751,6 +1099,7 @@ fun LazyListScope.ProductSellingSpecForEditItem(specTitle: String, spec: String,
     ) {
         Text(modifier = Modifier.width(130.dp), text = specTitle, color = theme.textColor)
         Text(spec, color = theme.primary)
+        Text(specSub, color = theme.textGrayColor)
     }
 }
 
@@ -832,6 +1181,7 @@ fun ProductSellingSpecEditItemFull(specTitle: String, spec: String, keyType: Key
             },
             shape = RoundedCornerShape(12.dp),
             placeholder = { Text(text = "Enter $specTitle", fontSize = 14.sp) },
+            label = { Text(text = specTitle, fontSize = 14.sp) },
             isError = spec.length > error,
             supportingText = {
                 Text(
@@ -841,7 +1191,6 @@ fun ProductSellingSpecEditItemFull(specTitle: String, spec: String, keyType: Key
                     textAlign = TextAlign.End,
                 )
             },
-            //label = { Text(text = specTitle, fontSize = 14.sp) },
             colors = theme.outlinedTextFieldStyle(),
             keyboardOptions = KeyboardOptions(keyboardType = keyType),
         )

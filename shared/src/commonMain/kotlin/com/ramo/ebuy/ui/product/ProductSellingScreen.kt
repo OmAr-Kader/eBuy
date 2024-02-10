@@ -59,6 +59,7 @@ import org.koin.compose.koinInject
 @Composable
 fun ProductSellingScreen(
     navigator: Navigator,
+    isAdmin: Boolean,
     project: Project = koinInject(),
     theme: Theme = koinInject(),
     stater: Stater = koinInject(),
@@ -99,10 +100,6 @@ fun ProductSellingScreen(
                     Text(modifier = Modifier.padding(horizontal = 10.dp), text = state.product.title, color = theme.textColor, fontSize = 16.sp)
                     Spacer(modifier = Modifier.height(10.dp))
                 }
-                ProductSellingHeadItemCorrectable(true, "Item specifics", theme) {
-                    navigator.navigateTo(RootComponent.Configuration.ProductSellingSpecRoute)
-                }
-                ProductSellingSpecs(state, theme)
                 ProductSellingHeadItemCorrectable(state.product.parentCategories.isNotEmpty(), "Category", theme) {
                     navigator.navigateTo(RootComponent.Configuration.ProductSellingCategoryRoute)
                 }
@@ -112,8 +109,21 @@ fun ProductSellingScreen(
                 }
                 ProductSellingDiscount(state, theme)
                 ProductSellingPrice(state, theme)
+                ProductSellingHeadItemCorrectable(true, "Item specifics", theme) {
+                    stater.subStateProductSelling = state
+                    navigator.navigateTo(RootComponent.Configuration.ProductSellingSpecRoute)
+                }
+                ProductSellingSpecs(state, theme)
+                if (state.product.priceValid) {
+                    ProductSellingHeadItemCorrectable(true, "Item Listed specifics", theme) {
+                        stater.subStateProductSelling = state
+                        navigator.navigateTo(RootComponent.Configuration.ProductSellingCustomSpecExtraRoute)
+                    }
+                    ProductSellingSpecsExtra(state, theme)
+                }
                 ProductSellingHeadItemCorrectable(state.deliveryProcess.deliveryCostValid, "Delivery", theme) {
-
+                    stater.subStateProductSelling = state
+                    navigator.navigateTo(RootComponent.Configuration.ProductShippingRoute)
                 }
                 ProductSellingShipping(state, theme)
                 item {
@@ -132,7 +142,7 @@ fun ProductSellingScreen(
                                 color = theme.primary,
                             ),
                             onClick = {
-
+                                navigator.goBack()
                             },
                         ) {
                             Text(
@@ -249,8 +259,17 @@ fun LazyListScope.ProductSellingSpecs(state: StateProductSelling, theme: Theme) 
     items(state.productSpecs.specs) {
         ProductSellingSpecItem(it.label, it.spec, theme)
     }
+}
+
+
+fun LazyListScope.ProductSellingSpecsExtra(state: StateProductSelling, theme: Theme) {
     items(state.productSpecs.specsExtra) {
-        ProductSellingSpecItem(it.labelExtra, it.specExtra.joinToString(separator = "\n"), theme)
+        ProductSellingSpecItem(it.labelExtra, it.specExtra.joinToString(separator = "\n") { it1 -> it1.labelSpec }, theme)
+    }
+    if (state.productSpecs.specsExtra.isEmpty()) {
+        item {
+            Spacer(Modifier.height(100.dp))
+        }
     }
 }
 
@@ -301,8 +320,8 @@ fun LazyListScope.ProductSellingShipping(state: StateProductSelling, theme: Them
         text = "Ship in ${state.user.businessCountryStr}", color = theme.textColor
     )
     ProductSellingSpecItem("Package Details", state.deliveryProcess.size, theme)
-    ProductSellingSpecItemWithSub("Service", state.deliveryProcess.serviceStr, state.deliveryProcess.durationStr, theme)
-    ProductSellingSpecItem("Shipping Cost", state.deliveryProcess.deliveryStr, theme)
+    ProductSellingSpecItemWithSub("Service", state.deliveryProcess.shippingService, state.deliveryProcess.durationStr, theme)
+    ProductSellingSpecItem("Shipping Cost", state.deliveryProcess.deliveryCostStr, theme)
     Spacer(modifier = Modifier.height(10.dp))
 }
 

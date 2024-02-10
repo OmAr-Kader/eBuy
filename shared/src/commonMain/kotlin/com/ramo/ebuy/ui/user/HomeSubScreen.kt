@@ -1,12 +1,9 @@
 package com.ramo.ebuy.ui.user
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
@@ -16,6 +13,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.dp
+import com.ramo.ebuy.di.Stater
+import com.ramo.ebuy.global.base.Theme
+import com.ramo.ebuy.global.navigation.Navigator
+import com.ramo.ebuy.global.navigation.RootComponent
 import com.ramo.ebuy.global.ui.HotBar
 import com.ramo.ebuy.global.ui.VerticalListSingleTitle
 import com.ramo.ebuy.global.ui.VerticalListTitle
@@ -26,19 +27,22 @@ import com.ramo.ebuy.global.ui.collapse.rememberCollapsingToolbarScaffoldState
 import com.ramo.ebuy.global.ui.collapse.rememberCollapsingToolbarState
 import com.ramo.ebuy.global.util.hotBarData
 import com.ramo.ebuy.ui.common.BarMainScreen
-import com.ramo.ebuy.ui.common.GridCircleCatoItem
+import com.ramo.ebuy.ui.common.CatoList
 import com.ramo.ebuy.ui.common.ProductList
 import com.ramo.ebuy.ui.common.SearchBarMainScreen
+import org.koin.compose.koinInject
 
 
 @Composable
 fun HomeSubScreen(
-    //navigator: Navigator,
+    navigator: Navigator,
     viewModel: HomeViewModel,
+    theme: Theme = koinInject(),
+    stater: Stater = koinInject(),
 ) {
     val state by viewModel.uiState.collectAsState()
     val scrollState = rememberCollapsingToolbarScaffoldState()
-    val offsetY = scrollState.offsetY // y offset of the layout
+    val offsetY = scrollState.offsetY
     val catoList = state.circleCato
 
     Box(Modifier.fillMaxSize()) {
@@ -66,36 +70,24 @@ fun HomeSubScreen(
                 }
             ) {
                 LazyColumn {
-                    item {
-                        HotBar(hotData = hotBarData) {
+                    HotBar(hotData = hotBarData, theme) {
 
-                        }
                     }
-                    item {
-                        VerticalListSingleTitle("Explore Popular Categories") {
+                    VerticalListSingleTitle("Explore Popular Categories", theme) {
 
-                        }
                     }
-                    items(viewModel.repeatableCategory) { i ->
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceAround,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            val w = i * state.repeatableCato
-                            repeat(state.repeatableCato) { sub ->
-                                GridCircleCatoItem(catoList[w + sub]) {}
+                    CatoList(catoList = catoList, repeatableCategory = viewModel.repeatableCategory, repeatableCato = state.repeatableCato) {
+
+                    }
+                    VerticalListTitle("Daily Deals", theme) {
+
+                    }
+                    ProductList(list = state.productVer) {
+                        stater.getScreenCount(RootComponent.Configuration.ProductDetailsRoute::class.java).let { count ->
+                            RootComponent.Configuration.ProductDetailsRoute(count + 1).also { route ->
+                                stater.writeArguments(route = route, one = it.id.toString(), two = it.title, screenCount = count + 1)
+                                navigator.navigateTo(route)
                             }
-                        }
-                    }
-                    item {
-                        VerticalListTitle("Daily Deals") {
-
-                        }
-                    }
-                    item {
-                        ProductList(list = state.productVer) {
-
                         }
                     }
                 }

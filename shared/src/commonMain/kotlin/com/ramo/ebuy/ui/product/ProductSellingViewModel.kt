@@ -6,6 +6,7 @@ import com.ramo.ebuy.data.model.Product
 import com.ramo.ebuy.data.model.ProductAvailability
 import com.ramo.ebuy.data.model.ProductBaseSpecs
 import com.ramo.ebuy.data.model.ProductSpecs
+import com.ramo.ebuy.data.model.ProductSpecsExtra
 import com.ramo.ebuy.data.model.User
 import com.ramo.ebuy.data.util.rearrange
 import com.ramo.ebuy.di.Project
@@ -54,7 +55,13 @@ class ProductSellingViewModel(project: Project, state: StateProductSelling, priv
 
     fun setCustomSpecIndex(it: Int) {
         _uiState.update { state ->
-            state.copy(customSpecIndex = it)
+            state.copy(customSpecIndex = it).paste()
+        }
+    }
+
+    fun setCustomSpecExtraIndex(it: Int) {
+        _uiState.update { state ->
+            state.copy(customSpecExtraIndex = it).paste()
         }
     }
 
@@ -82,6 +89,30 @@ class ProductSellingViewModel(project: Project, state: StateProductSelling, priv
         }
     }
 
+    fun addOrEditCustomSpecExtra(it: ProductSpecsExtra) {
+        _uiState.update { state ->
+            state.productSpecs.specsExtra.toMutableList().apply {
+                if (state.customSpecExtraIndex == -1) {
+                    this@apply.add(it)
+                } else {
+                    runCatching {
+                        this@apply[state.customSpecExtraIndex] = it
+                    }
+                }
+            }.let { newList ->
+                state.copy(productSpecs = state.productSpecs.copy(specsExtra = newList)).paste()
+            }
+        }
+    }
+
+    fun setDeleteCustomSpecExtra(it: Int) {
+        _uiState.update { state ->
+            state.productSpecs.specsExtra.toMutableList().apply { this@apply.removeAt(it) }.let { newList ->
+                state.copy(productSpecs = state.productSpecs.copy(specsExtra = newList)).paste()
+            }
+        }
+    }
+
     fun setOffer(it: String) {
         _uiState.update { state ->
             state.copy(product = state.product.copy(offerEditStr = it, offer = it.toFloatOrNull() ?: state.product.offer))
@@ -93,10 +124,8 @@ class ProductSellingViewModel(project: Project, state: StateProductSelling, priv
             countries().filter { c ->
                 c.searchable.contains(it, true)
             }.let { list ->
-                launchMain {
-                    _uiState.update { state ->
-                        state.copy(countrySearch = it, countryList = list)
-                    }
+                _uiState.update { state ->
+                    state.copy(countrySearch = it, countryList = list)
                 }
             }
         }
@@ -120,9 +149,21 @@ class ProductSellingViewModel(project: Project, state: StateProductSelling, priv
         }
     }
 
+    fun setDeliveryCost(it: String) {
+        _uiState.update { state ->
+            state.copy(deliveryProcess = state.deliveryProcess.copy(deliveryCostEditStr = it, deliveryCost = it.toFloatOrNull() ?: state.deliveryProcess.deliveryCost))
+        }
+    }
+
     fun setTitle(it: String) {
         _uiState.update { state ->
             state.copy(product = state.product.copy(title = it))
+        }
+    }
+
+    fun setSubTitle(it: String) {
+        _uiState.update { state ->
+            state.copy(productSpecs = state.productSpecs.copy(subTitle = it))
         }
     }
 
@@ -137,13 +178,6 @@ class ProductSellingViewModel(project: Project, state: StateProductSelling, priv
             state.copy(product = state.product.copy(productCode = it))
         }
     }
-
-    fun setTints(it: String) {
-        _uiState.update { state ->
-            state.copy(productSpecs = state.productSpecs.copy(mpn = it))
-        }
-    }
-
     fun setCategory(it: Category) {
         val catoList = mutableListOf(it)
         uiState.value.listCategory.toMutableList().reversed().map { cato ->
@@ -168,21 +202,12 @@ data class StateProductSelling(
     val product: Product = Product(),
     val productSpecs: ProductBaseSpecs = ProductBaseSpecs(product.id),
     val productAva: ProductAvailability = ProductAvailability(product.id),
-    val deliveryProcess: DeliveryProcess = DeliveryProcess(product.id),
+    val deliveryProcess: DeliveryProcess = DeliveryProcess(product.id).copy(shippingService = "USPS"),
     val listCategory: List<Category> = cato().rearrange(),
     val user: User = User(),
     val isErrorPressed: Boolean = false,
     val customSpecIndex: Int = -1,
+    val customSpecExtraIndex: Int = -1,
     val countrySearch: String = "",
     val countryList: List<Country> = countries()
-) {
-    constructor(state: StateProductSelling) : this(
-        state.product,
-        state.productSpecs,
-        state.productAva,
-        state.deliveryProcess,
-        state.listCategory,
-        state.user,
-        state.isErrorPressed
-    )
-}
+)

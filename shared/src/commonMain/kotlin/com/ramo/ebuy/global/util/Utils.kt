@@ -17,6 +17,7 @@ import com.ramo.ebuy.global.ui.rememberRecentViewed
 import com.ramo.ebuy.global.ui.rememberSearch
 import com.ramo.ebuy.global.ui.rememberSell
 import com.ramo.ebuy.global.ui.rememberSetting
+import io.ktor.http.Url
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.Instant
@@ -24,12 +25,42 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.toLocalDateTime
+val String?.urlCheckIfEmpty: String?
+    get() {
+        /*return try {
+            this?.let { Url(it).let { this } }
+        } catch (e: Throwable) {
+            null
+        }*/
+        return if (this@urlCheckIfEmpty?.isEmpty() == true) {
+            null
+        } else {
+            this
+        }
+    }
+
+val String?.urlFullCheck: String?
+    get() {
+        return if (this@urlFullCheck?.isEmpty() == true) {
+            null
+        } else {
+            if (this == null) {
+                null
+            } else {
+                try {
+                    Url(this)
+                    this
+                } catch (e: Throwable) {
+                    null
+                }
+            }
+        }
+    }
 
 val Long.toYearString: String
     get() {
         return Instant.fromEpochMilliseconds(this).toLocalDateTime(TimeZone.currentSystemDefault()).year.toString()
     }
-
 
 inline fun <C, R> List<C>.ifNotEmpty(defaultValue: List<C>.() -> R): R? = if (isNotEmpty()) defaultValue() else null
 
