@@ -4,8 +4,8 @@ import com.ramo.ebuy.data.util.BaseObject
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
+import kotlinx.serialization.json.encodeToJsonElement
+import kotlinx.serialization.json.jsonObject
 
 @Serializable
 data class Category(
@@ -22,11 +22,8 @@ data class Category(
 ): BaseObject() {
     var haveChildren: Boolean = false
     override fun json(): JsonObject {
-        return buildJsonObject {
-            put("name", name)
-            put("image_uri", imageUri)
-            put("cato_type", catoType)
-            put("parent_cato", parentId)
-        }
+        return kotlinx.serialization.json.Json.encodeToJsonElement(this).jsonObject.toMutableMap().apply {
+            remove("id")
+        }.let(::JsonObject)
     }
 }

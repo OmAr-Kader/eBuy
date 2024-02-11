@@ -40,7 +40,6 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.arkivanov.essenty.backhandler.BackCallback
 import com.ramo.ebuy.global.base.Theme
 
 
@@ -83,13 +82,13 @@ fun MultiFloatingActionButton(
     ) { state ->
         if (state == MultiFabState.EXPANDED) 45f else 0f
     }
-    val isEnable = currentState.value == MultiFabState.EXPANDED
 
+    /*val isEnable = currentState.value == MultiFabState.EXPANDED
     BackCallback(
         isEnable
     ) {
         currentState.value = MultiFabState.COLLAPSED
-    }
+    }*/
 
     val modifier = if (currentState.value == MultiFabState.EXPANDED)
         Modifier

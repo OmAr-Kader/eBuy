@@ -3,6 +3,7 @@ package com.ramo.ebuy.data.util
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.gotrue.PostgrestFilterDSL
 import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.postgrest.query.Order
 import io.github.jan.supabase.postgrest.query.filter.FilterOperator
 import io.github.jan.supabase.postgrest.query.filter.PostgrestFilterBuilder
 
@@ -75,7 +76,7 @@ abstract class BaseRepoImp(val supabase: SupabaseClient) {
     ): List<T> {
         return supabase {
             supabase.from(table).select {
-                //order("id", Order.ASCENDING)
+                order("id", Order.ASCENDING)
                 filter(block)
             }.decodeList<T>()
         } ?: emptyList()
@@ -86,7 +87,7 @@ abstract class BaseRepoImp(val supabase: SupabaseClient) {
     ): List<T> {
         return supabase {
             supabase.from(table).select{
-                //order("id", Order.ASCENDING)
+                order("id", Order.ASCENDING)
             }.decodeList<T>()
         } ?: emptyList()
     }

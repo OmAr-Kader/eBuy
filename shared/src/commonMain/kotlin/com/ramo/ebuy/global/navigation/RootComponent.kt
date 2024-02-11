@@ -48,7 +48,7 @@ class RootComponent(
                 is Configuration.LogInEmailRoute -> Screen.LogInEmailRoute(newNav, config.isRegister)
                 is Configuration.HomeUserRoute -> Screen.HomeUserRoute(newNav)
                 is Configuration.ProductDetailsRoute -> Screen.ProductDetailsRoute(newNav)
-                is Configuration.ProductSellingRoute -> Screen.ProductSellingRoute(newNav, config.isAdmin)
+                is Configuration.ProductSellingRoute -> Screen.ProductSellingRoute(newNav, config.productId, config.isAdmin)
                 is Configuration.ProductSellingPriceRoute -> Screen.ProductSellingPriceRoute(newNav)
                 is Configuration.ProductSellingTitleRoute -> Screen.ProductSellingTitleRoute(newNav)
                 is Configuration.ProductSellingSpecRoute -> Screen.ProductSellingSpecRoute(newNav)
@@ -62,6 +62,7 @@ class RootComponent(
                 is Configuration.ProductSellingCustomSpecRoute -> Screen.ProductSellingCustomSpecRoute(newNav)
                 is Configuration.ProductSellingMPNRoute -> Screen.ProductSellingMPNRoute(newNav)
                 is Configuration.ProductSellingUPCRoute -> Screen.ProductSellingUPCRoute(newNav)
+                is Configuration.ProductSellingQuantityRoute -> Screen.ProductSellingQuantityRoute(newNav)
                 is Configuration.ProductSellingCustomSpecExtraRoute -> Screen.ProductSellingCustomSpecExtraRoute(newNav)
                 is Configuration.ProductSellingCustomSpecExtraListRoute -> Screen.ProductSellingCustomSpecExtraListRoute(newNav)
                 is Configuration.ProductShippingRoute -> Screen.ProductShippingRoute(newNav)
@@ -78,7 +79,7 @@ class RootComponent(
         data class LogInEmailRoute(val component: Navigator, val isRegister: Boolean) : Screen()
         data class HomeUserRoute(val component: Navigator) : Screen()
         data class ProductDetailsRoute(val component: Navigator) : Screen()
-        data class ProductSellingRoute(val component: Navigator, val isAdmin: Boolean) : Screen()
+        data class ProductSellingRoute(val component: Navigator, val productId: Long, val isAdmin: Boolean) : Screen()
         data class ProductConditionMainRoute(val component: Navigator) : Screen()
         data class ProductSellingPriceRoute(val component: Navigator) : Screen()
         data class ProductSellingTitleRoute(val component: Navigator) : Screen()
@@ -94,6 +95,7 @@ class RootComponent(
         data class ProductSellingCustomSpecExtraListRoute(val component: Navigator) : Screen()
         data class ProductSellingMPNRoute(val component: Navigator) : Screen()
         data class ProductSellingUPCRoute(val component: Navigator) : Screen()
+        data class ProductSellingQuantityRoute(val component: Navigator) : Screen()
         data class ProductShippingRoute(val component: Navigator) : Screen()
         data class ProductShippingCostRoute(val component: Navigator) : Screen()
         data class CategoryCreatingRoute(val component: Navigator) : Screen()
@@ -113,7 +115,7 @@ class RootComponent(
         @Serializable
         data class ProductDetailsRoute(@SerialName("count_screen") val countS: Int) : Configuration()
         @Serializable
-        data class ProductSellingRoute(@SerialName("is_admin") val isAdmin: Boolean) : Configuration()
+        data class ProductSellingRoute(@SerialName("product_id") val productId: Long, @SerialName("is_admin") val isAdmin: Boolean) : Configuration()
         @Serializable
         data object ProductConditionMainRoute : Configuration()
         @Serializable
@@ -144,6 +146,8 @@ class RootComponent(
         data object ProductSellingMPNRoute : Configuration()
         @Serializable
         data object ProductSellingUPCRoute : Configuration()
+        @Serializable
+        data object ProductSellingQuantityRoute : Configuration()
         @Serializable
         data object ProductShippingRoute : Configuration()
         @Serializable

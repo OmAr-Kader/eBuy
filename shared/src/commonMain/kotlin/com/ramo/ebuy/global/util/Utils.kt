@@ -208,31 +208,6 @@ inline val offerSubTitle: String
 inline val conditions: List<String>
     get() = listOf("Brand New", "Like New", "Very Good", "Good", "Acceptable")
 
-fun cato(): List<Category> {
-    return buildList {
-        add(Category(1, "TECH", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/93/619094/1.jpg?2560", 1, -1))
-        add(Category(2, "TELEVISIONS", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/77/359744/1.jpg?4978", 1, 1))
-        add(Category(3, "TUBE", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/47/796613/1.jpg?7826", 1, 2))
-        add(Category(4, "LED", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/74/956483/1.jpg?9747", 1, 2))
-        add(Category(5, "PLASMA", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/40/357284/1.jpg?5906", 1, 2))
-        add(Category(6, "ELECTRONICS", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/18/313084/1.jpg?0214", 1, 1))
-        add(Category(7, "MP3 PLAYERS", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/77/491602/1.jpg?1949", 1, 6))
-        add(Category(8, "FLASH", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/22/411581/1.jpg?9349", 1, 7))
-        add(Category(9, "CD PLAYERS", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/37/850302/1.jpg?4989", 1, 6))
-        add(Category(10, "2 WAY RADIOS", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/55/159784/1.jpg?3043", 1, 6))
-        add(Category(11, "LCD", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/74/956483/1.jpg?9747", 1, 2))
-        add(Category(12, "IPS", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/40/357284/1.jpg?5906", 1, 2))
-        add(Category(13, "PORTABLE ELECTRONICS", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/18/313084/1.jpg?0214", 1, 1))
-    }
-}
-
-fun countries(): List<Country> {
-    return buildList {
-        add(Country(0, "US", "USA America United State"))
-        add(Country(1, "Egypt", "Egypt Cairo Giza"))
-    }
-}
-
 inline val ratings: List<AgeRate>
     get() {
         return listOf(
@@ -243,6 +218,24 @@ inline val ratings: List<AgeRate>
             AgeRate(4, "NC-17 – Adults Only"),
         )
     }
+fun countries(): List<Country> {
+    return buildList {
+        add(Country(0, "US", "USA America United State"))
+        add(Country(1, "Egypt", "Egypt Cairo Giza"))
+    }
+}
+
+data class Country(val id: Int, val display: String, val searchable: String)
+
+data class AgeRate(val id: Int, val display: String)
+
+data class TimeGap(val days: Int, val hours: Int)
+
+data class TimeSplitter(val year: Int, val month: Int, val day: Int, val hour: Int) {
+    constructor(year: Int) : this(year, 1, 1, 4)
+}
+
+data class HotBarData(val icon: String, val label: String)
 
 fun item(): List<Product> {
     return buildList {
@@ -420,16 +413,20 @@ fun item(): List<Product> {
     }
 }
 
-
-data class Country(val id: Int, val display: String, val searchable: String)
-
-data class AgeRate(val id: Int, val display: String)
-
-data class TimeGap(val days: Int, val hours: Int)
-
-data class TimeSplitter(val year: Int, val month: Int, val day: Int, val hour: Int) {
-
-    constructor(year: Int) : this(year, 1, 1, 4)
+fun cato(): List<Category> {
+    return buildList {
+        add(Category(1, "TECH", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/93/619094/1.jpg?2560", 1, -1))
+        add(Category(2, "TELEVISIONS", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/77/359744/1.jpg?4978", 1, 1))
+        add(Category(3, "TUBE", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/47/796613/1.jpg?7826", 1, 2))
+        add(Category(4, "LED", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/74/956483/1.jpg?9747", 1, 2))
+        add(Category(5, "PLASMA", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/40/357284/1.jpg?5906", 1, 2))
+        add(Category(6, "ELECTRONICS", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/18/313084/1.jpg?0214", 1, 1))
+        add(Category(7, "MP3 PLAYERS", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/77/491602/1.jpg?1949", 1, 6))
+        add(Category(8, "FLASH", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/22/411581/1.jpg?9349", 1, 7))
+        add(Category(9, "CD PLAYERS", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/37/850302/1.jpg?4989", 1, 6))
+        add(Category(10, "2 WAY RADIOS", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/55/159784/1.jpg?3043", 1, 6))
+        add(Category(11, "LCD", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/74/956483/1.jpg?9747", 1, 2))
+        add(Category(12, "IPS", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/40/357284/1.jpg?5906", 1, 2))
+        add(Category(13, "PORTABLE ELECTRONICS", "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/18/313084/1.jpg?0214", 1, 1))
+    }
 }
-
-data class HotBarData(val icon: String, val label: String)

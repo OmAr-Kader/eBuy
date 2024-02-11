@@ -52,6 +52,8 @@ import com.ramo.ebuy.global.navigation.MokoModel
 import com.ramo.ebuy.global.navigation.Navigator
 import com.ramo.ebuy.global.navigation.RootComponent
 import com.ramo.ebuy.global.ui.CalendarYearView
+import com.ramo.ebuy.global.ui.LoadingScreen
+import com.ramo.ebuy.global.ui.OnLaunchScreen
 import com.ramo.ebuy.global.ui.rememberArrowBack
 import com.ramo.ebuy.global.ui.rememberDeleteForever
 import com.ramo.ebuy.global.ui.rememberEdit
@@ -107,7 +109,7 @@ fun ProductConditionMainScreen(
                 conditions.forEach {
                     ProductSpecItemRadio(it, it == state.product.condition, theme) {
                         viewModel.setConditionMain(it)
-                        navigator.navigateToReplace(RootComponent.Configuration.ProductSellingRoute(false))
+                        navigator.navigateToReplace(RootComponent.Configuration.ProductSellingRoute(-1, false))
                     }
                 }
             }
@@ -240,6 +242,9 @@ fun ProductSellingCategoryScreen(
     }
 ) {
     val state by viewModel.uiState.collectAsState()
+    OnLaunchScreen {
+        viewModel.loadCategories()
+    }
     Scaffold { pad ->
         Column(
             modifier = Modifier
@@ -264,6 +269,7 @@ fun ProductSellingCategoryScreen(
                 viewModel.setCategory(it)
             }
         }
+        LoadingScreen(state.isProcess, theme)
     }
 }
 
@@ -296,6 +302,9 @@ fun ProductSellingSpecsScreen(
             LazyColumn {
                 ProductSellingSpecForEditItem("Condition", state.product.condition, theme) {
                     navigator.navigateTo(RootComponent.Configuration.ProductSellingConditionRoute)
+                }
+                ProductSellingSpecForEditItem("Quantities", state.productSpecs.quantityEditStr, theme) {
+                    navigator.navigateTo(RootComponent.Configuration.ProductSellingQuantityRoute)
                 }
                 ProductSellingSpecForEditItem("Made in", state.productSpecs.countryProductStr, theme) {
                     navigator.navigateTo(RootComponent.Configuration.ProductSellingMadeInRoute)
@@ -731,10 +740,10 @@ fun ProductSellingCustomSpecExtraListScreen(
     val customSpecExtra = remember {
         mutableStateOf(
             if (state.customSpecExtraIndex == -1) {
-                ProductSpecsExtra("", listOf(SpecExtra("", -1F,"")))
+                ProductSpecsExtra("", listOf(SpecExtra("", -1F,1, 1, "")))
             } else {
                 state.productSpecs.specsExtra.getOrElse(state.customSpecExtraIndex) {
-                    ProductSpecsExtra("", listOf(SpecExtra("", -1F,"")))
+                    ProductSpecsExtra("", listOf(SpecExtra("", -1F,1, 1,"")))
                 }
             }
         )
@@ -783,63 +792,98 @@ fun ProductSellingCustomSpecExtraListScreen(
                             .padding(horizontal = 10.dp, vertical = 5.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        OutlinedTextField(
-                            modifier = Modifier.weight(1F).padding(horizontal = 5.dp),
-                            value = spec.priceSpecEditStr,
-                            onValueChange = { change ->
-                                customSpecExtra.value.specExtra.toMutableList().apply {
-                                    getOrNull(i)?.apply f@{
-                                        change.toFloatOrNull()?.let { it1 ->
-                                            plusPriceSpec = it1
-                                        }
-                                        priceSpecEditStr = change
+                        Column {
+                            OutlinedTextField(
+                                modifier = Modifier.weight(1F).padding(horizontal = 5.dp),
+                                value = spec.labelSpec,
+                                onValueChange = { change ->
+                                    customSpecExtra.value.specExtra.toMutableList().apply {
+                                        getOrNull(i)?.labelSpec = change
+                                    }.also {
+                                        customSpecExtra.value = customSpecExtra.value.copy(specExtra = it, dummy = customSpecExtra.value.dummy + 1)
                                     }
-                                }.also {
-                                    customSpecExtra.value = customSpecExtra.value.copy(specExtra = it, dummy = customSpecExtra.value.dummy + 1)
-                                }
-                            },
-                            shape = RoundedCornerShape(12.dp),
-                            placeholder = { Text(text = "Spec Price", fontSize = 14.sp) },
-                            label = { Text(text = "Spec Price", fontSize = 14.sp) },
-                            isError = spec.priceSpecEditStr.length > 12,
-                            supportingText = {
-                                Text(
-                                    text = "${spec.priceSpecEditStr.length} / 12",
-                                    modifier = Modifier.fillMaxWidth(),
-                                    color = theme.textHintColor,
-                                    textAlign = TextAlign.End,
+                                },
+                                shape = RoundedCornerShape(12.dp),
+                                placeholder = { Text(text = "Spec Label", fontSize = 14.sp) },
+                                label = { Text(text = "Spec Label", fontSize = 14.sp) },
+                                isError = spec.labelSpec.length > 40,
+                                supportingText = {
+                                    Text(
+                                        text = "${spec.labelSpec.length} / 40",
+                                        modifier = Modifier.fillMaxWidth(),
+                                        color = theme.textHintColor,
+                                        textAlign = TextAlign.End,
+                                    )
+                                },
+                                maxLines = 1,
+                                colors = theme.outlinedTextFieldStyle(),
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                            )
+                            Row {
+                                OutlinedTextField(
+                                    modifier = Modifier.weight(1F).padding(horizontal = 5.dp),
+                                    value = spec.priceSpecEditStr,
+                                    onValueChange = { change ->
+                                        customSpecExtra.value.specExtra.toMutableList().apply {
+                                            getOrNull(i)?.apply f@{
+                                                change.toFloatOrNull()?.let { it1 ->
+                                                    plusPriceSpec = it1
+                                                }
+                                                priceSpecEditStr = change
+                                            }
+                                        }.also {
+                                            customSpecExtra.value = customSpecExtra.value.copy(specExtra = it, dummy = customSpecExtra.value.dummy + 1)
+                                        }
+                                    },
+                                    shape = RoundedCornerShape(12.dp),
+                                    placeholder = { Text(text = "Spec Price", fontSize = 14.sp) },
+                                    label = { Text(text = "Spec Price", fontSize = 14.sp) },
+                                    isError = spec.priceSpecEditStr.length > 12,
+                                    supportingText = {
+                                        Text(
+                                            text = "${spec.priceSpecEditStr.length} / 12",
+                                            modifier = Modifier.fillMaxWidth(),
+                                            color = theme.textHintColor,
+                                            textAlign = TextAlign.End,
+                                        )
+                                    },
+                                    maxLines = 1,
+                                    colors = theme.outlinedTextFieldStyle(),
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                 )
-                            },
-                            maxLines = 1,
-                            colors = theme.outlinedTextFieldStyle(),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        )
-                        OutlinedTextField(
-                            modifier = Modifier.weight(1F).padding(horizontal = 5.dp),
-                            value = spec.labelSpec,
-                            onValueChange = { change ->
-                                customSpecExtra.value.specExtra.toMutableList().apply {
-                                    getOrNull(i)?.labelSpec = change
-                                }.also {
-                                    customSpecExtra.value = customSpecExtra.value.copy(specExtra = it, dummy = customSpecExtra.value.dummy + 1)
-                                }
-                            },
-                            shape = RoundedCornerShape(12.dp),
-                            placeholder = { Text(text = "Spec Label", fontSize = 14.sp) },
-                            label = { Text(text = "Spec Label", fontSize = 14.sp) },
-                            isError = spec.labelSpec.length > 40,
-                            supportingText = {
-                                Text(
-                                    text = "${spec.labelSpec.length} / 40",
-                                    modifier = Modifier.fillMaxWidth(),
-                                    color = theme.textHintColor,
-                                    textAlign = TextAlign.End,
+                                OutlinedTextField(
+                                    modifier = Modifier.weight(1F).padding(horizontal = 5.dp),
+                                    value = spec.quantityEditStr,
+                                    onValueChange = { change ->
+                                        customSpecExtra.value.specExtra.toMutableList().apply {
+                                            getOrNull(i)?.apply f@{
+                                                change.toIntOrNull()?.let { it1 ->
+                                                    quantity = it1
+                                                }
+                                                quantityEditStr = change
+                                            }
+                                        }.also {
+                                            customSpecExtra.value = customSpecExtra.value.copy(specExtra = it, dummy = customSpecExtra.value.dummy + 1)
+                                        }
+                                    },
+                                    shape = RoundedCornerShape(12.dp),
+                                    placeholder = { Text(text = "Spec Quantity", fontSize = 14.sp) },
+                                    label = { Text(text = "Spec Quantity", fontSize = 14.sp) },
+                                    isError = spec.quantityEditStr.length > 12,
+                                    supportingText = {
+                                        Text(
+                                            text = "${spec.quantityEditStr.length} / 12",
+                                            modifier = Modifier.fillMaxWidth(),
+                                            color = theme.textHintColor,
+                                            textAlign = TextAlign.End,
+                                        )
+                                    },
+                                    maxLines = 1,
+                                    colors = theme.outlinedTextFieldStyle(),
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                                 )
-                            },
-                            maxLines = 1,
-                            colors = theme.outlinedTextFieldStyle(),
-                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                        )
+                            }
+                        }
                         Box(contentAlignment = Alignment.Center) {
                             Image(
                                 modifier = Modifier
@@ -966,6 +1010,49 @@ fun ProductSellingUPCScreen(
             ) {
                 viewModel.setUPC(it)
             }
+        }
+    }
+}
+
+@Composable
+fun ProductSellingQuantityScreen(
+    navigator: Navigator,
+    theme: Theme = koinInject(),
+    project: Project = koinInject(),
+    stater: Stater = koinInject(),
+    viewModel: ProductSellingViewModel = MokoModel {
+        ProductSellingViewModel(project, stater.subStateProductSellingModel.copy()) {
+            apply {
+                stater.subStateProductSelling = this@apply
+            }
+        }
+    }
+) {
+    val state by viewModel.uiState.collectAsState()
+    Scaffold { pad ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(pad)
+                .background(color = theme.background)
+        ) {
+            ProductSellingSpecsHeadBar("Quantity", theme) {
+                if (state.product.productCode.length > 12) {
+                    return@ProductSellingSpecsHeadBar
+                }
+                viewModel.donePressed()
+                navigator.goBack()
+            }
+            ProductSellingSpecEditItemFull(
+                "Product Quantities",
+                state.productSpecs.quantityEditStr,
+                KeyboardType.Text,
+                12,
+                theme
+            ) {
+                viewModel.setQuantity(it)
+            }
+            Text("Tip: If Item Listed Specifics quantities added, this value will be ignored", color = theme.textHintColor)
         }
     }
 }

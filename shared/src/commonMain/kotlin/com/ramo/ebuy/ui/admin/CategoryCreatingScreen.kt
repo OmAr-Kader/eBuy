@@ -36,6 +36,7 @@ import com.ramo.ebuy.di.Project
 import com.ramo.ebuy.global.base.Theme
 import com.ramo.ebuy.global.navigation.MokoModel
 import com.ramo.ebuy.global.navigation.Navigator
+import com.ramo.ebuy.global.ui.LoadingScreen
 import com.ramo.ebuy.global.ui.OnLaunchScreen
 import com.ramo.ebuy.global.ui.rememberDeleteForever
 import com.ramo.ebuy.ui.common.ExpandableCato
@@ -154,5 +155,6 @@ fun CategoryCreatingScreen(
                 viewModel.setCategory(it)
             }
         }
+        LoadingScreen(state.isProcess, theme)
     }
 }

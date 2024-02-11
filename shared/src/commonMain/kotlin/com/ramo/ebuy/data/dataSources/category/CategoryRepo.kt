@@ -6,6 +6,5 @@ interface CategoryRepo {
 
     suspend fun getCategories(): List<Category>
     suspend fun addNewCategory(item: Category): Category?
-    suspend fun addNewCategoryList(item: List<Category>): List<Category>?
     suspend fun deleteCato(id: Long): Int
 }

@@ -36,6 +36,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
@@ -91,6 +92,29 @@ fun OnLaunchScreenScope(invoke: suspend kotlinx.coroutines.CoroutineScope.() -> 
         isLaunched.value = true
         LaunchedEffect(key1 = isLaunched, block = invoke)
     }
+}
+
+@Composable
+fun LoadingScreen(
+    isLoading: Boolean,
+    theme: Theme,
+) {
+    if (isLoading) {
+        Surface(
+            modifier = Modifier.fillMaxSize().clickable {  },
+            color = theme.backDarkAlpha
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier,
+                    color = theme.primary,
+                )
+            }
+        }
+    } else return
 }
 
 @Composable
@@ -483,8 +507,6 @@ fun TextPickerView(
         }
     }
 }
-
-
 
 /*
 @Composable

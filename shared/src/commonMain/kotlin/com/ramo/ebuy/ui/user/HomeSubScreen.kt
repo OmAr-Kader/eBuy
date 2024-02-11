@@ -18,6 +18,7 @@ import com.ramo.ebuy.global.base.Theme
 import com.ramo.ebuy.global.navigation.Navigator
 import com.ramo.ebuy.global.navigation.RootComponent
 import com.ramo.ebuy.global.ui.HotBar
+import com.ramo.ebuy.global.ui.OnLaunchScreen
 import com.ramo.ebuy.global.ui.VerticalListSingleTitle
 import com.ramo.ebuy.global.ui.VerticalListTitle
 import com.ramo.ebuy.global.ui.collapse.CollapsingToolbar
@@ -45,6 +46,9 @@ fun HomeSubScreen(
     val offsetY = scrollState.offsetY
     val catoList = state.circleCato
 
+    OnLaunchScreen {
+        viewModel.loadCategories()
+    }
     Box(Modifier.fillMaxSize()) {
         Column(
             Modifier.onSizeChanged {  size ->

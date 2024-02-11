@@ -5,7 +5,6 @@ import com.ramo.ebuy.data.model.Product
 import com.ramo.ebuy.data.model.User
 import com.ramo.ebuy.di.Project
 import com.ramo.ebuy.global.navigation.BaseViewModel
-import com.ramo.ebuy.global.util.cato
 import com.ramo.ebuy.global.util.item
 import io.github.jan.supabase.gotrue.SessionStatus
 import io.github.jan.supabase.gotrue.auth
@@ -67,19 +66,29 @@ class HomeViewModel(project: Project, state: StateHomeViewModel, private val pas
             }
         }
 
+    fun loadCategories() {
+        launchBack {
+            project.categoryData.getCategories().let {
+                _uiState.update { state ->
+                    state.copy(circleCato = it).paste()
+                }
+            }
+        }
+    }
+
     fun setRepeatableCato(width: Int) {
         if (uiState.value.repeatableCato == width / 220) {
             return
         }
         _uiState.update { state ->
-            state.copy(repeatableCato = width / 220)
+            state.copy(repeatableCato = width / 220).paste()
         }
     }
 
 }
 
 data class StateHomeViewModel(
-    val circleCato: List<Category> = cato(),
+    val circleCato: List<Category> = emptyList(),
     val productVer: List<Product> = item(),
     val user: User? = null,
     val selectedPage: Int = 0,

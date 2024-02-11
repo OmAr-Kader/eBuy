@@ -2,7 +2,6 @@ package com.ramo.ebuy.ui.product
 
 import com.ramo.ebuy.data.model.DeliveryProcess
 import com.ramo.ebuy.data.model.Product
-import com.ramo.ebuy.data.model.ProductAvailability
 import com.ramo.ebuy.data.model.ProductBaseSpecs
 import com.ramo.ebuy.data.model.ProductSpecsExtra
 import com.ramo.ebuy.data.model.SpecExtra
@@ -18,6 +17,21 @@ class ProductDetailsViewModel(project: Project) : BaseViewModel(project) {
 
     private val _uiState = MutableStateFlow(State())
     val uiState = _uiState.asStateFlow()
+
+    fun loadProDetails(productId: Long) {
+        setIsProcess(true)
+        launchBack {
+            project.productData.getProductOnId(productId)?.let { product ->
+                project.productSpecsData.getProductSpecsOnId(productId)?.let { productSpecs ->
+                    project.deliveryData.getDeliveryOnId(productId)?.let { delivery ->
+                        _uiState.update { state ->
+                            state.copy(product = product, productSpecs = productSpecs, deliveryProcess = delivery, isProcess = false)
+                        }
+                    }
+                } ?: setIsProcess(false)
+            }
+        }
+    }
 
     fun setDroppedIndex(it: Int) {
         _uiState.update { state ->
@@ -45,6 +59,12 @@ class ProductDetailsViewModel(project: Project) : BaseViewModel(project) {
         }
     }
 
+    private fun setIsProcess(it: Boolean) {
+        _uiState.update { state ->
+            state.copy(isProcess = it)
+        }
+    }
+
     data class State(
         val product: Product = Product(
             id = 6330,
@@ -68,7 +88,7 @@ class ProductDetailsViewModel(project: Project) : BaseViewModel(project) {
             status = 1,
         ),
         val productSpecs: ProductBaseSpecs = ProductBaseSpecs(
-            productID = product.id,
+            productId = product.id,
             subTitle = "",
             publisherId = 7407,
             conditionDetails = "",
@@ -80,13 +100,13 @@ class ProductDetailsViewModel(project: Project) : BaseViewModel(project) {
             specs = listOf(),
             specsExtra = listOf(ProductSpecsExtra("Tints", listOf(SpecExtra("Red", 0F), SpecExtra("Blue", 0F), SpecExtra("Black", 0F), SpecExtra("Gray", 0F))))
         ),
-        val productAva: ProductAvailability = ProductAvailability(product.id),
         val deliveryProcess: DeliveryProcess = DeliveryProcess(product.id),
         val specChosen: List<SpecChosen> = emptyList(),
         val productVer: List<Product> = item(),
         val droppedIndex: Int = -1,
         val user: User? = null,
         val isModalBottom: Boolean = false,
+        val isProcess: Boolean = true,
         val dummy: Int = 0,
     )
     data class SpecChosen(

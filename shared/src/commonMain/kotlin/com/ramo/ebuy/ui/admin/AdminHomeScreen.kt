@@ -31,7 +31,7 @@ fun AdminHomeScreen(
                 if (it == 0) {
                     navigator.navigateTo(RootComponent.Configuration.CategoryCreatingRoute)
                 } else {
-                    navigator.navigateTo(RootComponent.Configuration.ProductSellingRoute(true))
+                    navigator.navigateTo(RootComponent.Configuration.ProductSellingRoute(-1, true))
                 }
             }
         },

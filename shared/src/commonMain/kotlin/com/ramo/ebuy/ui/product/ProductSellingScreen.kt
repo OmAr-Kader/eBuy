@@ -33,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,6 +48,8 @@ import com.ramo.ebuy.global.base.Theme
 import com.ramo.ebuy.global.navigation.MokoModel
 import com.ramo.ebuy.global.navigation.Navigator
 import com.ramo.ebuy.global.navigation.RootComponent
+import com.ramo.ebuy.global.ui.LoadingScreen
+import com.ramo.ebuy.global.ui.OnLaunchScreen
 import com.ramo.ebuy.global.ui.rememberAdd
 import com.ramo.ebuy.global.ui.rememberClose
 import com.ramo.ebuy.global.ui.rememberCorrect
@@ -54,11 +57,13 @@ import com.ramo.ebuy.global.ui.rememberEdit
 import com.ramo.ebuy.global.ui.rememberHelp
 import com.ramo.ebuy.global.ui.rememberWrong
 import com.seiko.imageloader.rememberImagePainter
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 @Composable
 fun ProductSellingScreen(
     navigator: Navigator,
+    productId: Long,
     isAdmin: Boolean,
     project: Project = koinInject(),
     theme: Theme = koinInject(),
@@ -72,8 +77,13 @@ fun ProductSellingScreen(
     }
 ) {
     val state by viewModel.uiState.collectAsState()
+    val scope = rememberCoroutineScope()
     val scaffoldState = remember { SnackbarHostState() }
     val isAllValid = state.product.title.isNotEmpty() &&  state.product.parentCategories.isNotEmpty() && state.product.priceValid && state.deliveryProcess.deliveryCostValid
+    OnLaunchScreen {
+        viewModel.loadProduct(productId)
+    }
+
     Scaffold(
         snackbarHost = {
             SnackbarHost(scaffoldState) {
@@ -142,7 +152,23 @@ fun ProductSellingScreen(
                                 color = theme.primary,
                             ),
                             onClick = {
-                                navigator.goBack()
+                                if(state.product.id == 0L) {
+                                    viewModel.addNewProduct(isAdmin, {
+                                        scope.launch {
+                                            navigator.goBack()
+                                        }
+                                    }) {
+
+                                    }
+                                } else {
+                                    viewModel.editProduct(isAdmin, {
+                                        scope.launch {
+                                            navigator.goBack()
+                                        }
+                                    }) {
+
+                                    }
+                                }
                             },
                         ) {
                             Text(
@@ -156,6 +182,7 @@ fun ProductSellingScreen(
                 }
             }
         }
+        LoadingScreen(state.isProcess, theme)
     }
 
 }

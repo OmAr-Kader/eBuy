@@ -47,6 +47,8 @@ import com.ramo.ebuy.global.navigation.MokoModel
 import com.ramo.ebuy.global.navigation.Navigator
 import com.ramo.ebuy.global.navigation.RootComponent
 import com.ramo.ebuy.global.ui.ImagesPageView
+import com.ramo.ebuy.global.ui.LoadingScreen
+import com.ramo.ebuy.global.ui.OnLaunchScreen
 import com.ramo.ebuy.global.ui.rememberArrowDropDown
 import com.ramo.ebuy.global.ui.rememberFavorite
 import com.ramo.ebuy.ui.common.BarProductScreen
@@ -57,6 +59,7 @@ import org.koin.compose.koinInject
 @Composable
 fun ProductDetailsScreen(
     navigator: Navigator,
+    productId: Long,
     project: Project = koinInject(),
     theme: Theme = koinInject(),
     stater: Stater = koinInject(),
@@ -64,7 +67,9 @@ fun ProductDetailsScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val scope = rememberCoroutineScope()
-
+    OnLaunchScreen {
+        viewModel.loadProDetails(productId)
+    }
     Scaffold { pad ->
         Column(Modifier.padding(pad)) {
             BarProductScreen {
@@ -112,6 +117,7 @@ fun ProductDetailsScreen(
         ProductDetailsBottomSheet(state, theme) {
             viewModel.setModelBottom(false)
         }
+        LoadingScreen(state.isProcess, theme)
     }
 }
 

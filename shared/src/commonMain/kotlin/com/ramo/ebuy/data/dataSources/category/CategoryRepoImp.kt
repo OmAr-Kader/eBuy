@@ -10,8 +10,6 @@ class CategoryRepoImp(supabase: SupabaseClient) : BaseRepoImp(supabase), Categor
 
     override suspend fun addNewCategory(item: Category): Category? = insert(SUPA_CATO, item)
 
-    override suspend fun addNewCategoryList(item: List<Category>): List<Category>? = insertList(SUPA_CATO, item)
-
     override suspend fun deleteCato(id: Long): Int = delete(SUPA_CATO, id)
 
 }

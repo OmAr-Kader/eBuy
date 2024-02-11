@@ -1,5 +1,6 @@
 package com.ramo.ebuy.data.model
 
+import com.ramo.ebuy.data.util.BaseObject
 import com.ramo.ebuy.global.util.TimeGap
 import com.ramo.ebuy.global.util.countries
 import com.ramo.ebuy.global.util.fetchTimeGap
@@ -8,46 +9,55 @@ import com.ramo.ebuy.global.util.splitTime
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.encodeToJsonElement
+import kotlinx.serialization.json.jsonObject
 
 @Serializable
 data class Product(
     @SerialName("id")
-    val id: Long,
+    val id: Long = 0,
     @SerialName("product_code")
-    val productCode: String,
+    val productCode: String = "",
     @SerialName("title")
-    val title: String,
+    val title: String = "",
     @SerialName("image_uris")
-    val imageUris: List<String>,
+    val imageUris: List<String> = emptyList(),
     @SerialName("price")
-    val price: Float,
+    val price: Float = -1F,
     @SerialName("offer")
-    val offer: Float,
+    val offer: Float = -1F,
     @SerialName("auction")
-    val auction: Float,
+    val auction: Float = -1F,
     @SerialName("auction_start")
-    val auctionStart: Long,
+    val auctionStart: Long = 0,
     @SerialName("auction_end")
-    val auctionEnd: Long,
-    @SerialName("parentCato")
-    val parentCato: Long,
+    val auctionEnd: Long = 0,
+    @SerialName("parent_cato_id")
+    val parentCato: Long = -1,
     @SerialName("parent_categories")
-    val parentCategories: List<String>,
+    val parentCategories: List<String> = emptyList(),
     @SerialName("condition")
-    val condition: String,
+    val condition: String = "",
     @SerialName("scheduled")
-    val scheduled: Long,
+    val scheduled: Long = -1L,
     @SerialName("currency")
     val currency: Int = 0,
     @SerialName("age_rating")
-    val ageRate: Int,
+    val ageRate: Int = -1,
     @SerialName("item_status")
-    val status: Int, // underReview = 1 - rejected = -1  - accepted = 2 - asReference = 0
+    val status: Int = 2, // underReview = 1 - rejected = -1  - accepted = 2 - asReference = 0
     @Transient
     val priceEditStr: String = if (price != -1F) price.toString() else "",
     @Transient
     val offerEditStr: String = if (offer != -1F) offer.toString() else "",
-) {
+): BaseObject() {
+    override fun json(): JsonObject {
+        return kotlinx.serialization.json.Json.encodeToJsonElement(this).jsonObject.toMutableMap().apply {
+            remove("id")
+        }.let(::JsonObject)
+    }
+
     @Transient
     val timeGap: TimeGap? = fetchTimeGap(auctionEnd)
 
@@ -58,10 +68,6 @@ data class Product(
 
     @Transient
     val parentCatoFull: String = parentCategories.toMutableList().joinToString(" > ")
-
-    //@Transient
-    val parentCatoLast: String?
-        get() = parentCategories.firstOrNull()
 
     @Transient
     val discountPer: Int = (((price - offer) / ((price + offer) / 2)) * 100).toInt()
@@ -81,70 +87,52 @@ data class Product(
     @Transient
     val offerStr: String = if (offerValid) "$ $offer" else ""
 
-    constructor() : this(
-        0L,
-        productCode = "",
-        title = "",
-        imageUris = emptyList<String>(),
-        price = -1F,
-        offer = -1F,
-        auction = -1F,
-        auctionStart = 0L,
-        auctionEnd = 0L,
-        parentCato = -1,
-        parentCategories  = emptyList(),
-        condition = "",
-        scheduled = -1L,
-        ageRate = -1,
-        status = 1,
-    )
-
 }
 
 @Serializable
 data class ProductBaseSpecs(
+    @SerialName("id")
+    val id: Long = 0,
     @SerialName("product_id")
-    val productID: Long,
+    val productId: Long = 0,
     @SerialName("sub_title")
-    val subTitle: String,
+    val subTitle: String = "",
     @SerialName("publisher_id")
-    val publisherId: Long,
+    val publisherId: Long = 0L,
     @SerialName("condition_details")
-    val conditionDetails: String,
+    val conditionDetails: String = "",
     @SerialName("country_product")
-    val countryProduct: Int,
+    val countryProduct: Int = 0,
     @SerialName("platform")
-    val platform: String,
+    val platform: String = "",
     @SerialName("description_url")
-    val descriptionUrl: String,
+    val descriptionUrl: String = "",
     @SerialName("release_year")
-    val releaseYear: Long,
+    val releaseYear: Long = 0L,
     @SerialName("mpn")
-    val mpn: String,
+    val mpn: String = "",
     @SerialName("product_spec")
-    val specs: List<ProductSpecs>,
+    val specs: List<ProductSpecs> = emptyList(),
     @SerialName("extra_product_spec")
-    val specsExtra: List<ProductSpecsExtra>,
-) {
+    val specsExtra: List<ProductSpecsExtra> = emptyList(),
+    @SerialName("quantity")
+    val quantity: Int = 0,
+    @SerialName("quantity_available")
+    val quantityAvailable: Int = 0,
+    @Transient
+    val quantityEditStr: String = if (quantity != -1) quantity.toString() else "",
+): BaseObject() {
 
     @Transient
     val countryProductStr = countries().find { it.id == countryProduct }?.display ?: "US"
 
     val releaseYearOnly: String = if (releaseYear != 0L) splitTime(releaseYear).year.toString() else ""
 
-    constructor(productID: Long) : this(
-        productID = productID,
-        "",
-        0L,
-        conditionDetails = "",
-        0,
-        "",
-        "",
-        0L,
-        "",
-        emptyList<ProductSpecs>(),
-        emptyList<ProductSpecsExtra>(),
-    )
+    override fun json(): JsonObject {
+        return kotlinx.serialization.json.Json.encodeToJsonElement(this).jsonObject.toMutableMap().apply {
+            remove("id")
+        }.let(::JsonObject)
+    }
 }
 
 /**
@@ -153,12 +141,10 @@ data class ProductBaseSpecs(
 @Serializable
 data class ProductSpecs(
     @SerialName("label")
-    val label: String,
+    val label: String = "",
     @SerialName("spec")
-    val spec: String,
-) {
-    constructor() : this("", "")
-}
+    val spec: String = "",
+)
 
 /**
  * Embedded For [ProductBaseSpecs]
@@ -166,33 +152,46 @@ data class ProductSpecs(
 @Serializable
 data class ProductSpecsExtra(
     @SerialName("label_extra")
-    val labelExtra: String,
+    val labelExtra: String = "",
     @SerialName("specs_extra")
-    val specExtra: List<SpecExtra>,
+    val specExtra: List<SpecExtra> = emptyList(),
     @Transient
     val dummy: Int = 0,
-) {
-    constructor() : this("", emptyList())
-}
+)
 
+/**
+ * Embedded For [ProductSpecsExtra]
+ */
 @Serializable
 data class SpecExtra(
     @SerialName("spec_label")
     var labelSpec: String,
     @SerialName("spec_price")
     var plusPriceSpec: Float,
+    @SerialName("spec_quantity")
+    var quantity: Int = 0,
+    @SerialName("spec_quantity_available")
+    val quantityAvailable: Int = 0,
     @Transient
     var priceSpecEditStr: String = if (plusPriceSpec != -1F) plusPriceSpec.toString() else "",
+    @Transient
+    var quantityEditStr: String = if (quantity != 0) quantity.toString() else "",
 )
-
+/*
 @Serializable
 data class ProductAvailability(
+    @SerialName("id")
+    val id: Long = 0,
     @SerialName("product_id")
-    val productID: Long,
+    val productID: Long = 0,
     @SerialName("product_ava_code")
-    val productAvaCode: ProductAvaCode,
-) {
-    constructor(productID: Long) : this(productID, ProductAvaCode())
+    val productAvaCode: ProductAvaCode = ProductAvaCode(),
+): BaseObject() {
+    override fun json(): JsonObject {
+        return kotlinx.serialization.json.Json.encodeToJsonElement(this).jsonObject.toMutableMap().apply {
+            remove("id")
+        }.let(::JsonObject)
+    }
 }
 
 /**
@@ -201,15 +200,10 @@ data class ProductAvailability(
 @Serializable
 data class ProductAvaCode(
     @SerialName("spec_code")
-    val specCode: String,
+    val specCode: String = "",
     @SerialName("quantity")
-    val quantity: Int,
+    val quantity: Int = 0,
     @SerialName("quantity_available")
-    val quantityAvailable: Int,
-) {
-    constructor() : this(
-        specCode = "",
-        quantity = 0,
-        quantityAvailable = 0,
-    )
-}
+    val quantityAvailable: Int = 0,
+)
+*/

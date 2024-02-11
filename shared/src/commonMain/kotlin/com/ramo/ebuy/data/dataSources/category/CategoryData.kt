@@ -7,6 +7,5 @@ class CategoryData(
 ) {
     suspend fun getCategories(): List<Category> = repo.getCategories()
     suspend fun addNewCategory(item: Category): Category? = repo.addNewCategory(item)
-    suspend fun addNewCategoryList(item: List<Category>): List<Category>? = repo.addNewCategoryList(item)
     suspend fun deleteCato(id: Long): Int = repo.deleteCato(id)
 }

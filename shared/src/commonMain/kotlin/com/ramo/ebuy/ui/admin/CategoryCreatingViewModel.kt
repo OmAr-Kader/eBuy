@@ -18,7 +18,7 @@ class CategoryCreatingViewModel(
         launchBack {
             project.categoryData.getCategories().rearrange().let {
                 _uiState.update { state ->
-                    state.copy(categories = it)
+                    state.copy(categories = it, isProcess = false)
                 }
             }
         }
@@ -45,6 +45,7 @@ class CategoryCreatingViewModel(
     }
 
     fun addNewCategory() {
+        setIsLoading(true)
         uiState.value.let {
             Category(name = it.newCategory, parentId = it.currentCategory?.id ?: -1)
         }.also { newCato ->
@@ -53,9 +54,11 @@ class CategoryCreatingViewModel(
                     if (it != null) {
                         uiState.value.categories.toMutableList().apply { add(it) }.rearrange().also { catos ->
                             _uiState.update { state ->
-                                state.copy(categories = catos, newCategory = "")
+                                state.copy(categories = catos, newCategory = "", isProcess = false)
                             }
                         }
+                    } else {
+                        setIsLoading(false)
                     }
                 }
             }
@@ -63,22 +66,32 @@ class CategoryCreatingViewModel(
     }
 
     fun deleteCategory(id: Long) {
+        setIsLoading(true)
         launchBack {
             uiState.value.categories.indexOfFirst { it.id == id }.let { i ->
                 project.categoryData.deleteCato(id).let { d ->
                     if (d == 1) {
                         uiState.value.categories.toMutableList().apply { removeAt(i) }.rearrange().also { catos ->
                             _uiState.update { state ->
-                                state.copy(categories = catos, newCategory = "", dummy = state.dummy + 1)
+                                state.copy(categories = catos, newCategory = "", dummy = state.dummy + 1, isProcess = false)
                             }
                         }
+                    } else {
+                        setIsLoading(false)
                     }
                 }
             }
         }
     }
 
+    private fun setIsLoading(it: Boolean) {
+        _uiState.update { state ->
+            state.copy(isProcess = it)
+        }
+    }
+
     data class State(
+        val isProcess: Boolean = true,
         val categories: List<Category> = emptyList(),
         val parentCategories: List<String> = emptyList(),
         val currentCategory: Category? = null,
