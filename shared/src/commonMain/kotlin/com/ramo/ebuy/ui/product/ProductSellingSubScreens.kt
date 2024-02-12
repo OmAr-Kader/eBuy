@@ -34,6 +34,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -65,6 +66,7 @@ import com.ramo.ebuy.global.util.offerSubTitle
 import com.ramo.ebuy.global.util.ratings
 import com.ramo.ebuy.global.util.splitTime
 import com.ramo.ebuy.ui.common.ExpandableCato
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 @Composable
@@ -81,6 +83,7 @@ fun ProductConditionMainScreen(
         }
     }
 ) {
+    val scope = rememberCoroutineScope()
     val state by viewModel.uiState.collectAsState()
     val scaffoldState = remember { SnackbarHostState() }
     Scaffold(
@@ -97,7 +100,9 @@ fun ProductConditionMainScreen(
                 .background(color = theme.background)
         ) {
             ProductSellingSpecsHeadBarBack("Add more details", theme) {
-                navigator.goBack()
+                scope.launch {
+                    navigator.goBack()
+                }
             }
             Text(
                 modifier = Modifier.padding(5.dp),
@@ -109,7 +114,9 @@ fun ProductConditionMainScreen(
                 conditions.forEach {
                     ProductSpecItemRadio(it, it == state.product.condition, theme) {
                         viewModel.setConditionMain(it)
-                        navigator.navigateToReplace(RootComponent.Configuration.ProductSellingRoute(-1, false))
+                        scope.launch {
+                            navigator.navigateToReplace(RootComponent.Configuration.ProductSellingRoute(-1, false))
+                        }
                     }
                 }
             }
@@ -131,6 +138,7 @@ fun ProductSellingPriceScreen(
         }
     }
 ) {
+    val scope = rememberCoroutineScope()
     val state by viewModel.uiState.collectAsState()
     val scaffoldState = remember { SnackbarHostState() }
     Scaffold(
@@ -148,7 +156,9 @@ fun ProductSellingPriceScreen(
         ) {
             ProductSellingSpecsHeadBar("Pricing", theme) {
                 viewModel.donePressed()
-                navigator.goBack()
+                scope.launch {
+                    navigator.goBack()
+                }
             }
             ProductSellingSpecEditItem(
                 "Price",
@@ -183,6 +193,7 @@ fun ProductSellingTitleScreen(
         }
     }
 ) {
+    val scope = rememberCoroutineScope()
     val state by viewModel.uiState.collectAsState()
     val scaffoldState = remember { SnackbarHostState() }
     Scaffold(
@@ -203,7 +214,9 @@ fun ProductSellingTitleScreen(
                     return@ProductSellingSpecsHeadBar
                 }
                 viewModel.donePressed()
-                navigator.goBack()
+                scope.launch {
+                    navigator.goBack()
+                }
             }
             ProductSellingSpecEditItemFull(
                 "Title",
@@ -216,7 +229,7 @@ fun ProductSellingTitleScreen(
             }
             ProductSellingSpecEditItemFull(
                 "Sub Title (Optional)",
-                state.product.title,
+                state.productSpecs.subTitle,
                 KeyboardType.Text,
                 55,
                 theme
@@ -241,6 +254,7 @@ fun ProductSellingCategoryScreen(
         }
     }
 ) {
+    val scope = rememberCoroutineScope()
     val state by viewModel.uiState.collectAsState()
     OnLaunchScreen {
         viewModel.loadCategories()
@@ -254,7 +268,9 @@ fun ProductSellingCategoryScreen(
         ) {
             ProductSellingSpecsHeadBar("Category", theme) {
                 viewModel.donePressed()
-                navigator.goBack()
+                scope.launch {
+                    navigator.goBack()
+                }
             }
             Row(
                 Modifier
@@ -276,6 +292,7 @@ fun ProductSellingCategoryScreen(
 @Composable
 fun ProductSellingSpecsScreen(
     navigator: Navigator,
+    isAdmin: Boolean,
     theme: Theme = koinInject(),
     project: Project = koinInject(),
     stater: Stater = koinInject(),
@@ -287,6 +304,7 @@ fun ProductSellingSpecsScreen(
         }
     }
 ) {
+    val scope = rememberCoroutineScope()
     val state by viewModel.uiState.collectAsState()
     Scaffold { pad ->
         Column(
@@ -296,45 +314,67 @@ fun ProductSellingSpecsScreen(
                 .background(color = theme.background)
         ) {
             ProductSellingSpecsHeadBar("Item Specifics", theme) {
-                viewModel.donePressed()
-                navigator.goBack()
+                scope.launch {
+                    viewModel.donePressed()
+                    navigator.goBack()
+                }
             }
             LazyColumn {
-                ProductSellingSpecForEditItem("Condition", state.product.condition, theme) {
-                    navigator.navigateTo(RootComponent.Configuration.ProductSellingConditionRoute)
-                }
-                ProductSellingSpecForEditItem("Quantities", state.productSpecs.quantityEditStr, theme) {
-                    navigator.navigateTo(RootComponent.Configuration.ProductSellingQuantityRoute)
+                if (!isAdmin) {
+                    ProductSellingSpecForEditItem("Condition", state.product.condition, theme) {
+                        scope.launch {
+                            navigator.navigateTo(RootComponent.Configuration.ProductSellingConditionRoute)
+                        }
+                    }
+                    ProductSellingSpecForEditItem("Quantities", state.productSpecs.quantityEditStr, theme) {
+                        scope.launch {
+                            navigator.navigateTo(RootComponent.Configuration.ProductSellingQuantityRoute)
+                        }
+                    }
                 }
                 ProductSellingSpecForEditItem("Made in", state.productSpecs.countryProductStr, theme) {
-                    navigator.navigateTo(RootComponent.Configuration.ProductSellingMadeInRoute)
+                    scope.launch {
+                        navigator.navigateTo(RootComponent.Configuration.ProductSellingMadeInRoute)
+                    }
                 }
                 ProductSellingSpecForEditItem("Platform", state.productSpecs.platform, theme) {
-                    navigator.navigateTo(RootComponent.Configuration.ProductSellingPlatformRoute)
+                    scope.launch {
+                        navigator.navigateTo(RootComponent.Configuration.ProductSellingPlatformRoute)
+                    }
                 }
                 ProductSellingSpecForEditItem("Rating", state.product.ageRateStr, theme) {
-                    navigator.navigateTo(RootComponent.Configuration.ProductSellingRatingRoute)
+                    scope.launch {
+                        navigator.navigateTo(RootComponent.Configuration.ProductSellingRatingRoute)
+                    }
                 }
                 ProductSellingSpecForEditItem("Release Year", state.productSpecs.releaseYearOnly, theme) {
-                    navigator.navigateTo(RootComponent.Configuration.ProductSellingReleaseYearRoute)
+                    scope.launch {
+                        navigator.navigateTo(RootComponent.Configuration.ProductSellingReleaseYearRoute)
+                    }
                 }
                 ProductSellingSpecForEditItem("MPN", state.productSpecs.mpn, theme) {
-                    navigator.navigateTo(RootComponent.Configuration.ProductSellingMPNRoute)
+                    scope.launch {
+                        navigator.navigateTo(RootComponent.Configuration.ProductSellingMPNRoute)
+                    }
                 }
                 ProductSellingSpecForEditItem("UPC", state.product.productCode, theme) {
-                    navigator.navigateTo(RootComponent.Configuration.ProductSellingUPCRoute)
+                    scope.launch {
+                        navigator.navigateTo(RootComponent.Configuration.ProductSellingUPCRoute)
+                    }
                 }
                 itemsIndexed(state.productSpecs.specs) { i, it ->
                     ProductSellingSpecForEdit(it.label, it.spec, theme) {
-                        viewModel.setCustomSpecIndex(i)
-                        navigator.navigateTo(RootComponent.Configuration.ProductSellingCustomSpecRoute)
+                        scope.launch {
+                            navigator.navigateTo(RootComponent.Configuration.ProductSellingCustomSpecRoute(i))
+                        }
                     }
                 }
                 item {
                     Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(modifier = Modifier.clickable {
-                            viewModel.setCustomSpecIndex(-1)
-                            navigator.navigateTo(RootComponent.Configuration.ProductSellingCustomSpecRoute)
+                            scope.launch {
+                                navigator.navigateTo(RootComponent.Configuration.ProductSellingCustomSpecRoute(-1))
+                            }
                         }.padding(15.dp), text = "ADD CUSTOM SPECIFIC", color = theme.primary)
                     }
                 }
@@ -357,6 +397,7 @@ fun ProductSellingConditionScreen(
         }
     }
 ) {
+    val scope = rememberCoroutineScope()
     val state by viewModel.uiState.collectAsState()
     Scaffold { pad ->
         Column(
@@ -366,7 +407,9 @@ fun ProductSellingConditionScreen(
                 .background(color = theme.background)
         ) {
             ProductSellingSpecsHeadBarBackHelp("Condition", theme) {
-                navigator.goBack()
+                scope.launch {
+                    navigator.goBack()
+                }
             }
             Text(
                 modifier = Modifier.padding(5.dp),
@@ -378,7 +421,9 @@ fun ProductSellingConditionScreen(
                 conditions.forEach {
                     ProductSpecItemRadio(it, it == state.product.condition, theme) {
                         viewModel.setCondition(it)
-                        navigator.goBack()
+                        scope.launch {
+                            navigator.goBack()
+                        }
                     }
                 }
             }
@@ -400,9 +445,9 @@ fun ProductSellingMadeInScreen(
         }
     }
 ) {
+    val scope = rememberCoroutineScope()
     val state by viewModel.uiState.collectAsState()
     Scaffold { pad ->
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -410,7 +455,9 @@ fun ProductSellingMadeInScreen(
                 .background(color = theme.background)
         ) {
             ProductSellingSpecsHeadBarBackHelp("Made In", theme) {
-                navigator.goBack()
+                scope.launch {
+                    navigator.goBack()
+                }
             }
             /** Try That Later
              *https://github.com/philipplackner/SearchFieldCompose/blob/master/app/src/main/java/com/plcoding/searchfieldcompose/MainViewModel.kt
@@ -433,7 +480,9 @@ fun ProductSellingMadeInScreen(
                     val isSelect = it.id == state.productSpecs.countryProduct
                     Row(Modifier.clickable {
                         viewModel.setMadeIn(it.id)
-                        navigator.goBack()
+                        scope.launch {
+                            navigator.goBack()
+                        }
                     }.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             text = it.display,
@@ -462,6 +511,8 @@ fun ProductSellingPlatformScreen(
         }
     }
 ) {
+
+    val scope = rememberCoroutineScope()
     @Suppress("UNUSED_VARIABLE") val state by viewModel.uiState.collectAsState()
     Scaffold { pad ->
         Column(
@@ -471,7 +522,9 @@ fun ProductSellingPlatformScreen(
                 .background(color = theme.background)
         ) {
             ProductSellingSpecsHeadBarBackHelp("Platform", theme) {
-                navigator.goBack()
+                scope.launch {
+                    navigator.goBack()
+                }
             }
         }
     }
@@ -491,6 +544,7 @@ fun ProductSellingRatingScreen(
         }
     }
 ) {
+    val scope = rememberCoroutineScope()
     val state by viewModel.uiState.collectAsState()
     Scaffold { pad ->
         Column(
@@ -500,7 +554,9 @@ fun ProductSellingRatingScreen(
                 .background(color = theme.background)
         ) {
             ProductSellingSpecsHeadBarBackHelp("Product Age Rating", theme) {
-                navigator.goBack()
+                scope.launch {
+                    navigator.goBack()
+                }
             }
             Text(
                 modifier = Modifier.padding(5.dp),
@@ -511,8 +567,10 @@ fun ProductSellingRatingScreen(
             Column {
                 ratings.forEach { rate ->
                     ProductSpecItemRadio(rate.display, state.product.ageRate == rate.id, theme) {
-                        viewModel.setAgeRate(rate.id)
-                        navigator.goBack()
+                        scope.launch {
+                            viewModel.setAgeRate(rate.id)
+                            navigator.goBack()
+                        }
                     }
                 }
             }
@@ -534,6 +592,7 @@ fun ProductSellingReleaseYearScreen(
         }
     }
 ) {
+    val scope = rememberCoroutineScope()
     val state by viewModel.uiState.collectAsState()
     val maxYear = currentTime.year
     val year = if (state.productSpecs.releaseYear == 0L) maxYear else splitTime(state.productSpecs.releaseYear).year
@@ -545,7 +604,9 @@ fun ProductSellingReleaseYearScreen(
                 .background(color = theme.background)
         ) {
             ProductSellingSpecsHeadBarBackHelp("Release Year", theme) {
-                navigator.goBack()
+                scope.launch {
+                    navigator.goBack()
+                }
             }
             Text(
                 modifier = Modifier.padding(5.dp),
@@ -555,7 +616,9 @@ fun ProductSellingReleaseYearScreen(
             )
             CalendarYearView(selectedYear = year, maxYear = maxYear, minYear = 1970, theme = theme) {
                 viewModel.setReleaseYear(margeYear(it))
-                navigator.goBack()
+                scope.launch {
+                    navigator.goBack()
+                }
             }
         }
     }
@@ -564,6 +627,7 @@ fun ProductSellingReleaseYearScreen(
 @Composable
 fun ProductSellingCustomSpecScreen(
     navigator: Navigator,
+    customSpecIndex: Int,
     theme: Theme = koinInject(),
     project: Project = koinInject(),
     stater: Stater = koinInject(),
@@ -575,13 +639,14 @@ fun ProductSellingCustomSpecScreen(
         }
     }
 ) {
+    val scope = rememberCoroutineScope()
     val state by viewModel.uiState.collectAsState()
     val customSpec = remember {
         mutableStateOf(
-            if (state.customSpecIndex == -1) {
+            if (customSpecIndex == -1) {
                 ProductSpecs()
             } else {
-                state.productSpecs.specs.getOrElse(state.customSpecIndex) {
+                state.productSpecs.specs.getOrElse(customSpecIndex) {
                     ProductSpecs()
                 }
             }
@@ -595,8 +660,10 @@ fun ProductSellingCustomSpecScreen(
                 .background(color = theme.background)
         ) {
             ProductSellingSpecsHeadBar("Custom Specific", theme) {
-                viewModel.addOrEditCustomSpec(customSpec.value)
-                navigator.goBack()
+                viewModel.addOrEditCustomSpec(customSpec.value, customSpecIndex)
+                scope.launch {
+                    navigator.goBack()
+                }
             }
             Spacer(Modifier.height(10.dp))
             OutlinedTextField(
@@ -644,11 +711,13 @@ fun ProductSellingCustomSpecScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
             )
             Spacer(Modifier.height(10.dp))
-            if (state.customSpecIndex != -1) {
+            if (customSpecIndex != -1) {
                 Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(modifier = Modifier.clickable {
-                        viewModel.setDeleteCustomSpec(state.customSpecIndex)
-                        navigator.goBack()
+                        viewModel.setDeleteCustomSpec(customSpecIndex)
+                        scope.launch {
+                            navigator.goBack()
+                        }
                     }.padding(15.dp), text = "DELETE", color = theme.error)
                 }
             }
@@ -670,17 +739,20 @@ fun ProductSellingCustomSpecExtraScreen(
         }
     }
 ) {
+    val scope = rememberCoroutineScope()
     val state by viewModel.uiState.collectAsState()
     Scaffold { pad ->
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(pad)
                 .background(color = theme.background)
         ) {
-            ProductSellingSpecsHeadBarBackHelp("Listed Specs", theme) {
-                navigator.goBack()
+            ProductSellingSpecsHeadBar("Listed Specs", theme) {
+                scope.launch {
+                    viewModel.donePressed()
+                    navigator.goBack()
+                }
             }
             Spacer(Modifier.height(10.dp))
             LazyColumn(Modifier.fillMaxWidth().padding(horizontal = 15.dp)) {
@@ -697,8 +769,9 @@ fun ProductSellingCustomSpecExtraScreen(
                                 .width(40.dp)
                                 .height(40.dp)
                                 .clickable {
-                                    viewModel.setCustomSpecExtraIndex(i)
-                                    navigator.navigateTo(RootComponent.Configuration.ProductSellingCustomSpecExtraListRoute)
+                                    scope.launch {
+                                        navigator.navigateTo(RootComponent.Configuration.ProductSellingCustomSpecExtraListRoute(i))
+                                    }
                                 }
                                 .padding(8.dp),
                             imageVector = rememberEdit(theme.textHintColor),
@@ -711,8 +784,9 @@ fun ProductSellingCustomSpecExtraScreen(
                 item {
                     Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(modifier = Modifier.clickable {
-                            viewModel.setCustomSpecExtraIndex(-1)
-                            navigator.navigateTo(RootComponent.Configuration.ProductSellingCustomSpecExtraListRoute)
+                            scope.launch {
+                                navigator.navigateTo(RootComponent.Configuration.ProductSellingCustomSpecExtraListRoute(-1))
+                            }
                         }.padding(15.dp), text = "ADD LISTED SPECIFIC", color = theme.primary)
                     }
                 }
@@ -725,6 +799,7 @@ fun ProductSellingCustomSpecExtraScreen(
 @Composable
 fun ProductSellingCustomSpecExtraListScreen(
     navigator: Navigator,
+    customSpecExtraIndex: Int,
     theme: Theme = koinInject(),
     project: Project = koinInject(),
     stater: Stater = koinInject(),
@@ -736,13 +811,14 @@ fun ProductSellingCustomSpecExtraListScreen(
         }
     }
 ) {
+    val scope = rememberCoroutineScope()
     val state by viewModel.uiState.collectAsState()
     val customSpecExtra = remember {
         mutableStateOf(
-            if (state.customSpecExtraIndex == -1) {
+            if (customSpecExtraIndex == -1) {
                 ProductSpecsExtra("", listOf(SpecExtra("", -1F,1, 1, "")))
             } else {
-                state.productSpecs.specsExtra.getOrElse(state.customSpecExtraIndex) {
+                state.productSpecs.specsExtra.getOrElse(customSpecExtraIndex) {
                     ProductSpecsExtra("", listOf(SpecExtra("", -1F,1, 1,"")))
                 }
             }
@@ -756,8 +832,10 @@ fun ProductSellingCustomSpecExtraListScreen(
                 .background(color = theme.background)
         ) {
             ProductSellingSpecsHeadBar("Custom Listed Specific", theme) {
-                viewModel.addOrEditCustomSpecExtra(customSpecExtra.value)
-                navigator.goBack()
+                viewModel.addOrEditCustomSpecExtra(customSpecExtra.value, customSpecExtraIndex)
+                scope.launch {
+                    navigator.goBack()
+                }
             }
             ProductSellingSpecItem("Price", state.product.priceStr, theme)
             Spacer(Modifier.height(10.dp))
@@ -768,7 +846,7 @@ fun ProductSellingCustomSpecExtraListScreen(
                     customSpecExtra.value = customSpecExtra.value.copy(labelExtra = change)
                 },
                 shape = RoundedCornerShape(12.dp),
-                placeholder = { Text(text = "Enter Spec Title", fontSize = 14.sp) },
+                //placeholder = { Text(text = "Enter Spec Title", fontSize = 14.sp) },
                 label = { Text(text = "Spec Title", fontSize = 14.sp) },
                 isError = customSpecExtra.value.labelExtra.length > 40,
                 supportingText = {
@@ -782,19 +860,18 @@ fun ProductSellingCustomSpecExtraListScreen(
                 colors = theme.outlinedTextFieldStyle(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
             )
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(20.dp))
             LazyColumn {
                 itemsIndexed(customSpecExtra.value.specExtra) { i, spec ->
                     Row(
                         Modifier
-                            .defaultMinSize(minHeight = 70.dp)
                             .fillMaxWidth()
                             .padding(horizontal = 10.dp, vertical = 5.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Column {
                             OutlinedTextField(
-                                modifier = Modifier.weight(1F).padding(horizontal = 5.dp),
+                                modifier = Modifier.fillMaxWidth(1F).padding(horizontal = 5.dp),
                                 value = spec.labelSpec,
                                 onValueChange = { change ->
                                     customSpecExtra.value.specExtra.toMutableList().apply {
@@ -804,8 +881,8 @@ fun ProductSellingCustomSpecExtraListScreen(
                                     }
                                 },
                                 shape = RoundedCornerShape(12.dp),
-                                placeholder = { Text(text = "Spec Label", fontSize = 14.sp) },
-                                label = { Text(text = "Spec Label", fontSize = 14.sp) },
+                                //placeholder = { Text(text = "Spec Section Label", fontSize = 14.sp) },
+                                label = { Text(text = "Spec Section Label", fontSize = 14.sp) },
                                 isError = spec.labelSpec.length > 40,
                                 supportingText = {
                                     Text(
@@ -836,8 +913,8 @@ fun ProductSellingCustomSpecExtraListScreen(
                                         }
                                     },
                                     shape = RoundedCornerShape(12.dp),
-                                    placeholder = { Text(text = "Spec Price", fontSize = 14.sp) },
-                                    label = { Text(text = "Spec Price", fontSize = 14.sp) },
+                                    //placeholder = { Text(text = "Spec Additional Price", fontSize = 14.sp) },
+                                    label = { Text(text = "Spec Additional Price", fontSize = 14.sp) },
                                     isError = spec.priceSpecEditStr.length > 12,
                                     supportingText = {
                                         Text(
@@ -867,7 +944,7 @@ fun ProductSellingCustomSpecExtraListScreen(
                                         }
                                     },
                                     shape = RoundedCornerShape(12.dp),
-                                    placeholder = { Text(text = "Spec Quantity", fontSize = 14.sp) },
+                                    //placeholder = { Text(text = "Spec Quantity", fontSize = 14.sp) },
                                     label = { Text(text = "Spec Quantity", fontSize = 14.sp) },
                                     isError = spec.quantityEditStr.length > 12,
                                     supportingText = {
@@ -880,7 +957,7 @@ fun ProductSellingCustomSpecExtraListScreen(
                                     },
                                     maxLines = 1,
                                     colors = theme.outlinedTextFieldStyle(),
-                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                                 )
                             }
                         }
@@ -914,14 +991,17 @@ fun ProductSellingCustomSpecExtraListScreen(
                             }
                         }.padding(15.dp), text = "ADD SECTION", color = theme.primary)
                     }
+                    Spacer(Modifier.height(20.dp))
                 }
             }
             Spacer(Modifier.height(10.dp))
-            if (state.customSpecIndex != -1) {
+            if (customSpecExtraIndex != -1) {
                 Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(modifier = Modifier.clickable {
-                        viewModel.setDeleteCustomSpecExtra(state.customSpecIndex)
-                        navigator.goBack()
+                        viewModel.setDeleteCustomSpecExtra(customSpecExtraIndex)
+                        scope.launch {
+                            navigator.goBack()
+                        }
                     }.padding(15.dp), text = "DELETE", color = theme.error)
                 }
             }
@@ -943,6 +1023,7 @@ fun ProductSellingMPNScreen(
         }
     }
 ) {
+    val scope = rememberCoroutineScope()
     val state by viewModel.uiState.collectAsState()
     Scaffold { pad ->
         Column(
@@ -956,7 +1037,9 @@ fun ProductSellingMPNScreen(
                     return@ProductSellingSpecsHeadBar
                 }
                 viewModel.donePressed()
-                navigator.goBack()
+                scope.launch {
+                    navigator.goBack()
+                }
             }
             ProductSellingSpecEditItemFull(
                 "Manufacturer Part Number",
@@ -986,6 +1069,7 @@ fun ProductSellingUPCScreen(
         }
     }
 ) {
+    val scope = rememberCoroutineScope()
     val state by viewModel.uiState.collectAsState()
     Scaffold { pad ->
         Column(
@@ -999,7 +1083,9 @@ fun ProductSellingUPCScreen(
                     return@ProductSellingSpecsHeadBar
                 }
                 viewModel.donePressed()
-                navigator.goBack()
+                scope.launch {
+                    navigator.goBack()
+                }
             }
             ProductSellingSpecEditItemFull(
                 "Universal Product Codes ",
@@ -1028,6 +1114,7 @@ fun ProductSellingQuantityScreen(
         }
     }
 ) {
+    val scope = rememberCoroutineScope()
     val state by viewModel.uiState.collectAsState()
     Scaffold { pad ->
         Column(
@@ -1041,7 +1128,9 @@ fun ProductSellingQuantityScreen(
                     return@ProductSellingSpecsHeadBar
                 }
                 viewModel.donePressed()
-                navigator.goBack()
+                scope.launch {
+                    navigator.goBack()
+                }
             }
             ProductSellingSpecEditItemFull(
                 "Product Quantities",
@@ -1084,6 +1173,7 @@ fun ProductShippingScreen(
         }
     }
 ) {
+    val scope = rememberCoroutineScope()
     val state by viewModel.uiState.collectAsState()
     Scaffold { pad ->
         Column(
@@ -1094,7 +1184,9 @@ fun ProductShippingScreen(
         ) {
             ProductSellingSpecsHeadBar("Item Specifics", theme) {
                 viewModel.donePressed()
-                navigator.goBack()
+                scope.launch {
+                    navigator.goBack()
+                }
             }
             LazyColumn {
                 ProductSellingSpecForEditItem("Package Details", state.deliveryProcess.size, theme) {
@@ -1104,7 +1196,9 @@ fun ProductShippingScreen(
 
                 }
                 ProductSellingSpecForEditItem("Shipping Coast", state.deliveryProcess.deliveryCostStr, theme) {
-                    navigator.navigateTo(RootComponent.Configuration.ProductShippingCostRoute)
+                    scope.launch {
+                        navigator.navigateTo(RootComponent.Configuration.ProductShippingCostRoute)
+                    }
                 }
                 ProductSellingSpecForEditItem("Delivery Location", state.deliveryProcess.location, theme) {
 
@@ -1128,6 +1222,7 @@ fun ProductShippingCostScreen(
         }
     }
 ) {
+    val scope = rememberCoroutineScope()
     val state by viewModel.uiState.collectAsState()
     val scaffoldState = remember { SnackbarHostState() }
     Scaffold(
@@ -1145,7 +1240,9 @@ fun ProductShippingCostScreen(
         ) {
             ProductSellingSpecsHeadBar("Shipping Cost", theme) {
                 viewModel.donePressed()
-                navigator.goBack()
+                scope.launch {
+                    navigator.goBack()
+                }
             }
             ProductSellingSpecEditItem(
                 "Cost",

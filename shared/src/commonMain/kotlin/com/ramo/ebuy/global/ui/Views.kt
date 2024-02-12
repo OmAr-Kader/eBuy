@@ -368,7 +368,7 @@ fun RowScope.AddItem(
 
 @Composable
 fun ImagesPageView(
-    list: List<String>,
+    list: Array<String>,
     size: DpSize,
     theme: Theme = koinInject(),
     onClick: (Int) -> Unit

@@ -7,6 +7,8 @@ import com.ramo.ebuy.data.model.ProductBaseSpecs
 import com.ramo.ebuy.data.model.ProductSpecs
 import com.ramo.ebuy.data.model.ProductSpecsExtra
 import com.ramo.ebuy.data.model.User
+import com.ramo.ebuy.data.supaBase.uploadListFile
+import com.ramo.ebuy.data.util.rearrange
 import com.ramo.ebuy.di.Project
 import com.ramo.ebuy.global.navigation.BaseViewModel
 import com.ramo.ebuy.global.util.Country
@@ -43,7 +45,7 @@ class ProductSellingViewModel(
 
     fun loadCategories() {
         launchBack {
-            project.categoryData.getCategories().let { listCategory ->
+            project.categoryData.getCategories().rearrange().let { listCategory ->
                 _uiState.update { state ->
                     state.copy(listCategory = listCategory, isProcess = false)
                 }
@@ -81,30 +83,18 @@ class ProductSellingViewModel(
         }
     }
 
-    fun setCustomSpecIndex(it: Int) {
-        _uiState.update { state ->
-            state.copy(customSpecIndex = it).paste()
-        }
-    }
-
-    fun setCustomSpecExtraIndex(it: Int) {
-        _uiState.update { state ->
-            state.copy(customSpecExtraIndex = it).paste()
-        }
-    }
-
-    fun addOrEditCustomSpec(it: ProductSpecs) {
+    fun addOrEditCustomSpec(it: ProductSpecs, customSpecIndex: Int) {
         _uiState.update { state ->
             state.productSpecs.specs.toMutableList().apply {
-                if (state.customSpecIndex == -1) {
+                if (customSpecIndex == -1) {
                     this@apply.add(it)
                 } else {
                     runCatching {
-                        this@apply[state.customSpecIndex] = it
+                        this@apply[customSpecIndex] = it
                     }
                 }
             }.let { newList ->
-                state.copy(productSpecs = state.productSpecs.copy(specs = newList)).paste()
+                state.copy(productSpecs = state.productSpecs.copy(specs = newList.toTypedArray())).paste()
             }
         }
     }
@@ -112,23 +102,23 @@ class ProductSellingViewModel(
     fun setDeleteCustomSpec(it: Int) {
         _uiState.update { state ->
             state.productSpecs.specs.toMutableList().apply { this@apply.removeAt(it) }.let { newList ->
-                state.copy(productSpecs = state.productSpecs.copy(specs = newList)).paste()
+                state.copy(productSpecs = state.productSpecs.copy(specs = newList.toTypedArray())).paste()
             }
         }
     }
 
-    fun addOrEditCustomSpecExtra(it: ProductSpecsExtra) {
+    fun addOrEditCustomSpecExtra(it: ProductSpecsExtra, customSpecExtraIndex: Int) {
         _uiState.update { state ->
             state.productSpecs.specsExtra.toMutableList().apply {
-                if (state.customSpecExtraIndex == -1) {
+                if (customSpecExtraIndex == -1) {
                     this@apply.add(it)
                 } else {
                     runCatching {
-                        this@apply[state.customSpecExtraIndex] = it
+                        this@apply[customSpecExtraIndex] = it
                     }
                 }
             }.let { newList ->
-                state.copy(productSpecs = state.productSpecs.copy(specsExtra = newList)).paste()
+                state.copy(productSpecs = state.productSpecs.copy(specsExtra = newList.toTypedArray())).paste()
             }
         }
     }
@@ -136,7 +126,7 @@ class ProductSellingViewModel(
     fun setDeleteCustomSpecExtra(it: Int) {
         _uiState.update { state ->
             state.productSpecs.specsExtra.toMutableList().apply { this@apply.removeAt(it) }.let { newList ->
-                state.copy(productSpecs = state.productSpecs.copy(specsExtra = newList)).paste()
+                state.copy(productSpecs = state.productSpecs.copy(specsExtra = newList.toTypedArray())).paste()
             }
         }
     }
@@ -222,46 +212,104 @@ class ProductSellingViewModel(
             e
         }
         _uiState.update { state ->
-            state.copy(product = state.product.copy(parentCategories = catoList.distinct().map { it.name }))
+            state.copy(product = state.product.copy(parentCategories = catoList.distinct().map { it.name }.toTypedArray()))
         }
     }
 
     fun addNewProduct(isAdmin: Boolean, invoke: () -> Unit, failed: () -> Unit) {
+        setIsProcess(true)
+        _uiState.value.apply {
+            launchBack {
+                userInfo()?.let { user ->
+                    doAddProduct(user.id, isAdmin, invoke, failed)
+                } ?: failed()
+            }
+        }
+    }
+
+    private fun StateProductSelling.doAddProduct(userId: String, isAdmin: Boolean, invoke: () -> Unit, failed: () -> Unit) {
         launchBack {
-            project.productData.addNewProduct(
-                uiState.value.product.copy(status = if (isAdmin) 0 else uiState.value.product.status)
-            )?.let { pro ->
-                project.productSpecsData.addNewProductSpecs(uiState.value.productSpecs.copy(productId = pro.id))?.let { _ ->
-                    project.deliveryData.addNewDelivery(uiState.value.deliveryProcess.copy(productId = pro.id))?.let {
-                        invoke()
+            project.supaBase.uploadListFile(userId, images) { imagesUrls ->
+                project.productData.addNewProduct(
+                    product.copy(status = if (isAdmin) 0 else product.status, imageUris = imagesUrls.toTypedArray())
+                )?.let { pro ->
+                    project.productSpecsData.addNewProductSpecs(productSpecs.copy(productId = pro.id))?.let { _ ->
+                        if (isAdmin) {
+                            invoke()
+                        } else {
+                            project.deliveryData.addNewDelivery(deliveryProcess.copy(productId = pro.id))?.let {
+                                invoke()
+                            } ?: failed()
+                        }
                     } ?: failed()
                 } ?: failed()
-            } ?: failed()
+            }
         }
     }
 
     fun editProduct(isAdmin: Boolean, invoke: () -> Unit, failed: () -> Unit) {
+        setIsProcess(true)
         launchBack {
             project.productData.editProduct(
                 uiState.value.product.copy(status = if (isAdmin) 0 else uiState.value.product.status)
             )?.let {
                 project.productSpecsData.editProductSpecs(uiState.value.productSpecs)?.let {
-                    project.deliveryData.editDelivery(uiState.value.deliveryProcess)?.let {
+                    if (isAdmin) {
                         invoke()
-                    } ?: failed()
+                    } else {
+                        project.deliveryData.editDelivery(uiState.value.deliveryProcess)?.let {
+                            invoke()
+                        } ?: failed()
+                    }
                 } ?: failed()
             } ?: failed()
         }
     }
 
-    private fun setIsProcess(it: Boolean) {
+    fun setIsProcess(it: Boolean) {
         _uiState.update { state ->
             state.copy(isProcess = it)
         }
     }
 
+    fun clear() {
+        _uiState.update { state ->
+            state.copy(listCategory = listOf(), images = listOf(), countrySearch = "")
+        }
+    }
+
+    fun appendImageUrl(byteArrays: List<ByteArray>) {
+        _uiState.update { state ->
+            state.images.toMutableList().apply {
+                addAll(byteArrays)
+            }.let { newImages ->
+                state.copy(images = newImages).paste()
+            }
+        }
+    }
+
+    fun removeImageUrl(pos: Int) {
+        _uiState.update { state ->
+            state.product.imageUris.toMutableList().apply {
+                removeAt(pos)
+            }.let {
+                state.copy(product = state.product.copy(imageUris = it.toTypedArray()), dummy = state.dummy + 1).paste()
+            }
+        }
+    }
+
+    fun removeImageByte(pos: Int) {
+        _uiState.update { state ->
+            state.images.toMutableList().apply {
+                removeAt(pos)
+            }.let {
+                state.copy(images = it, dummy = state.dummy + 1).paste()
+            }
+        }
+    }
+
     fun donePressed() {
-        _uiState.value.copy(listCategory = emptyList(), countrySearch = "", customSpecIndex = -1, customSpecExtraIndex = -1).paste()
+        _uiState.value.copy(listCategory = listOf(), countrySearch = "").paste()
     }
 
 }
@@ -271,11 +319,14 @@ data class StateProductSelling(
     val product: Product = Product(),
     val productSpecs: ProductBaseSpecs = ProductBaseSpecs(),
     val deliveryProcess: DeliveryProcess = DeliveryProcess(shippingService = "USPS"),//.copy(shippingService = "USPS")
-    val listCategory: List<Category> = emptyList(),
+    val listCategory: List<Category> = listOf(),
     val user: User = User(),
     val isErrorPressed: Boolean = false,
-    val customSpecIndex: Int = -1,
-    val customSpecExtraIndex: Int = -1,
     val countrySearch: String = "",
-    val countryList: List<Country> = countries()
+    val countryList: List<Country> = countries(),
+    val images: List<ByteArray> = listOf(),
+    val dummy: Int = 0,
+    val productGet: Product? = null,
+    val productSpecsGet: ProductBaseSpecs? = null,
+    val deliveryProcessGet: DeliveryProcess? = null,
 )

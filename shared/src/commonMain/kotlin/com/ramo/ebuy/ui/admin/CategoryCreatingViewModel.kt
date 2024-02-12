@@ -1,6 +1,7 @@
 package com.ramo.ebuy.ui.admin
 
 import com.ramo.ebuy.data.model.Category
+import com.ramo.ebuy.data.supaBase.uploadFile
 import com.ramo.ebuy.data.util.rearrange
 import com.ramo.ebuy.di.Project
 import com.ramo.ebuy.global.navigation.BaseViewModel
@@ -34,7 +35,7 @@ class CategoryCreatingViewModel(
             e
         }
         _uiState.update { state ->
-            state.copy(parentCategories = catoList.distinct().map { it.name }, currentCategory = it)
+            state.copy(parentCategories = catoList.distinct().map { it.name }.toTypedArray(), currentCategory = it)
         }
     }
 
@@ -45,20 +46,29 @@ class CategoryCreatingViewModel(
     }
 
     fun addNewCategory() {
+        val imageByte = uiState.value.image
+        if (imageByte == null) {
+            setIsLoading(false)
+            return
+        }
         setIsLoading(true)
         uiState.value.let {
             Category(name = it.newCategory, parentId = it.currentCategory?.id ?: -1)
         }.also { newCato ->
             launchBack {
-                project.categoryData.addNewCategory(newCato).let {
-                    if (it != null) {
-                        uiState.value.categories.toMutableList().apply { add(it) }.rearrange().also { catos ->
-                            _uiState.update { state ->
-                                state.copy(categories = catos, newCategory = "", isProcess = false)
+                userInfo()?.let { user ->
+                    project.supaBase.uploadFile(user.id, imageByte) { newImage ->
+                        project.categoryData.addNewCategory(newCato.copy(imageUri = newImage)).let {
+                            if (it != null) {
+                                uiState.value.categories.toMutableList().apply { add(it) }.rearrange().also { catos ->
+                                    _uiState.update { state ->
+                                        state.copy(categories = catos, newCategory = "", isProcess = false)
+                                    }
+                                }
+                            } else {
+                                setIsLoading(false)
                             }
                         }
-                    } else {
-                        setIsLoading(false)
                     }
                 }
             }
@@ -90,13 +100,56 @@ class CategoryCreatingViewModel(
         }
     }
 
+    fun setIsShowPicker(it: Boolean) {
+        _uiState.update { state ->
+            state.copy(isShowPicker = it)
+        }
+    }
+
+    fun setCategoryImage(it: String) {
+        _uiState.update { state ->
+            state.copy(newCategoryImage = it, isShowPicker = false)
+        }
+    }
+
     data class State(
         val isProcess: Boolean = true,
-        val categories: List<Category> = emptyList(),
-        val parentCategories: List<String> = emptyList(),
+        val categories: List<Category> = listOf(),
+        val parentCategories: Array<String> = arrayOf(),
         val currentCategory: Category? = null,
         val newCategory: String = "",
+        val newCategoryImage: String = "",
+        val isShowPicker: Boolean = false,
+        val image: ByteArray? = null,
         val dummy: Int = 0,
-    )
+    ) {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as State
+
+            if (isProcess != other.isProcess) return false
+            if (categories != other.categories) return false
+            if (!parentCategories.contentEquals(other.parentCategories)) return false
+            if (currentCategory != other.currentCategory) return false
+            if (newCategory != other.newCategory) return false
+            if (newCategoryImage != other.newCategoryImage) return false
+            if (isShowPicker != other.isShowPicker) return false
+            return dummy == other.dummy
+        }
+
+        override fun hashCode(): Int {
+            var result = isProcess.hashCode()
+            result = 31 * result + categories.hashCode()
+            result = 31 * result + parentCategories.contentHashCode()
+            result = 31 * result + (currentCategory?.hashCode() ?: 0)
+            result = 31 * result + newCategory.hashCode()
+            result = 31 * result + newCategoryImage.hashCode()
+            result = 31 * result + isShowPicker.hashCode()
+            result = 31 * result + dummy
+            return result
+        }
+    }
 
 }

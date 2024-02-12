@@ -21,14 +21,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ramo.ebuy.di.Project
+import com.ramo.ebuy.di.Stater
 import com.ramo.ebuy.global.base.Theme
 import com.ramo.ebuy.global.navigation.MokoModel
 import com.ramo.ebuy.global.navigation.Navigator
 import com.ramo.ebuy.global.navigation.RootComponent
+import com.ramo.ebuy.ui.product.StateProductSelling
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 @Composable
@@ -36,8 +40,10 @@ fun SellingSubScreen(
     navigator: Navigator,
     project: Project = koinInject(),
     theme: Theme = koinInject(),
+    stater: Stater = koinInject(),
     viewModel: SellingViewModel = MokoModel { SellingViewModel(project) }
 ) {
+    val scope = rememberCoroutineScope()
     @Suppress("UNUSED_VARIABLE") val state by viewModel.uiState.collectAsState()
     val scaffoldState = remember { SnackbarHostState() }
     Scaffold(
@@ -74,7 +80,10 @@ fun SellingSubScreen(
                         color = theme.primary,
                     ),
                     onClick = {
-                        navigator.navigateTo(RootComponent.Configuration.ProductConditionMainRoute)
+                        scope.launch {
+                            stater.stateProductSelling = StateProductSelling()
+                            navigator.navigateTo(RootComponent.Configuration.ProductConditionMainRoute)
+                        }
                     },
                 ) {
                     Text(

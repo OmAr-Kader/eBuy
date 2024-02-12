@@ -68,7 +68,7 @@ class HomeViewModel(project: Project, state: StateHomeViewModel, private val pas
 
     fun loadCategories() {
         launchBack {
-            project.categoryData.getCategories().let {
+            project.categoryData.getMainCategories().let {
                 _uiState.update { state ->
                     state.copy(circleCato = it).paste()
                 }
@@ -88,7 +88,7 @@ class HomeViewModel(project: Project, state: StateHomeViewModel, private val pas
 }
 
 data class StateHomeViewModel(
-    val circleCato: List<Category> = emptyList(),
+    val circleCato: List<Category> = listOf(),
     val productVer: List<Product> = item(),
     val user: User? = null,
     val selectedPage: Int = 0,

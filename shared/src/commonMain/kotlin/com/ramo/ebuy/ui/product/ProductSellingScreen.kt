@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
@@ -42,6 +44,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.preat.peekaboo.image.picker.SelectionMode
+import com.preat.peekaboo.image.picker.rememberImagePickerLauncher
+import com.preat.peekaboo.image.picker.toImageBitmap
 import com.ramo.ebuy.di.Project
 import com.ramo.ebuy.di.Stater
 import com.ramo.ebuy.global.base.Theme
@@ -53,6 +58,7 @@ import com.ramo.ebuy.global.ui.OnLaunchScreen
 import com.ramo.ebuy.global.ui.rememberAdd
 import com.ramo.ebuy.global.ui.rememberClose
 import com.ramo.ebuy.global.ui.rememberCorrect
+import com.ramo.ebuy.global.ui.rememberDeleteForever
 import com.ramo.ebuy.global.ui.rememberEdit
 import com.ramo.ebuy.global.ui.rememberHelp
 import com.ramo.ebuy.global.ui.rememberWrong
@@ -79,63 +85,93 @@ fun ProductSellingScreen(
     val state by viewModel.uiState.collectAsState()
     val scope = rememberCoroutineScope()
     val scaffoldState = remember { SnackbarHostState() }
-    val isAllValid = state.product.title.isNotEmpty() &&  state.product.parentCategories.isNotEmpty() && state.product.priceValid && state.deliveryProcess.deliveryCostValid
+    val singleImagePicker = rememberImagePickerLauncher(
+        selectionMode = SelectionMode.Multiple(11),
+        scope = scope,
+        onResult = { byteArrays ->
+            viewModel.appendImageUrl(byteArrays)
+        }
+    )
+    val isAllValid = state.product.title.isNotEmpty() && state.product.parentCategories.isNotEmpty() &&
+            state.product.priceValid && (if (isAdmin) true else state.deliveryProcess.deliveryCostValid)
     OnLaunchScreen {
         viewModel.loadProduct(productId)
     }
-
     Scaffold(
         snackbarHost = {
             SnackbarHost(scaffoldState) {
                 Snackbar(it, containerColor = theme.backDarkSec, contentColor = theme.textColor)
             }
         },
-    ) {
+    ) { pad ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(it).background(color = theme.background)
+            modifier = Modifier.fillMaxSize().padding(pad).background(color = theme.background)
         ) {
-            ProductSellingHeadBar(navigator, theme)
+            ProductSellingHeadBar(theme) {
+                scope.launch {
+                    navigator.goBack()
+                }
+            }
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(it)
                     .background(color = theme.background)
             ) {
                 ProductSellingHeadItem("Photos", theme)
-                ProductSellingPhotos(state, theme)
+                ProductSellingPhotos(state, theme, onDeleteCloud = {
+                    viewModel.removeImageUrl(it)
+                }, onDeletePicker = {
+                    viewModel.removeImageByte(it)
+                }) {
+                    singleImagePicker.launch()
+                }
                 ProductSellingHeadItemCorrectable(state.product.title.isNotEmpty(), "Title", theme) {
-                    navigator.navigateTo(RootComponent.Configuration.ProductSellingTitleRoute)
+                    scope.launch {
+                        navigator.navigateTo(RootComponent.Configuration.ProductSellingTitleRoute)
+                    }
                 }
                 item {
                     Text(modifier = Modifier.padding(horizontal = 10.dp), text = state.product.title, color = theme.textColor, fontSize = 16.sp)
                     Spacer(modifier = Modifier.height(10.dp))
                 }
                 ProductSellingHeadItemCorrectable(state.product.parentCategories.isNotEmpty(), "Category", theme) {
-                    navigator.navigateTo(RootComponent.Configuration.ProductSellingCategoryRoute)
+                    scope.launch {
+                        navigator.navigateTo(RootComponent.Configuration.ProductSellingCategoryRoute)
+                    }
                 }
                 ProductSellingCato(state, theme)
                 ProductSellingHeadItemCorrectable(state.product.priceValid, "Pricing", theme) {
-                    navigator.navigateTo(RootComponent.Configuration.ProductSellingPriceRoute)
+                    scope.launch {
+                        navigator.navigateTo(RootComponent.Configuration.ProductSellingPriceRoute)
+                    }
                 }
                 ProductSellingDiscount(state, theme)
                 ProductSellingPrice(state, theme)
                 ProductSellingHeadItemCorrectable(true, "Item specifics", theme) {
-                    stater.subStateProductSelling = state
-                    navigator.navigateTo(RootComponent.Configuration.ProductSellingSpecRoute)
+                    scope.launch {
+                        stater.subStateProductSelling = state
+                        navigator.navigateTo(RootComponent.Configuration.ProductSellingSpecRoute(isAdmin))
+                    }
                 }
                 ProductSellingSpecs(state, theme)
                 if (state.product.priceValid) {
                     ProductSellingHeadItemCorrectable(true, "Item Listed specifics", theme) {
-                        stater.subStateProductSelling = state
-                        navigator.navigateTo(RootComponent.Configuration.ProductSellingCustomSpecExtraRoute)
+                        scope.launch {
+                            stater.subStateProductSelling = state
+                            navigator.navigateTo(RootComponent.Configuration.ProductSellingCustomSpecExtraRoute)
+                        }
                     }
                     ProductSellingSpecsExtra(state, theme)
                 }
-                ProductSellingHeadItemCorrectable(state.deliveryProcess.deliveryCostValid, "Delivery", theme) {
-                    stater.subStateProductSelling = state
-                    navigator.navigateTo(RootComponent.Configuration.ProductShippingRoute)
+                if (!isAdmin) {
+                    ProductSellingHeadItemCorrectable(state.deliveryProcess.deliveryCostValid, "Delivery", theme) {
+                        scope.launch {
+                            stater.subStateProductSelling = state
+                            navigator.navigateTo(RootComponent.Configuration.ProductShippingRoute)
+                        }
+                    }
+                    ProductSellingShipping(state, theme)
                 }
-                ProductSellingShipping(state, theme)
                 item {
                     Spacer(modifier = Modifier.height(20.dp))
                 }
@@ -152,21 +188,23 @@ fun ProductSellingScreen(
                                 color = theme.primary,
                             ),
                             onClick = {
-                                if(state.product.id == 0L) {
+                                if (state.product.id == 0L) {
                                     viewModel.addNewProduct(isAdmin, {
+                                        viewModel.clear()
                                         scope.launch {
                                             navigator.goBack()
                                         }
                                     }) {
-
+                                        viewModel.setIsProcess(false)
                                     }
                                 } else {
                                     viewModel.editProduct(isAdmin, {
+                                        viewModel.clear()
                                         scope.launch {
                                             navigator.goBack()
                                         }
                                     }) {
-
+                                        viewModel.setIsProcess(false)
                                     }
                                 }
                             },
@@ -182,6 +220,13 @@ fun ProductSellingScreen(
                 }
             }
         }
+        /*
+        MultipleFilePicker(state.isShowPicker, fileExtensions = listOf("jpg", "png", "webp", "mpeg", "heic", "heif", "hevc")) { files ->
+            files?.also {
+                viewModel.appendImageUrl(it)
+            } ?: viewModel.setIsShowPicker(it = false)
+
+        }*/
         LoadingScreen(state.isProcess, theme)
     }
 
@@ -189,8 +234,8 @@ fun ProductSellingScreen(
 
 @Composable
 fun ProductSellingHeadBar(
-    navigator: Navigator,
-    theme: Theme
+    theme: Theme,
+    onBack: () -> Unit,
 ) {
     Row(
         Modifier
@@ -202,9 +247,8 @@ fun ProductSellingHeadBar(
             modifier = Modifier
                 .width(40.dp)
                 .height(40.dp)
-                .background(color = theme.backDark, shape = CircleShape).clickable {
-                    navigator.goBack()
-                }
+                .background(color = theme.backDark, shape = CircleShape)
+                .clickable(onClick = onBack)
                 .padding(8.dp),
             imageVector = rememberClose(theme.textColor),
             contentScale = ContentScale.Fit,
@@ -229,47 +273,108 @@ fun ProductSellingHeadBar(
     Spacer(modifier = Modifier.height(10.dp))
 }
 
-fun LazyListScope.ProductSellingPhotos(state: StateProductSelling, theme: Theme) = item {
+fun LazyListScope.ProductSellingPhotos(
+    state: StateProductSelling,
+    theme: Theme,
+    onDeleteCloud: (Int) -> Unit,
+    onDeletePicker: (Int) -> Unit,
+    onPicker: () -> Unit,
+) = item {
     LazyRow {
-        items(state.product.imageUris) { imageUrl ->
-            val painter = rememberImagePainter(url = imageUrl)
-            Image(
-                modifier = Modifier
-                    .width(150.dp)
-                    .height(150.dp)
-                    .padding(5.dp)
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(color = theme.backDark),
-                painter = painter,
-                contentScale = ContentScale.Fit,
-                contentDescription = "Product  ",
-            )
+        itemsIndexed(state.product.imageUris) { i, imageUrl ->
+            ProductImageItem(theme, i, {
+                onDeleteCloud(i)
+            }) {
+                val painter = rememberImagePainter(url = imageUrl)
+                Image(
+                    modifier = Modifier
+                        .width(150.dp)
+                        .height(150.dp)
+                        .padding(5.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(color = theme.backDark),
+                    painter = painter,
+                    contentScale = ContentScale.Fit,
+                    contentDescription = "Product  ",
+                )
+            }
+        }
+        itemsIndexed(state.images) { i, image ->
+            ProductImageItem(theme, i, {
+                onDeletePicker(i)
+            }) {
+                Image(
+                    modifier = Modifier
+                        .width(150.dp)
+                        .height(150.dp)
+                        .padding(5.dp)
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(color = theme.backDark),
+                    bitmap = image.toImageBitmap(),
+                    contentScale = ContentScale.Fit,
+                    contentDescription = "Product  ",
+                )
+            }
         }
         item {
-            Surface(
-                modifier = Modifier
-                    .width(150.dp)
-                    .height(150.dp)
-                    .padding(start = 5.dp, end = 5.dp, top = 5.dp, bottom = 5.dp),
-                color = Color.Transparent,
-                shape = RoundedCornerShape(10.dp),
-                border = BorderStroke(0.5.dp, color = theme.textHintColor)
-            ) {
-                Box(
-                    contentAlignment = Alignment.Center,
+            Column {
+                Surface(
+                    modifier = Modifier
+                        .width(150.dp)
+                        .height(150.dp)
+                        .clickable(onClick = onPicker)
+                        .padding(start = 5.dp, end = 5.dp, top = 5.dp, bottom = 5.dp),
+                    color = Color.Transparent,
+                    shape = RoundedCornerShape(10.dp),
+                    border = BorderStroke(0.5.dp, color = theme.textHintColor)
                 ) {
-                    Image(
-                        modifier = Modifier
-                            .size(30.dp),
-                        imageVector = rememberAdd(color = theme.primary),
-                        contentScale = ContentScale.Fit,
-                        contentDescription = "Product Image",
-                    )
+                    Box(
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Image(
+                            modifier = Modifier
+                                .size(30.dp),
+                            imageVector = rememberAdd(color = theme.primary),
+                            contentScale = ContentScale.Fit,
+                            contentDescription = "Product Image",
+                        )
+                    }
                 }
+                Spacer(
+                    modifier = Modifier
+                        .width(40.dp)
+                        .height(40.dp)
+                )
             }
         }
     }
     Spacer(modifier = Modifier.height(10.dp))
+}
+
+@Composable
+fun ProductImageItem(theme: Theme, pos: Int, onDeleteCloud: (Int) -> Unit, content: @Composable ColumnScope.() -> Unit) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Modifier
+            .width(150.dp)
+            .height(150.dp)
+            .padding(5.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .background(color = theme.backDark)
+        content()
+        Image(
+            modifier = Modifier
+                .width(40.dp)
+                .height(40.dp)
+                .background(color = theme.backDark, shape = CircleShape)
+                .clickable {
+                    onDeleteCloud(pos)
+                }
+                .padding(8.dp),
+            imageVector = rememberDeleteForever(theme.textGrayColor),
+            contentScale = ContentScale.Fit,
+            contentDescription = null,
+        )
+    }
 }
 
 

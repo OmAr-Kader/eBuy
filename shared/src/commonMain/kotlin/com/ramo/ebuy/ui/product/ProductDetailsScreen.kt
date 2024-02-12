@@ -74,7 +74,9 @@ fun ProductDetailsScreen(
         Column(Modifier.padding(pad)) {
             BarProductScreen {
                 when (it) {
-                    0 -> navigator.goBack()
+                    0 -> scope.launch {
+                        navigator.goBack()
+                    }
                 }
             }
             LazyColumn {
@@ -106,9 +108,11 @@ fun ProductDetailsScreen(
                 }
                 ProductList(list = state.productVer) {
                     stater.getScreenCount(RootComponent.Configuration.ProductDetailsRoute::class.java).let { count ->
-                        RootComponent.Configuration.ProductDetailsRoute(count + 1).also { route ->
-                            stater.writeArguments(route = route, one = it.id.toString(), two = it.title, screenCount = count + 1)
-                            navigator.navigateTo(route)
+                        RootComponent.Configuration.ProductDetailsRoute(-1, count + 1).also { route ->
+                            scope.launch {
+                                stater.writeArguments(route = route, one = it.id.toString(), two = it.title, screenCount = count + 1)
+                                navigator.navigateTo(route)
+                            }
                         }
                     }
                 }

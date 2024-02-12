@@ -5,6 +5,8 @@ import com.ramo.ebuy.di.Project
 import dev.icerock.moko.mvvm.compose.getViewModel
 import dev.icerock.moko.mvvm.compose.viewModelFactory
 import dev.icerock.moko.mvvm.viewmodel.ViewModel
+import io.github.jan.supabase.gotrue.auth
+import io.github.jan.supabase.gotrue.user.UserInfo
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
@@ -35,6 +37,12 @@ abstract class BaseViewModel(
         block: suspend kotlinx.coroutines.CoroutineScope.() -> Unit
     ): Job {
         return launch(kotlinx.coroutines.Dispatchers.Main.immediate, kotlinx.coroutines.CoroutineStart.DEFAULT, block)
+    }
+
+    suspend fun userInfo(): UserInfo? {
+        return kotlinx.coroutines.coroutineScope {
+            return@coroutineScope project.supaBase.auth.currentUserOrNull()
+        }
     }
 
     override fun onCleared() {

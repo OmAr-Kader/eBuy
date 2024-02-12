@@ -15,6 +15,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -22,7 +23,6 @@ import com.arkivanov.decompose.extensions.compose.jetbrains.stack.Children
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.slide
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.stackAnimation
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
-import com.ramo.ebuy.data.model.ProductBaseSpecs
 import com.ramo.ebuy.di.Project
 import com.ramo.ebuy.di.initApp
 import com.ramo.ebuy.global.base.MyApplicationTheme
@@ -30,6 +30,7 @@ import com.ramo.ebuy.global.base.Theme
 import com.ramo.ebuy.global.navigation.MokoModel
 import com.ramo.ebuy.global.navigation.Navigator
 import com.ramo.ebuy.global.navigation.RootComponent
+import com.ramo.ebuy.global.ui.OnLaunchScreen
 import com.ramo.ebuy.global.ui.OnLaunchScreenScope
 import com.ramo.ebuy.global.ui.rememberEbuy
 import com.ramo.ebuy.global.ui.rememberWifiOff
@@ -59,6 +60,7 @@ import com.ramo.ebuy.ui.sign.LogInEmailScreen
 import com.ramo.ebuy.ui.sign.LogInScreen
 import com.ramo.ebuy.ui.user.HomeUserScreen
 import io.github.jan.supabase.gotrue.SessionStatus
+import kotlinx.coroutines.launch
 import org.koin.compose.KoinApplication
 import org.koin.compose.koinInject
 
@@ -83,24 +85,24 @@ fun Main(root: RootComponent) {
                         is RootComponent.Screen.LogInRoute -> LogInScreen(instance.component)
                         is RootComponent.Screen.LogInEmailRoute -> LogInEmailScreen(instance.component, instance.isRegister)
                         is RootComponent.Screen.HomeUserRoute -> HomeUserScreen(instance.component)
-                        is RootComponent.Screen.ProductDetailsRoute -> ProductDetailsScreen(instance.component)
+                        is RootComponent.Screen.ProductDetailsRoute -> ProductDetailsScreen(instance.component, instance.productId)
                         is RootComponent.Screen.ProductSellingRoute -> ProductSellingScreen(instance.component, instance.productId, instance.isAdmin)
                         is RootComponent.Screen.ProductConditionMainRoute -> ProductConditionMainScreen(instance.component)
                         is RootComponent.Screen.ProductSellingPriceRoute -> ProductSellingPriceScreen(instance.component)
                         is RootComponent.Screen.ProductSellingTitleRoute -> ProductSellingTitleScreen(instance.component)
-                        is RootComponent.Screen.ProductSellingSpecRoute -> ProductSellingSpecsScreen(instance.component)
+                        is RootComponent.Screen.ProductSellingSpecRoute -> ProductSellingSpecsScreen(instance.component, instance.isAdmin)
                         is RootComponent.Screen.ProductSellingCategoryRoute -> ProductSellingCategoryScreen(instance.component)
                         is RootComponent.Screen.ProductSellingConditionRoute -> ProductSellingConditionScreen(instance.component)
                         is RootComponent.Screen.ProductSellingMadeInRoute -> ProductSellingMadeInScreen(instance.component)
                         is RootComponent.Screen.ProductSellingPlatformRoute -> ProductSellingPlatformScreen(instance.component)
                         is RootComponent.Screen.ProductSellingRatingRoute -> ProductSellingRatingScreen(instance.component)
                         is RootComponent.Screen.ProductSellingReleaseYearRoute -> ProductSellingReleaseYearScreen(instance.component)
-                        is RootComponent.Screen.ProductSellingCustomSpecRoute -> ProductSellingCustomSpecScreen(instance.component)
+                        is RootComponent.Screen.ProductSellingCustomSpecRoute -> ProductSellingCustomSpecScreen(instance.component, instance.index)
                         is RootComponent.Screen.ProductSellingMPNRoute -> ProductSellingMPNScreen(instance.component)
                         is RootComponent.Screen.ProductSellingUPCRoute -> ProductSellingUPCScreen(instance.component)
                         is RootComponent.Screen.ProductSellingQuantityRoute -> ProductSellingQuantityScreen(instance.component)
                         is RootComponent.Screen.ProductSellingCustomSpecExtraRoute -> ProductSellingCustomSpecExtraScreen(instance.component)
-                        is RootComponent.Screen.ProductSellingCustomSpecExtraListRoute -> ProductSellingCustomSpecExtraListScreen(instance.component)
+                        is RootComponent.Screen.ProductSellingCustomSpecExtraListRoute -> ProductSellingCustomSpecExtraListScreen(instance.component, instance.index)
                         is RootComponent.Screen.ProductShippingRoute -> ProductShippingScreen(instance.component)
                         is RootComponent.Screen.ProductShippingCostRoute -> ProductShippingCostScreen(instance.component)
                         is RootComponent.Screen.CategoryCreatingRoute -> CategoryCreatingScreen(instance.component)
@@ -112,21 +114,6 @@ fun Main(root: RootComponent) {
     }
 }
 
-inline val productBaseSpecsData: ProductBaseSpecs
-    get() = ProductBaseSpecs(
-        id = 1,
-        productId = 4654,
-        subTitle = "",
-        publisherId = 7407,
-        conditionDetails = "",
-        countryProduct = 6413,
-        platform = "LG",
-        descriptionUrl = "",
-        releaseYear = 1705769091483,
-        mpn = "vestibulum",
-        specs = listOf(),
-        specsExtra = listOf()
-    )
 @Composable
 fun SplashScreen(
     navigator: Navigator,
@@ -136,35 +123,37 @@ fun SplashScreen(
         AppViewModel(project)
     }
 ) {
+    val scope = rememberCoroutineScope()
     val state by viewModel.uiState.collectAsState()
-
     OnLaunchScreenScope {
         viewModel.init()
-        /*productBaseSpecsData.apply {
-            json().let {
-                android.util.Log.w("WWWW", it.toString())
-            }
-            kotlinx.serialization.json.Json.encodeToJsonElement(this).jsonObject.let {
-                android.util.Log.w("WWWW", it.toString())
-            }
-        }*/
     }
     when(val sessionStatus = state.sessionStatus) {
         is SessionStatus.Authenticated -> {
             viewModel.fetchUser(sessionStatus.session).let { user ->
                 if (user != null) {
                     if (user.userType == 1) {
-                        navigator.navigateHome(RootComponent.Configuration.AdminHomeRoute)
+                        scope.launch {
+                            navigator.navigateHome(RootComponent.Configuration.AdminHomeRoute)
+                        }
                     } else {
-                        navigator.navigateHome(RootComponent.Configuration.HomeUserRoute)
+                        scope.launch {
+                            navigator.navigateHome(RootComponent.Configuration.HomeUserRoute)
+                        }
                     }
                 } else {
-                    navigator.navigateHome(RootComponent.Configuration.LogInRoute)
+                    scope.launch {
+                        navigator.navigateHome(RootComponent.Configuration.LogInRoute)
+                    }
                 }
             }
         }
         is SessionStatus.NotAuthenticated -> {
-            navigator.navigateHome(RootComponent.Configuration.LogInRoute)
+            OnLaunchScreen {
+                scope.launch {
+                    navigator.navigateHome(RootComponent.Configuration.LogInRoute)
+                }
+            }
         }
         is SessionStatus.NetworkError -> {
             Scaffold { pad ->

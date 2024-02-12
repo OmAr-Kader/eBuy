@@ -1,30 +1,23 @@
 package com.ramo.ebuy.global.navigation
 
-import com.arkivanov.decompose.ComponentContext
-
 class Navigator(
-    componentContext: ComponentContext,
-    private val onNavigateToScreen: (RootComponent.Configuration) -> Unit,
-    private val onDisplayScreen: (RootComponent.Configuration) -> Unit,
-    private val onReplaceScreen: (RootComponent.Configuration) -> Unit,
-    private val onGoBack: () -> Unit
-) : ComponentContext by componentContext {
-
-    /*private var _text = MutableValue("")
-    val text: Value<String> = _text
-    _text.value = event.text*/
-
-    fun navigateHome(route: RootComponent.Configuration) {
-        onDisplayScreen(route)
-    }
-    fun navigateToReplace(route: RootComponent.Configuration) {
-        onReplaceScreen(route)
-    }
-    fun navigateTo(route: RootComponent.Configuration) {
+    componentContext: com.arkivanov.decompose.ComponentContext,
+    private val onNavigateToScreen: suspend (RootComponent.Configuration) -> Unit,
+    private val onDisplayScreen: suspend (RootComponent.Configuration) -> Unit,
+    private val onReplaceScreen: suspend (RootComponent.Configuration) -> Unit,
+    private val onGoBack: suspend () -> Unit
+) : com.arkivanov.decompose.ComponentContext by componentContext {
+    suspend fun navigateTo(route: RootComponent.Configuration) {
         onNavigateToScreen(route)
     }
+    suspend fun navigateHome(route: RootComponent.Configuration) {
+        onDisplayScreen(route)
+    }
+    suspend fun navigateToReplace(route: RootComponent.Configuration) {
+        onReplaceScreen(route)
+    }
 
-    fun goBack() {
+    suspend fun goBack() {
         onGoBack()
     }
 }

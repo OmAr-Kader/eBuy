@@ -59,6 +59,7 @@ fun LogInScreen(
     theme: Theme = koinInject(),
     viewModel: LogInViewModel = MokoModel { LogInViewModel(project) }
 ) {
+    val scope = rememberCoroutineScope()
     val state by viewModel.uiState.collectAsState()
     val scaffoldState = remember { SnackbarHostState() }
     Scaffold(
@@ -141,7 +142,9 @@ fun LogInScreen(
                             color = theme.primary,
                         ),
                         onClick = {
-                            navigator.navigateTo(RootComponent.Configuration.LogInEmailRoute(state.isRegister))
+                            scope.launch {
+                                navigator.navigateTo(RootComponent.Configuration.LogInEmailRoute(state.isRegister))
+                            }
                         },
                     ) {
                         Text(
@@ -263,7 +266,9 @@ fun LogInEmailScreen(
                     Image(
                         modifier = Modifier
                             .clickable {
-                                navigator.goBack()
+                                scope.launch {
+                                    navigator.goBack()
+                                }
                             }
                             .padding(start = 10.dp)
                             .height(56.dp),

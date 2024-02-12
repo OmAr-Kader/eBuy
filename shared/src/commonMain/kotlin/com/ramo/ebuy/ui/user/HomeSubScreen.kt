@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
@@ -31,6 +32,7 @@ import com.ramo.ebuy.ui.common.BarMainScreen
 import com.ramo.ebuy.ui.common.CatoList
 import com.ramo.ebuy.ui.common.ProductList
 import com.ramo.ebuy.ui.common.SearchBarMainScreen
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 
@@ -41,6 +43,7 @@ fun HomeSubScreen(
     theme: Theme = koinInject(),
     stater: Stater = koinInject(),
 ) {
+    val scope = rememberCoroutineScope()
     val state by viewModel.uiState.collectAsState()
     val scrollState = rememberCollapsingToolbarScaffoldState()
     val offsetY = scrollState.offsetY
@@ -51,7 +54,7 @@ fun HomeSubScreen(
     }
     Box(Modifier.fillMaxSize()) {
         Column(
-            Modifier.onSizeChanged {  size ->
+            Modifier.onSizeChanged { size ->
                 viewModel.setRepeatableCato(size.width)
             }
         ) {
@@ -88,9 +91,11 @@ fun HomeSubScreen(
                     }
                     ProductList(list = state.productVer) {
                         stater.getScreenCount(RootComponent.Configuration.ProductDetailsRoute::class.java).let { count ->
-                            RootComponent.Configuration.ProductDetailsRoute(count + 1).also { route ->
-                                stater.writeArguments(route = route, one = it.id.toString(), two = it.title, screenCount = count + 1)
-                                navigator.navigateTo(route)
+                            RootComponent.Configuration.ProductDetailsRoute(-1, count + 1).also { route ->
+                                scope.launch {
+                                    stater.writeArguments(route = route, one = it.id.toString(), two = it.title, screenCount = count + 1)
+                                    navigator.navigateTo(route)
+                                }
                             }
                         }
                     }

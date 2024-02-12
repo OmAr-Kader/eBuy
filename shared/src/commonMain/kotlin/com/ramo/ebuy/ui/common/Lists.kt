@@ -101,7 +101,7 @@ fun ProductMainSearch(
 fun ExpandableCato(
     id: Long,
     list: List<Category>,
-    productCato: List<String>,
+    productCato: Array<String>,
     onClick: (Category) -> Unit,
 ) {
     var isShow = remember {
@@ -127,7 +127,7 @@ fun ExpandableCato(
 
 fun LazyListScope.ExpandableCatoList(
     id: Long,
-    productCato: List<String>,
+    productCato: Array<String>,
     padding: Int,
     isShow: SnapshotStateMap<Long, Boolean>,
     onClick: (Category) -> Unit,

@@ -14,9 +14,10 @@ abstract class BaseRepoImp(val supabase: SupabaseClient) {
         item: T,
     ): T? {
         return supabase {
-            supabase.from(table).insert(item.json()) {
-                select()
-            }.decodeList<T>().firstOrNull()
+            supabase.from(table).insert(item.json()).let {
+                item
+            }
+            item
         }
     }
 
@@ -25,9 +26,8 @@ abstract class BaseRepoImp(val supabase: SupabaseClient) {
         items: List<T>,
     ): List<T>? {
         return supabase {
-            supabase.from(table).insert(items.map { it.json() }) {
-                select()
-            }.decodeList<T>()
+            supabase.from(table).insert(items.map { it.json() })
+            items
         }
     }
 
@@ -38,18 +38,17 @@ abstract class BaseRepoImp(val supabase: SupabaseClient) {
     ): T? {
         return supabase {
             supabase.from(table).update(edit.json()) {
-                select()
                 filter {
                     eq("id", id)
                 }
-            }.decodeList<T>().firstOrNull()
+            }
+            edit
         }
     }
 
     suspend inline fun delete(table: String, id: Long): Int {
         return supabase {
             supabase.from(table).delete {
-                select()
                 filter {
                     filter("id", FilterOperator.EQ, id)
                 }
@@ -79,7 +78,7 @@ abstract class BaseRepoImp(val supabase: SupabaseClient) {
                 order("id", Order.ASCENDING)
                 filter(block)
             }.decodeList<T>()
-        } ?: emptyList()
+        } ?: listOf()
     }
 
     suspend inline fun <reified T : BaseObject> queryAll(
@@ -89,6 +88,6 @@ abstract class BaseRepoImp(val supabase: SupabaseClient) {
             supabase.from(table).select{
                 order("id", Order.ASCENDING)
             }.decodeList<T>()
-        } ?: emptyList()
+        } ?: listOf()
     }
 }

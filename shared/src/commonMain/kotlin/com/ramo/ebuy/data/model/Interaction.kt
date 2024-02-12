@@ -34,12 +34,30 @@ data class UserWatchlist(
     @SerialName("user_id")
     val userId: Long,
     @SerialName("product_id")
-    val watchlist: List<Long>,
+    val watchlist: Array<Long>,
 ): BaseObject() {
     override fun json(): JsonObject {
         return kotlinx.serialization.json.Json.encodeToJsonElement(this).jsonObject.toMutableMap().apply {
             remove("id")
         }.let(::JsonObject)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as UserWatchlist
+
+        if (id != other.id) return false
+        if (userId != other.userId) return false
+        return watchlist.contentEquals(other.watchlist)
+    }
+
+    override fun hashCode(): Int {
+        var result = id.hashCode()
+        result = 31 * result + userId.hashCode()
+        result = 31 * result + watchlist.contentHashCode()
+        return result
     }
 }
 

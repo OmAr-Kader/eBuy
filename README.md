@@ -23,7 +23,7 @@ E-commerce built in Kotlin Multiplatform Mobile using Supabase auth, realtime, d
 - Task ~~2.1.1~~: Implement products listing page Design
   - [HomeUserScreen](https://github.com/OmAr-Kader/eBuy/tree/master/shared/src/commonMain/kotlin/com/ramo/ebuy/ui/user/HomeUserScreen.kt) - [eBuy Common UI Elements](https://github.com/OmAr-Kader/eBuy/tree/master/shared/src/commonMain/kotlin/com/ramo/ebuy/ui/common) - [Common UI Elements](https://github.com/OmAr-Kader/eBuy/tree/master/shared/src/commonMain/kotlin/com/ramo/ebuy/global/ui/Views.kt)
 - Task ~~2.1.2~~: Create database schema for products
-- Task 2.1.3: Implement product listing functionality
+- Task ~~2.1.3~~: Implement product listing functionality
 - Task 2.1.4: Write tests for product listing
 ### Story 2.2: Product Details
 - Task ~~2.2.1~~: Implement product details page design
@@ -31,7 +31,7 @@ E-commerce built in Kotlin Multiplatform Mobile using Supabase auth, realtime, d
 - Task 2.2.3: Write tests for product details
 ### Story 2.3: Product Creating
 - Task ~~2.3.1~~: Implement product creating page design
-- Task 2.3.2: Implement product creating functionality
+- Task ~~2.3.2~~: Implement product creating functionality
 - Task 2.3.3: Write tests for product details
 
 ## Epic 3: Admin Panel
@@ -41,9 +41,9 @@ E-commerce built in Kotlin Multiplatform Mobile using Supabase auth, realtime, d
 - Task ~~3.1.3~~: Implement category creating functionality
 - Task 3.1.4: Write tests for category creating
 ### Story 3.2: Reference Product Creating
-- Task 3.2.1: Implement reference products creating page Design
-- Task 3.3.2: Create database schema for reference products
-- Task 3.4.3: Implement reference product creating functionality
+- Task ~~3.2.1~~: Implement reference products creating page Design
+- Task ~~3.3.2~~: Create database schema for reference products
+- Task ~~3.4.3~~: Implement reference product creating functionality
 - Task 3.5.4: Write tests for reference products creating
 - 
 ## Epic 4: Shopping Cart

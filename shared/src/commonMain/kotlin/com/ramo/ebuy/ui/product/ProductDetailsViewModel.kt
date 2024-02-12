@@ -19,6 +19,10 @@ class ProductDetailsViewModel(project: Project) : BaseViewModel(project) {
     val uiState = _uiState.asStateFlow()
 
     fun loadProDetails(productId: Long) {
+        if (productId == -1L) {
+            setIsProcess(false)
+            return
+        }
         setIsProcess(true)
         launchBack {
             project.productData.getProductOnId(productId)?.let { product ->
@@ -70,7 +74,7 @@ class ProductDetailsViewModel(project: Project) : BaseViewModel(project) {
             id = 6330,
             productCode = "molestiae",
             title = "Wilson Pro Staff Classic 6.1 Si Tennis Racquet 95 sq in 4 5/8\" Grip",
-            imageUris = listOf(
+            imageUris = arrayOf(
                 "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/40/357284/1.jpg?5906",
                 "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/77/359744/1.jpg?4978",
                 "https://eg.jumia.is/unsafe/fit-in/680x680/filters:fill(white)/product/77/359744/1.jpg?4978"
@@ -81,7 +85,7 @@ class ProductDetailsViewModel(project: Project) : BaseViewModel(project) {
             auctionStart = 9625,
             auctionEnd = 2549,
             parentCato = 5189,
-            parentCategories = listOf("Video Game", "Sigma", "Figma"),
+            parentCategories = arrayOf("Video Game", "Sigma", "Figma"),
             condition = "New",
             scheduled = -1L,
             ageRate = 0,
@@ -97,11 +101,11 @@ class ProductDetailsViewModel(project: Project) : BaseViewModel(project) {
             descriptionUrl = "",
             releaseYear = 1705769091483,
             mpn = "vestibulum",
-            specs = listOf(),
-            specsExtra = listOf(ProductSpecsExtra("Tints", listOf(SpecExtra("Red", 0F), SpecExtra("Blue", 0F), SpecExtra("Black", 0F), SpecExtra("Gray", 0F))))
+            specs = arrayOf(),
+            specsExtra = arrayOf(ProductSpecsExtra("Tints", listOf(SpecExtra("Red", 0F), SpecExtra("Blue", 0F), SpecExtra("Black", 0F), SpecExtra("Gray", 0F))))
         ),
         val deliveryProcess: DeliveryProcess = DeliveryProcess(product.id),
-        val specChosen: List<SpecChosen> = emptyList(),
+        val specChosen: List<SpecChosen> = listOf(),
         val productVer: List<Product> = item(),
         val droppedIndex: Int = -1,
         val user: User? = null,

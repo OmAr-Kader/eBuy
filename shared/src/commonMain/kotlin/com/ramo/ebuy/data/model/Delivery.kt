@@ -54,7 +54,7 @@ data class DeliveryProcess(
     val deliveryCostStr: String = if (deliveryCostValid) "$ $deliveryCost" else " "
 
     override fun json(): JsonObject {
-        return kotlinx.serialization.json.Json.encodeToJsonElement(this).jsonObject.toMutableMap().apply {
+        return kotlinx.serialization.json.Json.encodeToJsonElement(this.copy()).jsonObject.toMutableMap().apply {
             remove("id")
         }.let(::JsonObject)
     }

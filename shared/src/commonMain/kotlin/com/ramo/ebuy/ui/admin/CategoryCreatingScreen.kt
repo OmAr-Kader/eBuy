@@ -27,11 +27,13 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.darkrockstudios.libraries.mpfilepicker.FilePicker
 import com.ramo.ebuy.di.Project
 import com.ramo.ebuy.global.base.Theme
 import com.ramo.ebuy.global.navigation.MokoModel
@@ -41,6 +43,7 @@ import com.ramo.ebuy.global.ui.OnLaunchScreen
 import com.ramo.ebuy.global.ui.rememberDeleteForever
 import com.ramo.ebuy.ui.common.ExpandableCato
 import com.ramo.ebuy.ui.product.ProductSellingSpecsHeadBarBack
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 @Composable
@@ -52,6 +55,7 @@ fun CategoryCreatingScreen(
         CategoryCreatingViewModel(project)
     }
 ) {
+    val scope = rememberCoroutineScope()
     val state by viewModel.uiState.collectAsState()
     OnLaunchScreen {
         viewModel.loadCategories()
@@ -114,7 +118,9 @@ fun CategoryCreatingScreen(
                 .background(color = theme.background)
         ) {
             ProductSellingSpecsHeadBarBack("Add New Category", theme) {
-                navigator.goBack()
+                scope.launch {
+                    navigator.goBack()
+                }
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Row(
@@ -154,6 +160,9 @@ fun CategoryCreatingScreen(
             ExpandableCato(-1, state.categories, state.parentCategories) {
                 viewModel.setCategory(it)
             }
+        }
+        FilePicker(state.isShowPicker, fileExtensions = listOf("jpg", "png", "webp", "mpeg", "heic", "heif", "hevc")) { file ->
+            file?.platformFile?.toString()?.let { viewModel.setCategoryImage(it) } ?: viewModel.setIsShowPicker(false)
         }
         LoadingScreen(state.isProcess, theme)
     }
