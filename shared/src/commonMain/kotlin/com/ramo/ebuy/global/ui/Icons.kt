@@ -2669,3 +2669,86 @@ fun rememberWifiOff(color: Color): ImageVector {
         }.build()
     }
 }
+
+@Composable
+fun rememberFindReplace(color: Color): ImageVector {
+    return remember {
+        ImageVector.Builder(
+            name = "FindReplace",
+            defaultWidth = 256.dp,
+            defaultHeight = 256.dp,
+            viewportWidth = 256f,
+            viewportHeight = 256f
+        ).apply {
+            path(
+                fill = SolidColor(color),
+                fillAlpha = 1.0f,
+                stroke = null,
+                strokeAlpha = 1.0f,
+                strokeLineWidth = 1.0f,
+                strokeLineCap = StrokeCap.Butt,
+                strokeLineJoin = StrokeJoin.Miter,
+                strokeLineMiter = 1.0f,
+                pathFillType = PathFillType.NonZero
+            ) {
+                moveTo(75.2f, 15.8f)
+                curveToRelative(-27.5f, 8.5f, -52f, 33.3f, -60.1f, 61.1f)
+                lineToRelative(-4.8f, 15.3f)
+                horizontalLineToRelative(14.6f)
+                curveToRelative(13.6f, 0f, 14.9f, -0.7f, 16.6f, -10.2f)
+                curveToRelative(3.1f, -14.3f, 26.1f, -36.3f, 43.8f, -41.1f)
+                curveToRelative(18.3f, -4.8f, 40.7f, -1.7f, 56f, 7.5f)
+                lineToRelative(11.9f, 7.5f)
+                lineToRelative(-18f, 18f)
+                lineToRelative(-18f, 18.3f)
+                horizontalLineToRelative(41.4f)
+                horizontalLineToRelative(41.4f)
+                verticalLineTo(50.7f)
+                verticalLineTo(9.3f)
+                lineToRelative(-14.3f, 13.9f)
+                lineToRelative(-14.6f, 14.3f)
+                lineTo(161.1f, 29f)
+                curveTo(140.7f, 12.4f, 104.1f, 6.6f, 75.2f, 15.8f)
+                close()
+            }
+            path(
+                fill = SolidColor(color),
+                fillAlpha = 1.0f,
+                stroke = null,
+                strokeAlpha = 1.0f,
+                strokeLineWidth = 1.0f,
+                strokeLineCap = StrokeCap.Butt,
+                strokeLineJoin = StrokeJoin.Miter,
+                strokeLineMiter = 1.0f,
+                pathFillType = PathFillType.NonZero
+            ) {
+                moveTo(10f, 159.1f)
+                verticalLineToRelative(39.7f)
+                lineToRelative(13.2f, -12.9f)
+                lineTo(36.5f, 173f)
+                lineToRelative(13.9f, 10.2f)
+                curveToRelative(27.2f, 19.7f, 64.9f, 22.4f, 96.8f, 7.1f)
+                lineToRelative(15.6f, -7.8f)
+                lineToRelative(32.3f, 31.9f)
+                lineToRelative(32.3f, 32.3f)
+                lineToRelative(9.2f, -9.5f)
+                lineToRelative(9.5f, -9.2f)
+                lineToRelative(-24.1f, -24.5f)
+                curveToRelative(-41.8f, -43.5f, -40.1f, -41.1f, -33.6f, -54f)
+                curveToRelative(3.4f, -6.1f, 7.1f, -15.3f, 8.8f, -20.7f)
+                curveToRelative(2.7f, -9.5f, 2.4f, -9.5f, -12.6f, -9.5f)
+                curveToRelative(-11.9f, 0f, -14.9f, 1f, -14.9f, 6.1f)
+                curveToRelative(0f, 9.2f, -15.3f, 29.9f, -28.2f, 37.7f)
+                curveToRelative(-22.4f, 13.9f, -57.4f, 12.6f, -77.1f, -3.1f)
+                lineToRelative(-8.5f, -6.5f)
+                lineToRelative(17f, -17.3f)
+                lineToRelative(16.6f, -17f)
+                horizontalLineTo(49.7f)
+                horizontalLineTo(10f)
+                verticalLineTo(159.1f)
+                close()
+            }
+        }.build()
+    }
+}
+

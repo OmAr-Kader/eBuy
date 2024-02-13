@@ -253,12 +253,12 @@ fun item(): List<Product> {
                 offer = 10.11f,
                 auctionStart = 6110,
                 auctionEnd = 3498,
-                parentCato = 1291,
-                parentCategories = arrayOf("Adan Goodwin"),
+                parentCatoId = 1291,
+                parentCategory = arrayOf("Adan Goodwin"),
                 condition = "New",
                 scheduled = -1L,
-                status = 1,
-                ageRate = 0,
+                itemStatus = 1,
+                ageRating = 0,
             )
         )
         add(
@@ -272,12 +272,12 @@ fun item(): List<Product> {
                 offer = 18.19f,
                 auctionStart = 8687,
                 auctionEnd = 6307,
-                parentCato = 4482,
-                parentCategories = arrayOf("Adan Goodwin"),
+                parentCatoId = 4482,
+                parentCategory = arrayOf("Adan Goodwin"),
                 condition = "New",
                 scheduled = -1L,
-                status = 1,
-                ageRate = 0,
+                itemStatus = 1,
+                ageRating = 0,
             )
         )
         add(
@@ -291,12 +291,12 @@ fun item(): List<Product> {
                 offer = 26.27f,
                 auctionStart = 4193,
                 auctionEnd = 1261,
-                parentCato = 4362,
-                parentCategories = arrayOf("Adan Goodwin"),
+                parentCatoId = 4362,
+                parentCategory = arrayOf("Adan Goodwin"),
                 condition = "New",
                 scheduled = -1L,
-                status = 1,
-                ageRate = 0,
+                itemStatus = 1,
+                ageRating = 0,
             )
         )
         add(
@@ -310,12 +310,12 @@ fun item(): List<Product> {
                 offer = 34.35f,
                 auctionStart = 6303,
                 auctionEnd = 6759,
-                parentCato = 8497,
-                parentCategories = arrayOf("Adan Goodwin"),
+                parentCatoId = 8497,
+                parentCategory = arrayOf("Adan Goodwin"),
                 condition = "New",
                 scheduled = -1L,
-                status = 1,
-                ageRate = 0,
+                itemStatus = 1,
+                ageRating = 0,
             )
         )
         add(
@@ -329,12 +329,12 @@ fun item(): List<Product> {
                 offer = 42.43f,
                 auctionStart = 1155,
                 auctionEnd = 6576,
-                parentCato = 9036,
-                parentCategories = arrayOf("Adan Goodwin"),
+                parentCatoId = 9036,
+                parentCategory = arrayOf("Adan Goodwin"),
                 condition = "New",
                 scheduled = -1L,
-                status = 1,
-                ageRate = 0,
+                itemStatus = 1,
+                ageRating = 0,
             )
         )
         add(
@@ -348,12 +348,12 @@ fun item(): List<Product> {
                 offer = 50.51f,
                 auctionStart = 9625,
                 auctionEnd = 2549,
-                parentCato = 5189,
-                parentCategories = arrayOf("Adan Goodwin"),
+                parentCatoId = 5189,
+                parentCategory = arrayOf("Adan Goodwin"),
                 condition = "New",
                 scheduled = -1L,
-                status = 1,
-                ageRate = 0,
+                itemStatus = 1,
+                ageRating = 0,
             )
         )
         add(
@@ -367,12 +367,12 @@ fun item(): List<Product> {
                 offer = 58.59f,
                 auctionStart = 3306,
                 auctionEnd = 4182,
-                parentCato = 3158,
-                parentCategories = arrayOf("Adan Goodwin"),
+                parentCatoId = 3158,
+                parentCategory = arrayOf("Adan Goodwin"),
                 condition = "New",
                 scheduled = -1L,
-                status = 1,
-                ageRate = 0,
+                itemStatus = 1,
+                ageRating = 0,
             )
         )
         add(
@@ -386,12 +386,12 @@ fun item(): List<Product> {
                 offer = 66.67f,
                 auctionStart = 3883,
                 auctionEnd = 3322,
-                parentCato = 5627,
-                parentCategories = arrayOf("Adan Goodwin"),
+                parentCatoId = 5627,
+                parentCategory = arrayOf("Adan Goodwin"),
                 condition = "New",
                 scheduled = -1L,
-                status = 1,
-                ageRate = 0,
+                itemStatus = 1,
+                ageRating = 0,
             )
         )
         add(
@@ -405,12 +405,12 @@ fun item(): List<Product> {
                 offer = 74.75f,
                 auctionStart = 1490,
                 auctionEnd = 2468,
-                parentCato = 5768,
-                parentCategories = arrayOf("Adan Goodwin"),
+                parentCatoId = 5768,
+                parentCategory = arrayOf("Adan Goodwin"),
                 condition = "New",
                 scheduled = -1L,
-                status = 1,
-                ageRate = 0,
+                itemStatus = 1,
+                ageRating = 0,
             )
         )
     }

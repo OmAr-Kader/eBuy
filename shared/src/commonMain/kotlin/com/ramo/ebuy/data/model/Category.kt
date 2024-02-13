@@ -18,7 +18,7 @@ data class Category(
     @SerialName("cato_type")
     val catoType: Int = 0,
     @SerialName("parent_cato")
-    val parentId: Long = -1,
+    val parentCato: Long = -1,
 ): BaseObject() {
     var haveChildren: Boolean = false
     override fun json(): JsonObject {

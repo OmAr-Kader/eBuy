@@ -34,7 +34,7 @@ data class Product(
     @SerialName("auction_end")
     val auctionEnd: Long = 0,
     @SerialName("parent_cato_id")
-    val parentCato: Long = -1,
+    val parentCatoId: Long = -1,
     @SerialName("condition")
     val condition: String = "",
     @SerialName("scheduled")
@@ -42,11 +42,11 @@ data class Product(
     @SerialName("currency")
     val currency: Int = 0,
     @SerialName("age_rating")
-    val ageRate: Int = -1,
+    val ageRating: Int = -1,
     @SerialName("item_status")
-    val status: Int = 2, // underReview = 1 - rejected = -1  - accepted = 2 - asReference = 0
+    val itemStatus: Int = 2, // underReview = 1 - rejected = -1  - accepted = 2 - asReference = 0
     @SerialName("parent_category")
-    val parentCategories: Array<String> = arrayOf(),
+    val parentCategory: Array<String> = arrayOf(),
     @Transient
     val priceEditStr: String = if (price != -1F) price.toString() else "",
     @Transient
@@ -62,18 +62,18 @@ data class Product(
     val timeGap: TimeGap? = fetchTimeGap(auctionEnd)
 
     @Transient
-    val parentCatoRest: String = parentCategories.toMutableList().filterIndexed { i, _ ->
+    val parentCatoRest: String = parentCategory.toMutableList().filterIndexed { i, _ ->
         i != 0
     }.joinToString(" > ")
 
     @Transient
-    val parentCatoFull: String = parentCategories.toMutableList().joinToString(" > ")
+    val parentCatoFull: String = parentCategory.toMutableList().joinToString(" > ")
 
     @Transient
     val discountPer: Int = (((price - offer) / ((price + offer) / 2)) * 100).toInt()
 
     @Transient
-    val ageRateStr: String = ratings.find { it.id == ageRate }?.display ?: ""
+    val ageRateStr: String = ratings.find { it.id == ageRating }?.display ?: ""
 
     @Transient
     val priceValid: Boolean = price != -1F
@@ -103,13 +103,13 @@ data class Product(
         if (auction != other.auction) return false
         if (auctionStart != other.auctionStart) return false
         if (auctionEnd != other.auctionEnd) return false
-        if (parentCato != other.parentCato) return false
+        if (parentCatoId != other.parentCatoId) return false
         if (condition != other.condition) return false
         if (scheduled != other.scheduled) return false
         if (currency != other.currency) return false
-        if (ageRate != other.ageRate) return false
-        if (status != other.status) return false
-        if (!parentCategories.contentEquals(other.parentCategories)) return false
+        if (ageRating != other.ageRating) return false
+        if (itemStatus != other.itemStatus) return false
+        if (!parentCategory.contentEquals(other.parentCategory)) return false
         if (priceEditStr != other.priceEditStr) return false
         if (offerEditStr != other.offerEditStr) return false
         if (timeGap != other.timeGap) return false
@@ -133,13 +133,13 @@ data class Product(
         result = 31 * result + auction.hashCode()
         result = 31 * result + auctionStart.hashCode()
         result = 31 * result + auctionEnd.hashCode()
-        result = 31 * result + parentCato.hashCode()
+        result = 31 * result + parentCatoId.hashCode()
         result = 31 * result + condition.hashCode()
         result = 31 * result + scheduled.hashCode()
         result = 31 * result + currency
-        result = 31 * result + ageRate
-        result = 31 * result + status
-        result = 31 * result + parentCategories.contentHashCode()
+        result = 31 * result + ageRating
+        result = 31 * result + itemStatus
+        result = 31 * result + parentCategory.contentHashCode()
         result = 31 * result + priceEditStr.hashCode()
         result = 31 * result + offerEditStr.hashCode()
         result = 31 * result + (timeGap?.hashCode() ?: 0)
@@ -163,8 +163,6 @@ data class ProductBaseSpecs(
     val productId: Long = 0,
     @SerialName("sub_title")
     val subTitle: String = "",
-    @SerialName("publisher_id")
-    val publisherId: Long = 0L,
     @SerialName("condition_details")
     val conditionDetails: String = "",
     @SerialName("country_product")
@@ -185,6 +183,8 @@ data class ProductBaseSpecs(
     val specs: Array<ProductSpecs> = arrayOf(),
     @SerialName("extra_product_specs")
     val specsExtra: Array<ProductSpecsExtra> = arrayOf(),
+    @SerialName("id_publisher")
+    val publisherId: String = "",
     @Transient
     val quantityEditStr: String = if (quantity != -1) quantity.toString() else "",
 ): BaseObject() {

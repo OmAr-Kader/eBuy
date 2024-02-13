@@ -4,6 +4,7 @@ kotlin = "1.9.22"
 compose = "1.6.1"
 compose-material3 = "1.2.0"
 composePlug = "1.6.0-beta01"
+flexible-bottomsheet = "0.1.2"
 androidx-activityCompose = "1.8.2"
 voyager = "1.0.0"
 composeImageLoader = "1.7.1"
@@ -24,8 +25,8 @@ ktor-ver = "2.3.7"
 supabase-ver = "2.0.4"
 russhwolf = "1.1.1"
 core = "1.12.0"
-mp-file-picker = "3.1.0"
 peekaboo = "0.4.3"
+#mp-file-picker = "3.1.0"
 #coil = "2.5.0"
 #androidx-appcompat = "1.6.1"[versions]
 
@@ -36,8 +37,9 @@ compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose" }
 compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose" }
 compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose" }
 compose-material3 = { module = "androidx.compose.material3:material3", version.ref = "compose-material3" }
+flexible-bottomsheet = { module = "com.github.skydoves:flexible-bottomsheet-material3", version.ref = "flexible-bottomsheet" }
 #compose-window-size = { module = "dev.chrisbanes.material3:material3-window-size-class-multiplatform", version.ref = "compose-window-size" }
-mp-file-picker = { module = "com.darkrockstudios:mpfilepicker", version.ref = "mp-file-picker" }
+#mp-file-picker = { module = "com.darkrockstudios:mpfilepicker", version.ref = "mp-file-picker" }
 zvoyager-navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.ref = "voyager" }
 composeImageLoader = { module = "io.github.qdsfdhvh:image-loader", version.ref = "composeImageLoader" }
 napier = { module = "io.github.aakira:napier", version.ref = "napier" }

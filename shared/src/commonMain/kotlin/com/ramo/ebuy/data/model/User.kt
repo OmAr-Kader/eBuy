@@ -32,7 +32,7 @@ data class User(
     @SerialName("is_verified")
     val isVerified: Boolean = true,
     @SerialName("user_type")
-    val userType: Int = 1, //USER = 0, ADMIN = 1
+    val userType: Int = 0, //USER = 0, ADMIN = 1
 ) : BaseObject() {
 
     @kotlinx.serialization.Transient

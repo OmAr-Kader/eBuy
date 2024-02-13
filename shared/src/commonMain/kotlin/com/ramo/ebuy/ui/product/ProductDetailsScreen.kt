@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -21,11 +20,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -49,10 +45,14 @@ import com.ramo.ebuy.global.navigation.RootComponent
 import com.ramo.ebuy.global.ui.ImagesPageView
 import com.ramo.ebuy.global.ui.LoadingScreen
 import com.ramo.ebuy.global.ui.OnLaunchScreen
+import com.ramo.ebuy.global.ui.SheetBottomTitle
 import com.ramo.ebuy.global.ui.rememberArrowDropDown
 import com.ramo.ebuy.global.ui.rememberFavorite
 import com.ramo.ebuy.ui.common.BarProductScreen
 import com.ramo.ebuy.ui.common.ProductList
+import com.skydoves.flexible.bottomsheet.material3.FlexibleBottomSheet
+import com.skydoves.flexible.core.FlexibleSheetSize
+import com.skydoves.flexible.core.rememberFlexibleBottomSheetState
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
@@ -128,32 +128,24 @@ fun ProductDetailsScreen(
 @Composable
 fun ProductDetailsBottomSheet(state: ProductDetailsViewModel.State, theme: Theme, hide: () -> Unit) {
     if (state.isModalBottom) {
-        ModalBottomSheet(
+        FlexibleBottomSheet(
             onDismissRequest = {
                 hide()
             },
+            sheetState = rememberFlexibleBottomSheetState(
+                flexibleSheetSize = FlexibleSheetSize(
+                    fullyExpanded = 0.9F,
+                    intermediatelyExpanded = 0.9F,
+                    slightlyExpanded = 0.9F,
+                ),
+                isModal = true,
+                skipSlightlyExpanded = false,
+            ),
             dragHandle = {
-                Column(Modifier.fillMaxWidth().background(theme.backDark), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Surface(
-                        modifier = Modifier
-                            .padding(top = 22.dp),
-                        color = theme.textGrayColor,
-                        shape = MaterialTheme.shapes.extraLarge
-                    ) {
-                        Box(
-                            Modifier
-                                .size(
-                                    width = 32.dp,
-                                    height = 4.0.dp
-                                )
-                        )
-                    }
-                    Text(modifier = Modifier.fillMaxWidth().padding(7.dp), text = "About this Item", color = theme.textColor)
-                    Spacer(Modifier.height(5.dp))
-                }
+                SheetBottomTitle("About this Item", theme)
             },
-            contentColor = theme.backDark,
-            containerColor = theme.textColor
+            containerColor = theme.backDark,
+            contentColor = theme.textColor,
         ) {
             LazyColumn(modifier = Modifier.background(theme.backDark)) {
                 item {

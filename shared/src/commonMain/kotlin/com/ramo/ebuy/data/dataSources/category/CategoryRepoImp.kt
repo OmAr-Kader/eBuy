@@ -10,12 +10,12 @@ class CategoryRepoImp(supabase: SupabaseClient) : BaseRepoImp(supabase), Categor
 
     override suspend fun getMainCategories(): List<Category> {
         return query<Category>(SUPA_CATO) {
-            Category::parentId eq -1
+            Category::parentCato eq -1
         }
     }
 
     override suspend fun addNewCategory(item: Category): Category? = insert(SUPA_CATO, item)
-
+    override suspend fun editCategory(item: Category): Category? = edit(SUPA_CATO, item.id, item)
     override suspend fun deleteCato(id: Long): Int = delete(SUPA_CATO, id)
 
 }

@@ -54,7 +54,7 @@ import com.ramo.ebuy.global.navigation.Navigator
 import com.ramo.ebuy.global.navigation.RootComponent
 import com.ramo.ebuy.global.ui.CalendarYearView
 import com.ramo.ebuy.global.ui.LoadingScreen
-import com.ramo.ebuy.global.ui.OnLaunchScreen
+import com.ramo.ebuy.global.ui.OnLaunchScreenScope
 import com.ramo.ebuy.global.ui.rememberArrowBack
 import com.ramo.ebuy.global.ui.rememberDeleteForever
 import com.ramo.ebuy.global.ui.rememberEdit
@@ -256,7 +256,7 @@ fun ProductSellingCategoryScreen(
 ) {
     val scope = rememberCoroutineScope()
     val state by viewModel.uiState.collectAsState()
-    OnLaunchScreen {
+    OnLaunchScreenScope {
         viewModel.loadCategories()
     }
     Scaffold { pad ->
@@ -281,7 +281,7 @@ fun ProductSellingCategoryScreen(
                 Text(modifier = Modifier.width(130.dp), text = "Product Category", color = theme.textGrayColor)
                 Text(state.product.parentCatoFull, color = theme.textColor)
             }
-            ExpandableCato(-1, state.listCategory, state.product.parentCategories) {
+            ExpandableCato(-1, state.listCategory, state.product.parentCategory) {
                 viewModel.setCategory(it)
             }
         }
@@ -566,7 +566,7 @@ fun ProductSellingRatingScreen(
             )
             Column {
                 ratings.forEach { rate ->
-                    ProductSpecItemRadio(rate.display, state.product.ageRate == rate.id, theme) {
+                    ProductSpecItemRadio(rate.display, state.product.ageRating == rate.id, theme) {
                         scope.launch {
                             viewModel.setAgeRate(rate.id)
                             navigator.goBack()

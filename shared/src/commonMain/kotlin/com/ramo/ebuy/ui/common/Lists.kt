@@ -108,7 +108,7 @@ fun ExpandableCato(
         mutableStateMapOf<Long, Boolean>()
     }
     val fetchCato = { iD: Long ->
-        list.toMutableList().filter { it.parentId == iD }
+        list.toMutableList().filter { it.parentCato == iD }
     }
     LaunchedEffect(key1 = Unit) {
         isShow = isShow.apply {

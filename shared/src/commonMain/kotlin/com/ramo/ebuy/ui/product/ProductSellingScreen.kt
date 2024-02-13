@@ -85,14 +85,14 @@ fun ProductSellingScreen(
     val state by viewModel.uiState.collectAsState()
     val scope = rememberCoroutineScope()
     val scaffoldState = remember { SnackbarHostState() }
-    val singleImagePicker = rememberImagePickerLauncher(
+    val multiImagePicker = rememberImagePickerLauncher(
         selectionMode = SelectionMode.Multiple(11),
         scope = scope,
         onResult = { byteArrays ->
             viewModel.appendImageUrl(byteArrays)
         }
     )
-    val isAllValid = state.product.title.isNotEmpty() && state.product.parentCategories.isNotEmpty() &&
+    val isAllValid = state.product.title.isNotEmpty() && state.product.parentCategory.isNotEmpty() &&
             state.product.priceValid && (if (isAdmin) true else state.deliveryProcess.deliveryCostValid)
     OnLaunchScreen {
         viewModel.loadProduct(productId)
@@ -123,7 +123,7 @@ fun ProductSellingScreen(
                 }, onDeletePicker = {
                     viewModel.removeImageByte(it)
                 }) {
-                    singleImagePicker.launch()
+                    multiImagePicker.launch()
                 }
                 ProductSellingHeadItemCorrectable(state.product.title.isNotEmpty(), "Title", theme) {
                     scope.launch {
@@ -134,7 +134,7 @@ fun ProductSellingScreen(
                     Text(modifier = Modifier.padding(horizontal = 10.dp), text = state.product.title, color = theme.textColor, fontSize = 16.sp)
                     Spacer(modifier = Modifier.height(10.dp))
                 }
-                ProductSellingHeadItemCorrectable(state.product.parentCategories.isNotEmpty(), "Category", theme) {
+                ProductSellingHeadItemCorrectable(state.product.parentCategory.isNotEmpty(), "Category", theme) {
                     scope.launch {
                         navigator.navigateTo(RootComponent.Configuration.ProductSellingCategoryRoute)
                     }
@@ -342,7 +342,6 @@ fun LazyListScope.ProductSellingPhotos(
                 }
                 Spacer(
                     modifier = Modifier
-                        .width(40.dp)
                         .height(40.dp)
                 )
             }
@@ -354,12 +353,6 @@ fun LazyListScope.ProductSellingPhotos(
 @Composable
 fun ProductImageItem(theme: Theme, pos: Int, onDeleteCloud: (Int) -> Unit, content: @Composable ColumnScope.() -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Modifier
-            .width(150.dp)
-            .height(150.dp)
-            .padding(5.dp)
-            .clip(RoundedCornerShape(20.dp))
-            .background(color = theme.backDark)
         content()
         Image(
             modifier = Modifier
@@ -410,7 +403,7 @@ fun LazyListScope.ProductSellingCato(state: StateProductSelling, theme: Theme) =
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 10.dp, vertical = 5.dp),
-        text = state.product.parentCategories.firstOrNull() ?: "", color = theme.textColor
+        text = state.product.parentCategory.firstOrNull() ?: "", color = theme.textColor
     )
     Text(modifier = Modifier.padding(start = 15.dp, end = 10.dp), text = state.product.parentCatoRest, color = theme.textGrayColor)
     Spacer(modifier = Modifier.height(10.dp))

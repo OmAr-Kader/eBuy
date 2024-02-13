@@ -5,7 +5,6 @@ import com.ramo.ebuy.data.model.Product
 import com.ramo.ebuy.data.model.User
 import com.ramo.ebuy.di.Project
 import com.ramo.ebuy.global.navigation.BaseViewModel
-import com.ramo.ebuy.global.util.item
 import io.github.jan.supabase.gotrue.SessionStatus
 import io.github.jan.supabase.gotrue.auth
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +19,18 @@ class HomeViewModel(project: Project, state: StateHomeViewModel, private val pas
 
     private val _uiState = MutableStateFlow(state)
     val uiState = _uiState.asStateFlow()
+    fun loadMainData() {
+        launchBack {
+            project.categoryData.getMainCategories().let { catos ->
+                project.productData.getProductsOnIds(listOf(17, 16)).let { products ->
+                    _uiState.update { state ->
+                        state.copy(circleCato = catos, productVer = products, isProcess = false)
+                    }
+                }
+            }
+        }
+    }
+
 
     fun loadUserData() {
         if (uiState.value.user != null) {
@@ -66,16 +77,6 @@ class HomeViewModel(project: Project, state: StateHomeViewModel, private val pas
             }
         }
 
-    fun loadCategories() {
-        launchBack {
-            project.categoryData.getMainCategories().let {
-                _uiState.update { state ->
-                    state.copy(circleCato = it).paste()
-                }
-            }
-        }
-    }
-
     fun setRepeatableCato(width: Int) {
         if (uiState.value.repeatableCato == width / 220) {
             return
@@ -88,8 +89,9 @@ class HomeViewModel(project: Project, state: StateHomeViewModel, private val pas
 }
 
 data class StateHomeViewModel(
+    val isProcess: Boolean = true,
     val circleCato: List<Category> = listOf(),
-    val productVer: List<Product> = item(),
+    val productVer: List<Product> = listOf(),
     val user: User? = null,
     val selectedPage: Int = 0,
     val repeatableCato: Int = 0,

@@ -10,6 +10,10 @@ class ProductSpecsRepoImp(supabase: SupabaseClient) : BaseRepoImp(supabase), Pro
         ProductBaseSpecs::productId eq id
     }
 
+    override suspend fun getProductSpecsOnIdsProduct(ids: List<Long>): List<ProductBaseSpecs> = query<ProductBaseSpecs>(SUPA_PRODUCT_SPECS) {
+        ProductBaseSpecs::productId isIn ids
+    }
+
     override suspend fun addNewProductSpecs(item: ProductBaseSpecs): ProductBaseSpecs? = insert(SUPA_PRODUCT_SPECS, item)
 
     override suspend fun editProductSpecs(item: ProductBaseSpecs): ProductBaseSpecs? = edit(SUPA_PRODUCT_SPECS, item.id, item)

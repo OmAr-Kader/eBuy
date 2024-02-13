@@ -365,6 +365,28 @@ fun RowScope.AddItem(
     )
 }
 
+@Composable
+fun SheetBottomTitle(title: String, theme: Theme) {
+    Column(Modifier.fillMaxWidth().background(theme.backDark), horizontalAlignment = Alignment.CenterHorizontally) {
+        Surface(
+            modifier = Modifier
+                .padding(top = 22.dp),
+            color = theme.textGrayColor,
+            shape = MaterialTheme.shapes.extraLarge
+        ) {
+            Box(
+                Modifier
+                    .size(
+                        width = 32.dp,
+                        height = 4.0.dp
+                    )
+            )
+        }
+        Text(modifier = Modifier.fillMaxWidth().padding(7.dp), text = title, color = theme.textColor)
+        Spacer(Modifier.height(5.dp))
+    }
+}
+
 
 @Composable
 fun ImagesPageView(

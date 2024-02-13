@@ -16,7 +16,7 @@ data class UserSearch(
     @SerialName("search")
     val search: String,
     @SerialName("type_search")
-    val searchType: Int, // Normal = 0 , Saved = 1
+    val typeSearch: Int, // Normal = 0 , Saved = 1
     @SerialName("last_use")
     val lastUse: Long,
 ): BaseObject() {
@@ -33,7 +33,7 @@ data class UserWatchlist(
     val id: Long = 0,
     @SerialName("user_id")
     val userId: Long,
-    @SerialName("product_id")
+    @SerialName("watchlist")
     val watchlist: Array<Long>,
 ): BaseObject() {
     override fun json(): JsonObject {
@@ -67,7 +67,7 @@ data class UserBuyItems(
     val id: Long = 0,
     @SerialName("user_id")
     val userId: Long,
-    @SerialName("watchlist")
+    @SerialName("product_id")
     val productId: Long,
     @SerialName("product_title")
     val productTitle: String,

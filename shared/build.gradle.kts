@@ -66,7 +66,6 @@ kotlin {
             implementation(libs.supabase.storage)
             implementation(libs.settings.russhwolf)
             implementation(libs.napier)
-            implementation(libs.mp.file.picker)
             implementation(libs.peekaboo.ui)
             implementation(libs.peekaboo.image.picker)
             api(libs.moko.mvvm.core)
@@ -74,6 +73,7 @@ kotlin {
             api(libs.moko.mvvm.flow)
             api(libs.moko.mvvm.flow.compose)
             api(libs.moko.mvvm.livedata.compose)
+            implementation(libs.flexible.bottomsheet)
             // https://mvnrepository.com/artifact/com.google.mlkit/vision-common
             //implementation("com.google.mlkit:vision-common:17.3.0")
 

@@ -1,23 +1,34 @@
 package com.ramo.ebuy.data.util
 
-import android.util.Log
-import io.github.jan.supabase.exceptions.HttpRequestException
-import io.github.jan.supabase.exceptions.RestException
-import io.ktor.client.plugins.HttpRequestTimeoutException
+suspend inline fun <reified T : BaseObject> io.github.jan.supabase.postgrest.result.PostgrestResult.toListOfObject(): List<T>? {
+    return try {
+        kotlinx.coroutines.coroutineScope {
+            kotlinx.serialization.json.Json.decodeFromString<List<T>?>(data)
+        }
+    } catch (e: kotlinx.serialization.SerializationException) {
+        android.util.Log.w("jsonToObject", e.stackTraceToString())
+        null
+    } catch (e: IllegalArgumentException) {
+        android.util.Log.w("jsonToObject", e.stackTraceToString())
+        null
+    }
+}
 
 suspend inline fun <reified T : Any> supabase(
     crossinline operation: suspend () -> T?,
 ): T? {
     return try {
-        operation()
-    } catch (e: RestException) {
-        Log.w("supabase", e.stackTraceToString())
+        kotlinx.coroutines.coroutineScope {
+            operation()
+        }
+    } catch (e: io.github.jan.supabase.exceptions.RestException) {
+        android.util.Log.w("supabase", e.stackTraceToString())
         null
-    } catch (e: HttpRequestTimeoutException) {
-        Log.w("supabase", e.stackTraceToString())
+    } catch (e: io.ktor.client.plugins.HttpRequestTimeoutException) {
+        android.util.Log.w("supabase", e.stackTraceToString())
         null
-    } catch (e: HttpRequestException) {
-        Log.w("supabase", e.stackTraceToString())
+    } catch (e: io.github.jan.supabase.exceptions.HttpRequestException) {
+        android.util.Log.w("supabase", e.stackTraceToString())
         null
     }
 }

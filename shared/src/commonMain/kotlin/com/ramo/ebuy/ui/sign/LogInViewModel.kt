@@ -9,6 +9,9 @@ import io.github.jan.supabase.gotrue.providers.builtin.Email
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.encodeToJsonElement
+import kotlinx.serialization.json.jsonObject
 
 class LogInViewModel(
     project: Project
@@ -81,7 +84,9 @@ class LogInEmailViewModel(
             project.supaBase.auth.signUpWith(Email) {
                 email = user.email
                 password = passwordUser
-                data = user.json()
+                data = kotlinx.serialization.json.Json.encodeToJsonElement(user).jsonObject.toMutableMap().apply {
+                    remove("id")
+                }.let(::JsonObject)
             }
             user
         }.let {

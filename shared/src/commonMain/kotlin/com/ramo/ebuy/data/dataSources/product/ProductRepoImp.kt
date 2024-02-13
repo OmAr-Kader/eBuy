@@ -11,8 +11,12 @@ class ProductRepoImp(supabase: SupabaseClient) : BaseRepoImp(supabase), ProductR
         Product::id eq id
     }
 
-    override suspend fun getProductsOnCato(catoId: Long): List<Product> = query<Product>(SUPA_PRODUCT) {
-        Product::parentCato eq catoId
+    override suspend fun getProductsOnCato(ids: Long): List<Product> = query<Product>(SUPA_PRODUCT) {
+        Product::parentCatoId eq ids
+    }
+
+    override suspend fun getProductsOnIds(ids: List<Long>): List<Product> = query<Product>(SUPA_PRODUCT) {
+        Product::id isIn ids
     }
 
     override suspend fun addNewProduct(item: Product): Product? = insert(SUPA_PRODUCT, item)

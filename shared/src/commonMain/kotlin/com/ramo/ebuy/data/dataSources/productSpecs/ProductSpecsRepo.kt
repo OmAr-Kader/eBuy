@@ -5,6 +5,7 @@ import com.ramo.ebuy.data.model.ProductBaseSpecs
 interface ProductSpecsRepo {
 
     suspend fun getProductSpecsOnId(id: Long): ProductBaseSpecs?
+    suspend fun getProductSpecsOnIdsProduct(ids: List<Long>): List<ProductBaseSpecs>
     suspend fun addNewProductSpecs(item: ProductBaseSpecs): ProductBaseSpecs?
     suspend fun editProductSpecs(item: ProductBaseSpecs): ProductBaseSpecs?
     suspend fun deleteProductSpecs(id: Long): Int
