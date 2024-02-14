@@ -47,6 +47,8 @@ data class Product(
     val itemStatus: Int = 2, // underReview = 1 - rejected = -1  - accepted = 2 - asReference = 0
     @SerialName("parent_category")
     val parentCategory: Array<String> = arrayOf(),
+    @SerialName("categories_search")
+    val categoriesSearch: String = "",
     @Transient
     val priceEditStr: String = if (price != -1F) price.toString() else "",
     @Transient
@@ -185,6 +187,8 @@ data class ProductBaseSpecs(
     val specsExtra: Array<ProductSpecsExtra> = arrayOf(),
     @SerialName("id_publisher")
     val publisherId: String = "",
+    @SerialName("description")
+    val description: String = "",
     @Transient
     val quantityEditStr: String = if (quantity != -1) quantity.toString() else "",
 ): BaseObject() {

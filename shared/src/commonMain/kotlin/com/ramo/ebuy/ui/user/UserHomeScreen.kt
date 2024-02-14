@@ -64,7 +64,8 @@ fun HomeUserScreen(
             when (state.selectedPage) {
                 0 -> HomeSubScreen(navigator, viewModel)
                 1 -> ProfileSubScreen(viewModel)
-                4 -> SellingSubScreen(navigator)
+                2 -> SearchSubScreen(navigator, viewModel)
+                4 -> SellingSubScreen(navigator, viewModel)
             }
         }
     }

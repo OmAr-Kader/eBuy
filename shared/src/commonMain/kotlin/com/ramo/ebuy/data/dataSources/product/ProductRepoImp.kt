@@ -3,7 +3,10 @@ package com.ramo.ebuy.data.dataSources.product
 import com.ramo.ebuy.data.model.Product
 import com.ramo.ebuy.data.util.BaseRepoImp
 import com.ramo.ebuy.global.base.SUPA_PRODUCT
+import com.ramo.ebuy.global.base.SUPA_PRODUCT_SPECS
 import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.postgrest.query.Columns
+import io.github.jan.supabase.postgrest.query.filter.TextSearchType
 
 class ProductRepoImp(supabase: SupabaseClient) : BaseRepoImp(supabase), ProductRepo {
 
@@ -17,6 +20,25 @@ class ProductRepoImp(supabase: SupabaseClient) : BaseRepoImp(supabase), ProductR
 
     override suspend fun getProductsOnIds(ids: List<Long>): List<Product> = query<Product>(SUPA_PRODUCT) {
         Product::id isIn ids
+    }
+
+    override suspend fun getProductsOnSearch(text: String): List<Product> {
+        return queryByForeign<Product>(
+            SUPA_PRODUCT,
+            Columns.raw("*, $SUPA_PRODUCT_SPECS(sub_title, description)"),
+        ) {
+            or {
+                like("${SUPA_PRODUCT_SPECS}.sub_title", "%${text}%")
+                like("${SUPA_PRODUCT_SPECS}.description", "%${text}%")
+            }
+            or {
+                textSearch(column = "title", query = text, textSearchType = TextSearchType.WEBSEARCH)
+                Product::title like "%${text}%"
+                textSearch(column = "condition", query = text, textSearchType = TextSearchType.WEBSEARCH)
+                Product::condition like "%${text}%"
+                Product::categoriesSearch like "%${text}%"
+            }
+        }
     }
 
     override suspend fun addNewProduct(item: Product): Product? = insert(SUPA_PRODUCT, item)

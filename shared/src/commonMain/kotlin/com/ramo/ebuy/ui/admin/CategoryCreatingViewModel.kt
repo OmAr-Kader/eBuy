@@ -111,7 +111,7 @@ class CategoryCreatingViewModel(
             launchBack {
                 userInfo()?.let { user ->
                     project.supaBase.uploadFile(SUPA_STORAGE_CATO, user.id, imageByte) { newImage ->
-                        project.supaBase.deleteFile(SUPA_STORAGE_CATO, imageUrl) {
+                        project.supaBase.deleteFile(SUPA_STORAGE_CATO, listOf(imageUrl)) {
                             invoke(newImage)
                         }
                     }

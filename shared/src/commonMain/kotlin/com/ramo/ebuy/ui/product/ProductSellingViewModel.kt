@@ -7,6 +7,7 @@ import com.ramo.ebuy.data.model.ProductBaseSpecs
 import com.ramo.ebuy.data.model.ProductSpecs
 import com.ramo.ebuy.data.model.ProductSpecsExtra
 import com.ramo.ebuy.data.model.User
+import com.ramo.ebuy.data.supaBase.deleteFile
 import com.ramo.ebuy.data.supaBase.uploadListFile
 import com.ramo.ebuy.data.util.rearrange
 import com.ramo.ebuy.di.Project
@@ -36,7 +37,15 @@ class ProductSellingViewModel(
                 project.productSpecsData.getProductSpecsOnId(productId)?.let { productSpecs ->
                     project.deliveryData.getDeliveryOnId(productId)?.let { delivery ->
                         _uiState.update { state ->
-                            state.copy(product = product, productSpecs = productSpecs, deliveryProcess = delivery, isProcess = false).paste()
+                            state.copy(
+                                product = product,
+                                productGet = product,
+                                productSpecs = productSpecs,
+                                productSpecsGet = productSpecs,
+                                deliveryProcess = delivery,
+                                deliveryProcessGet = delivery,
+                                isProcess = false
+                            ).paste()
                         }
                     }
                 } ?: setIsProcess(false)
@@ -210,16 +219,24 @@ class ProductSellingViewModel(
     }
 
     fun setCategory(it: Category) {
-        val catoList = mutableListOf(it)
-        uiState.value.listCategory.toMutableList().reversed().map { cato ->
-            val e = cato.id == it.id || catoList.find { c -> c.parentCato == cato.id } != null
-            if (e) {
-                catoList.add(cato)
+        mutableListOf<Category>(it).also { catoList ->
+            uiState.value.listCategory.toMutableList().reversed().map { cato ->
+                val e = cato.id == it.id || catoList.find { c -> c.parentCato == cato.id } != null
+                if (e) {
+                    catoList.add(cato)
+                }
+                e
             }
-            e
-        }
-        _uiState.update { state ->
-            state.copy(product = state.product.copy(parentCategory = catoList.distinct().map { it.name }.toTypedArray()))
+        }.distinct().let { catosList ->
+            _uiState.update { state ->
+                state.copy(
+                    product = state.product.copy(
+                        parentCatoId = catosList.first().id,
+                        parentCategory = catosList.map { it.name }.toTypedArray(),
+                        categoriesSearch = catosList.joinToString(" ")
+                    )
+                )
+            }
         }
     }
 
@@ -237,39 +254,140 @@ class ProductSellingViewModel(
     }
 
     private fun StateProductSelling.doAddProduct(imagesUrls: List<String>, isAdmin: Boolean, invoke: () -> Unit, failed: () -> Unit) {
-        launchBack {
-            project.productData.addNewProduct(
-                product.copy(itemStatus = if (isAdmin) 0 else product.itemStatus, imageUris = imagesUrls.toTypedArray())
-            )?.let { pro ->
-                project.productSpecsData.addNewProductSpecs(productSpecs.copy(productId = pro.id))?.let { _ ->
-                    if (isAdmin) {
-                        invoke()
-                    } else {
-                        project.deliveryData.addNewDelivery(deliveryProcess.copy(productId = pro.id))?.let {
+        publisherId { publisherId ->
+            launchBack {
+                project.productData.addNewProduct(
+                    product.copy(itemStatus = if (isAdmin) 0 else product.itemStatus, imageUris = imagesUrls.toTypedArray())
+                )?.let { pro ->
+                    project.productSpecsData.addNewProductSpecs(productSpecs.copy(productId = pro.id, publisherId = publisherId))?.let { _ ->
+                        if (isAdmin) {
                             invoke()
-                        } ?: failed()
-                    }
+                        } else {
+                            project.deliveryData.addNewDelivery(deliveryProcess.copy(productId = pro.id))?.let {
+                                invoke()
+                            } ?: failed()
+                        }
+                    } ?: failed()
                 } ?: failed()
-            } ?: failed()
+            }
+        }
+    }
+
+    private fun publisherId(invoke: (String) -> Unit) {
+        launchBack {
+            userInfo().let { it?.id ?: "" }.apply(invoke)
         }
     }
 
     fun editProduct(isAdmin: Boolean, invoke: () -> Unit, failed: () -> Unit) {
-        setIsProcess(true)
-        launchBack {
-            project.productData.editProduct(
-                uiState.value.product.copy(itemStatus = if (isAdmin) 0 else uiState.value.product.itemStatus)
-            )?.let {
-                project.productSpecsData.editProductSpecs(uiState.value.productSpecs)?.let {
-                    if (isAdmin) {
-                        invoke()
-                    } else {
-                        project.deliveryData.editDelivery(uiState.value.deliveryProcess)?.let {
-                            invoke()
-                        } ?: failed()
+        _uiState.value.apply {
+            checkValidObjects({ oriProduct, oriProductSpecs ->
+                setIsProcess(true)
+                editProductImages(product.imageUris, { newUrls ->
+                    launchBack {
+                        editProductObject(product.copy(imageUris = newUrls), oriProduct, {
+                            editProductSpecsObject(productSpecs, oriProductSpecs, {
+                                editDeliveryObject(isAdmin, deliveryProcess, deliveryProcessGet, {
+                                    invoke()
+                                }, failed)
+                            }, failed)
+                        }, failed)
+                    }
+                }, failed)
+            }, failed)
+        }
+    }
+
+    private fun StateProductSelling.checkValidObjects(invoke: (Product, ProductBaseSpecs) -> Unit, failed: () -> Unit) {
+        productGet?.also { oriProduct ->
+            productSpecsGet?.also { oriProductSpecs ->
+                invoke(oriProduct, oriProductSpecs)
+            } ?: failed()
+        } ?: failed()
+    }
+
+    private fun StateProductSelling.editProductImages(currentImages: Array<String>, invoke: (Array<String>) -> Unit, failed: () -> Unit) {
+        if (images.isNotEmpty()) {
+            launchBack {
+                userInfo()?.let { user ->
+                    project.supaBase.uploadListFile(SUPA_STORAGE_PRODUCT, user.id, images) {
+                        currentImages.toMutableList().apply {
+                            addAll(it)
+                        }.let { newImages ->
+                            deleteImages(imagesUrlToDelete) {
+                                invoke(newImages.toTypedArray())
+                            }
+                        }
                     }
                 } ?: failed()
+            }
+        } else {
+            deleteImages(imagesUrlToDelete) {
+                invoke(currentImages)
+            }
+        }
+    }
+
+    private suspend fun editProductObject(newProduct: Product, oriProduct: Product, invoke: suspend (Product) -> Unit, failed: () -> Unit) {
+        if (oriProduct != newProduct) {
+            project.productData.editProduct(
+                newProduct
+            )?.apply {
+                invoke(this)
             } ?: failed()
+        } else {
+            invoke(newProduct)
+        }
+    }
+
+    private suspend fun editProductSpecsObject(
+        newProductSpecs: ProductBaseSpecs,
+        oriProductSpecs: ProductBaseSpecs,
+        invoke: suspend (ProductBaseSpecs) -> Unit,
+        failed: () -> Unit
+    ) {
+        if (oriProductSpecs != newProductSpecs) {
+            project.productSpecsData.editProductSpecs(
+                newProductSpecs
+            )?.apply {
+                invoke(this)
+            } ?: failed()
+        } else {
+            invoke(newProductSpecs)
+        }
+    }
+
+    private suspend fun editDeliveryObject(
+        isAdmin: Boolean,
+        newDelivery: DeliveryProcess,
+        oriDelivery: DeliveryProcess?,
+        invoke: suspend (DeliveryProcess?) -> Unit,
+        failed: () -> Unit
+    ) {
+        if (isAdmin || oriDelivery == null) {
+            invoke(null)
+        } else {
+            if (oriDelivery != newDelivery) {
+                project.deliveryData.editDelivery(
+                    newDelivery
+                )?.apply {
+                    invoke(this)
+                } ?: failed()
+            } else {
+                invoke(newDelivery)
+            }
+        }
+    }
+
+    private fun deleteImages(imagesUrlToDelete: List<String>, invoke: (Unit?) -> Unit) {
+        if (imagesUrlToDelete.isNotEmpty()) {
+            launchBack {
+                project.supaBase.deleteFile(SUPA_STORAGE_PRODUCT, imagesUrlToDelete) {
+                    invoke(it)
+                }
+            }
+        } else {
+            invoke(Unit)
         }
     }
 

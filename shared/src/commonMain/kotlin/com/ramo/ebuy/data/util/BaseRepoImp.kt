@@ -3,7 +3,9 @@ package com.ramo.ebuy.data.util
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.gotrue.PostgrestFilterDSL
 import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Order
+import io.github.jan.supabase.postgrest.query.PostgrestRequestBuilder
 import io.github.jan.supabase.postgrest.query.filter.FilterOperator
 import io.github.jan.supabase.postgrest.query.filter.PostgrestFilterBuilder
 
@@ -17,17 +19,6 @@ abstract class BaseRepoImp(val supabase: SupabaseClient) {
             supabase.from(table).insert(item) {
                 select()
             }.decodeList<T>().firstOrNull()
-        }
-    }
-
-    suspend inline fun <reified T : BaseObject> insertList(
-        table: String,
-        items: List<T>,
-    ): List<T>? {
-        return supabase {
-            supabase.from(table).insert(items.map { it }) {
-                select()
-            }.decodeList<T>()
         }
     }
 
@@ -76,9 +67,33 @@ abstract class BaseRepoImp(val supabase: SupabaseClient) {
     ): List<T> {
         return supabase {
             supabase.from(table).select {
-                order("id", Order.ASCENDING)
+                order("id", Order.DESCENDING)
                 filter(block)
             }.decodeList<T>()
+        } ?: listOf()
+    }
+
+    suspend inline fun <reified T : BaseObject> queryAllOrder(
+        table: String,
+        crossinline block: @PostgrestFilterDSL PostgrestRequestBuilder.() -> Unit,
+    ): List<T> {
+        return supabase {
+            supabase.from(table).select(request = block).decodeList<T>()
+        } ?: listOf()
+    }
+
+    suspend inline fun <reified T : BaseObject> queryByForeign(
+        table: String,
+        columns: Columns,
+        crossinline block: @PostgrestFilterDSL PostgrestFilterBuilder.() -> Unit,
+    ): List<T> {
+        return supabase {
+            supabase.from(table).select(
+                columns = columns
+            ) {
+                order("id", Order.DESCENDING)
+                filter(block)
+            }.toListOfObject<T>()
         } ?: listOf()
     }
 
@@ -87,7 +102,7 @@ abstract class BaseRepoImp(val supabase: SupabaseClient) {
     ): List<T> {
         return supabase {
             supabase.from(table).select {
-                order("id", Order.ASCENDING)
+                order("id", Order.DESCENDING)
             }.decodeList<T>()
         } ?: listOf()
     }

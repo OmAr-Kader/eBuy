@@ -66,6 +66,11 @@ E-commerce built in Kotlin Multiplatform Mobile using Supabase auth, realtime, d
 - Task 6.1.1: Implement Unverified Payment designs
 - Task 6.1.2: Implement Payment methods validation
 
+## Epic 7: UX
+### Story 7.1: User Registration
+- Task 7.1.1: Implement user confirmation screens design
+- Task 7.1.2: Implement user confirmation functionality
+
 ---
 ---
 ---

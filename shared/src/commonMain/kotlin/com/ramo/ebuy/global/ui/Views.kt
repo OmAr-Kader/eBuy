@@ -12,6 +12,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -31,6 +32,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -42,15 +44,19 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
@@ -101,7 +107,7 @@ fun LoadingScreen(
 ) {
     if (isLoading) {
         Surface(
-            modifier = Modifier.fillMaxSize().clickable {  },
+            modifier = Modifier.fillMaxSize().clickable { },
             color = theme.backDarkAlpha
         ) {
             Box(
@@ -452,6 +458,51 @@ fun DotsIndicator(
             )
             if (index != totalDots - 1) {
                 Spacer(modifier = Modifier.padding(horizontal = 2.dp))
+            }
+        }
+    }
+}
+
+@Composable
+fun PagerTab(
+    theme: Theme,
+    list: Array<String>,
+    pagerState: PagerState,
+    onPageChanged: (Int) -> Unit,
+    content: @Composable ColumnScope.(Int) -> Unit
+) {
+    //val pagerState = rememberPagerState(pageCount = { list.size })
+    val selectedTabIndex = remember { derivedStateOf { pagerState.currentPage } }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        TabRow(
+            selectedTabIndex = selectedTabIndex.value,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            list.forEachIndexed { index, currentTab ->
+                Tab(
+                    selected = selectedTabIndex.value == index,
+                    selectedContentColor = MaterialTheme.colorScheme.primary,
+                    unselectedContentColor = MaterialTheme.colorScheme.outline,
+                    onClick = {
+                        onPageChanged(index)
+                    },
+                    text = { Text(text = currentTab, color = if (selectedTabIndex.value == index) theme.primary else theme.textColor) },
+                )
+            }
+        }
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                content(it)
             }
         }
     }

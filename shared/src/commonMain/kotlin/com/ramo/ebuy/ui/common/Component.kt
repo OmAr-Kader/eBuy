@@ -16,10 +16,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -27,14 +29,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ramo.ebuy.global.base.Theme
+import com.ramo.ebuy.global.base.outlinedTextFieldStyle
 import com.ramo.ebuy.global.ui.rememberArrowBack
 import com.ramo.ebuy.global.ui.rememberEbuy
 import com.ramo.ebuy.global.ui.rememberMenu
@@ -43,6 +49,7 @@ import com.ramo.ebuy.global.ui.rememberPhotoCamera
 import com.ramo.ebuy.global.ui.rememberSearch
 import com.ramo.ebuy.global.ui.rememberShare
 import com.ramo.ebuy.global.ui.rememberShoppingCart
+import com.ramo.ebuy.global.ui.rememberVoice
 import org.koin.compose.koinInject
 
 @Composable
@@ -101,6 +108,87 @@ fun BarMainScreen(
                     .background(color = theme.backDark, shape = CircleShape)
                     .padding(8.dp),
                 imageVector = rememberShoppingCart(theme.textColor),
+                contentScale = ContentScale.Fit,
+                contentDescription = null,
+            )
+        }
+    }
+}
+
+@Composable
+fun BarSearchScreen(
+    theme: Theme,
+    focusRequester: FocusRequester,
+    search: String,
+    onSearch: (String) -> Unit,
+    onClick: (Int) -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .background(theme.background)
+            .padding(start = 10.dp, end = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Image(
+                modifier = Modifier
+                    .width(48.dp)
+                    .height(48.dp)
+                    .clip(CircleShape)
+                    .clickable {
+                        onClick(0)
+                    }
+                    .padding(7.dp),
+                imageVector = rememberArrowBack(theme.textColor),
+                contentScale = ContentScale.Fit,
+                contentDescription = null,
+            )
+            Spacer(Modifier.width(5.dp))
+            TextField(
+                modifier = Modifier
+                    .weight(1F)
+                    .focusRequester(focusRequester),
+                value = search,
+                onValueChange = onSearch,
+                placeholder = {
+                    Text("Search On Ebuy", color = theme.textGrayColor)
+                },
+                maxLines = 1,
+                colors = theme.outlinedTextFieldStyle(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+            )
+        }
+        Row {
+            Image(
+                modifier = Modifier
+                    .clickable {
+                        onClick(1)
+                    }
+                    .width(40.dp)
+                    .height(40.dp)
+                    .background(color = theme.backDark, shape = CircleShape)
+                    .clip(CircleShape)
+                    .padding(8.dp),
+                imageVector = rememberVoice(theme.textColor),
+                contentScale = ContentScale.Fit,
+                contentDescription = null,
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Image(
+                modifier = Modifier
+                    .clickable {
+                        onClick(2)
+                    }
+                    .width(40.dp)
+                    .height(40.dp)
+                    .background(color = theme.backDark, shape = CircleShape)
+                    .clip(CircleShape)
+                    .padding(8.dp),
+                imageVector = rememberPhotoCamera(theme.textColor),
+                colorFilter = ColorFilter.tint(theme.textColor),
                 contentScale = ContentScale.Fit,
                 contentDescription = null,
             )

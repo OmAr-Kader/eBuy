@@ -53,16 +53,19 @@ suspend fun io.github.jan.supabase.SupabaseClient.uploadListFile(
 
 suspend fun io.github.jan.supabase.SupabaseClient.deleteFile(
     bucket: String,
-    url: String,
+    urls: List<String>,
     invoke: suspend (Unit?) -> Unit,
 ) {
     storage.from(bucket).apply {
         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-            supabase {
-                url.split("${bucket}/").lastOrNull()?.let {
-                    delete(it)
+            urls.forEach { url ->
+                supabase {
+                    url.split("${bucket}/").lastOrNull()?.let {
+                        delete(it)
+                    }
                 }
             }
+
         }.let {
             invoke(it)
         }

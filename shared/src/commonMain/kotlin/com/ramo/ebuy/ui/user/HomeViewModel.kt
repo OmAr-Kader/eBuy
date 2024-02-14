@@ -3,6 +3,7 @@ package com.ramo.ebuy.ui.user
 import com.ramo.ebuy.data.model.Category
 import com.ramo.ebuy.data.model.Product
 import com.ramo.ebuy.data.model.User
+import com.ramo.ebuy.data.model.UserSearch
 import com.ramo.ebuy.di.Project
 import com.ramo.ebuy.global.navigation.BaseViewModel
 import io.github.jan.supabase.gotrue.SessionStatus
@@ -15,22 +16,44 @@ import kotlinx.coroutines.flow.update
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
 
-class HomeViewModel(project: Project, state: StateHomeViewModel, private val paste: StateHomeViewModel.() -> StateHomeViewModel) : BaseViewModel(project) {
+class HomeViewModel(
+    project: Project,
+    state: StateHomeViewModel,
+    private val paste: StateHomeViewModel.() -> StateHomeViewModel
+) : BaseViewModel(project) {
 
     private val _uiState = MutableStateFlow(state)
     val uiState = _uiState.asStateFlow()
+
+    inline val repeatableCategory: Int
+        get() {
+            val state = uiState.value
+            return if (state.repeatableCato == 0) {
+                0
+            } else {
+                state.circleCato.size / state.repeatableCato
+            }
+        }
+
+
+    val onSearch: (String) -> Unit
+        get() = {
+            _uiState.update { state ->
+                state.copy(search = it).paste()
+            }
+        }
+
     fun loadMainData() {
         launchBack {
             project.categoryData.getMainCategories().let { catos ->
                 project.productData.getProductsOnIds(listOf(17, 16)).let { products ->
                     _uiState.update { state ->
-                        state.copy(circleCato = catos, productVer = products, isProcess = false)
+                        state.copy(circleCato = catos, productVer = products, isProcess = false).paste()
                     }
                 }
             }
         }
     }
-
 
     fun loadUserData() {
         if (uiState.value.user != null) {
@@ -49,7 +72,9 @@ class HomeViewModel(project: Project, state: StateHomeViewModel, private val pas
                                 setUser(Json.decodeFromJsonElement<User?>(it)?.copy(id = user.id))
                             }
                         }
-                    } else -> {}
+                    }
+
+                    else -> {}
                 }
             }.launchIn(this)
         }
@@ -67,16 +92,6 @@ class HomeViewModel(project: Project, state: StateHomeViewModel, private val pas
         }
     }
 
-    inline val repeatableCategory: Int
-        get() {
-            val state = uiState.value
-            return if (state.repeatableCato == 0) {
-                0
-            } else {
-                state.circleCato.size / state.repeatableCato
-            }
-        }
-
     fun setRepeatableCato(width: Int) {
         if (uiState.value.repeatableCato == width / 220) {
             return
@@ -86,13 +101,40 @@ class HomeViewModel(project: Project, state: StateHomeViewModel, private val pas
         }
     }
 
+    fun loadSearchHistory(invoke: () -> Unit) {
+        launchBack {
+            project.userSearchData.getUserSearches().toMutableList().apply {
+                doLoadSearchHistory(
+                    toMutableList().filter { it.typeSearch == 0 },
+                    toMutableList().filter { it.typeSearch == 1 },
+                    invoke
+                )
+            }
+        }
+    }
+
+    private fun doLoadSearchHistory(userSearchList: List<UserSearch>, userSearchSavedList: List<UserSearch>, invoke: () -> Unit) {
+        launchMain {
+            _uiState.update { state ->
+                state.copy(
+                    userSearchList = userSearchList,
+                    userSearchSavedList = userSearchSavedList
+                )
+            }
+            invoke()
+        }
+    }
+
 }
 
 data class StateHomeViewModel(
     val isProcess: Boolean = true,
     val circleCato: List<Category> = listOf(),
     val productVer: List<Product> = listOf(),
+    val userSearchList: List<UserSearch> = listOf(),
+    val userSearchSavedList: List<UserSearch> = listOf(),
     val user: User? = null,
+    val search: String = "",
     val selectedPage: Int = 0,
     val repeatableCato: Int = 0,
 )

@@ -66,11 +66,13 @@ data class UserBuyItems(
     @SerialName("id")
     val id: Long = 0,
     @SerialName("user_id")
-    val userId: Long,
+    val userId: Long = -1L,
     @SerialName("product_id")
-    val productId: Long,
+    val productId: Long = -1L,
     @SerialName("product_title")
-    val productTitle: String,
+    val productTitle: String = "",
+    @SerialName("last_purchase")
+    val lastPurchase: Long = 0L,
 ): BaseObject() {
     override fun json(): JsonObject {
         return kotlinx.serialization.json.Json.encodeToJsonElement(this).jsonObject.toMutableMap().apply {

@@ -69,6 +69,7 @@ class RootComponent(
                 is Configuration.ProductShippingCostRoute -> Screen.ProductShippingCostRoute(newNav)
                 is Configuration.CategoryCreatingRoute -> Screen.CategoryCreatingRoute(newNav)
                 is Configuration.AdminHomeRoute -> Screen.AdminHomeRoute(newNav)
+                is Configuration.SearchProcessRoute -> Screen.SearchProcessRoute(newNav, config.searchText)
             }
         }
     }
@@ -100,6 +101,7 @@ class RootComponent(
         data class ProductShippingCostRoute(val component: Navigator) : Screen()
         data class CategoryCreatingRoute(val component: Navigator) : Screen()
         data class AdminHomeRoute(val component: Navigator) : Screen()
+        data class SearchProcessRoute(val component: Navigator, val searchText: String) : Screen()
     }
 
     @Serializable
@@ -156,6 +158,8 @@ class RootComponent(
         data object AdminHomeRoute : Configuration()
         @Serializable
         data object CategoryCreatingRoute : Configuration()
+        @Serializable
+        data class SearchProcessRoute(@SerialName("search_text") val searchText: String) : Configuration()
 
     }
 }

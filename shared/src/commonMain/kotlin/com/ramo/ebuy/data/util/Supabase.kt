@@ -3,7 +3,7 @@ package com.ramo.ebuy.data.util
 suspend inline fun <reified T : BaseObject> io.github.jan.supabase.postgrest.result.PostgrestResult.toListOfObject(): List<T>? {
     return try {
         kotlinx.coroutines.coroutineScope {
-            kotlinx.serialization.json.Json.decodeFromString<List<T>?>(data)
+            kotlinx.serialization.json.Json{ ignoreUnknownKeys = true }.decodeFromString<List<T>?>(data)
         }
     } catch (e: kotlinx.serialization.SerializationException) {
         android.util.Log.w("jsonToObject", e.stackTraceToString())

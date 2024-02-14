@@ -59,6 +59,7 @@ import com.ramo.ebuy.ui.product.ProductShippingScreen
 import com.ramo.ebuy.ui.sign.LogInEmailScreen
 import com.ramo.ebuy.ui.sign.LogInScreen
 import com.ramo.ebuy.ui.user.HomeUserScreen
+import com.ramo.ebuy.ui.user.SearchProcessScreen
 import io.github.jan.supabase.gotrue.SessionStatus
 import kotlinx.coroutines.launch
 import org.koin.compose.KoinApplication
@@ -107,6 +108,7 @@ fun Main(root: RootComponent) {
                         is RootComponent.Screen.ProductShippingCostRoute -> ProductShippingCostScreen(instance.component)
                         is RootComponent.Screen.CategoryCreatingRoute -> CategoryCreatingScreen(instance.component)
                         is RootComponent.Screen.AdminHomeRoute -> AdminHomeScreen(instance.component)
+                        is RootComponent.Screen.SearchProcessRoute -> SearchProcessScreen(instance.component)
                     }
                 }
             }
