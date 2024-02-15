@@ -36,6 +36,9 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -56,7 +59,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
@@ -67,6 +69,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ramo.ebuy.data.model.Product
 import com.ramo.ebuy.global.base.Theme
 import com.ramo.ebuy.global.util.bottomBarIcons
 import com.ramo.ebuy.global.util.hotBarIcons
@@ -398,40 +401,59 @@ fun SheetBottomTitle(title: String, theme: Theme) {
 fun ImagesPageView(
     list: Array<String>,
     size: DpSize,
+    item: Product,
+    favorite: (Product) -> Unit,
     theme: Theme = koinInject(),
     onClick: (Int) -> Unit
 ) {
     val pagerState = rememberPagerState(pageCount = { list.size })
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(theme.background),
-        //verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(modifier = Modifier.height(13.dp))
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier.fillWidthIfZero(size)
-                .background(theme.background)
-                .clip(RoundedCornerShape(20.dp)),
+    Box {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(theme.background),
+            //verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            val painter = rememberImagePainter(url = list[it])
-            Image(
-                modifier = Modifier.fillMaxSize().clickable {
-                    onClick(it)
-                },
-                painter = painter,
-                contentScale = ContentScale.Crop,
-                contentDescription = "",
+            Spacer(modifier = Modifier.height(13.dp))
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillWidthIfZero(size)
+                    .background(theme.background)
+                    .clip(RoundedCornerShape(20.dp)),
+            ) {
+                val painter = rememberImagePainter(url = list[it])
+                Image(
+                    modifier = Modifier.fillMaxSize().clickable {
+                        onClick(it)
+                    },
+                    painter = painter,
+                    contentScale = ContentScale.Crop,
+                    contentDescription = "",
+                )
+            }
+            Spacer(modifier = Modifier.height(13.dp))
+            DotsIndicator(
+                totalDots = pagerState.pageCount,
+                selectedIndex = pagerState.currentPage,
+                selectedColor = theme.textHintColor,
+                unSelectedColor = theme.textHintAlpha
             )
         }
-        Spacer(modifier = Modifier.height(13.dp))
-        DotsIndicator(
-            totalDots = pagerState.pageCount,
-            selectedIndex = pagerState.currentPage,
-            selectedColor = theme.textHintColor,
-            unSelectedColor = theme.textHintAlpha
+        Image(
+            modifier = Modifier
+                .width(45.dp)
+                .height(45.dp)
+                .background(color = theme.backDark, shape = CircleShape)
+                .clip(CircleShape)
+                .padding(10.dp)
+                .clickable {
+                    favorite(item)
+                },
+            imageVector = if (item.isWatchlist) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+            colorFilter = ColorFilter.tint(theme.primary),
+            contentScale = ContentScale.Fit,
+            contentDescription = "Expandable Category Image",
         )
     }
 }
@@ -479,10 +501,14 @@ fun PagerTab(
     ) {
         TabRow(
             selectedTabIndex = selectedTabIndex.value,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.wrapContentWidth(),
+            divider = {
+
+            }
         ) {
             list.forEachIndexed { index, currentTab ->
                 Tab(
+                    modifier = Modifier.wrapContentWidth().background(theme.background),
                     selected = selectedTabIndex.value == index,
                     selectedContentColor = MaterialTheme.colorScheme.primary,
                     unselectedContentColor = MaterialTheme.colorScheme.outline,
@@ -492,6 +518,7 @@ fun PagerTab(
                     text = { Text(text = currentTab, color = if (selectedTabIndex.value == index) theme.primary else theme.textColor) },
                 )
             }
+            Spacer(Modifier.weight(1F).background(theme.background))
         }
         HorizontalPager(
             state = pagerState,

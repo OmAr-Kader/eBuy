@@ -81,7 +81,9 @@ fun ProductDetailsScreen(
             }
             LazyColumn {
                 item {
-                    ImagesPageView(state.product.imageUris, DpSize(0.dp, 300.dp)) {
+                    ImagesPageView(state.product.imageUris, DpSize(0.dp, 300.dp), state.product, {
+
+                    }) {
 
                     }
                 }
@@ -108,7 +110,7 @@ fun ProductDetailsScreen(
                 }
                 ProductList(list = state.productVer) {
                     stater.getScreenCount(RootComponent.Configuration.ProductDetailsRoute::class.java).let { count ->
-                        RootComponent.Configuration.ProductDetailsRoute(-1, count + 1).also { route ->
+                        RootComponent.Configuration.ProductDetailsRoute(it.id, count + 1).also { route ->
                             scope.launch {
                                 stater.writeArguments(route = route, screenCount = count + 1)
                                 navigator.navigateTo(route)

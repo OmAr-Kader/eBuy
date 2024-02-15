@@ -22,6 +22,18 @@ abstract class BaseRepoImp(val supabase: SupabaseClient) {
         }
     }
 
+    suspend inline fun <reified T : BaseObject> upsert(
+        table: String,
+        onConflict: String,
+        item: T,
+    ): T? {
+        return supabase {
+            supabase.from(table).upsert(item, onConflict = onConflict) {
+                select()
+            }.decodeList<T>().firstOrNull()
+        }
+    }
+
     suspend inline fun <reified T : BaseObject> edit(
         table: String,
         id: Long,
@@ -44,6 +56,16 @@ abstract class BaseRepoImp(val supabase: SupabaseClient) {
                 filter {
                     filter("id", FilterOperator.EQ, id)
                 }
+            }
+        }.let {
+            if (it != null) 1 else -1
+        }
+    }
+
+    suspend inline fun deleteFilter(table: String, crossinline block: @PostgrestFilterDSL PostgrestFilterBuilder.() -> Unit): Int {
+        return supabase {
+            supabase.from(table).delete {
+                filter(block)
             }
         }.let {
             if (it != null) 1 else -1
@@ -80,6 +102,20 @@ abstract class BaseRepoImp(val supabase: SupabaseClient) {
         return supabase {
             supabase.from(table).select(request = block).decodeList<T>()
         } ?: listOf()
+    }
+
+    suspend inline fun querySingleByForeign(
+        table: String,
+        columns: Columns,
+        crossinline block: @PostgrestFilterDSL PostgrestFilterBuilder.() -> Unit,
+    ): io.github.jan.supabase.postgrest.result.PostgrestResult? {
+        return supabase {
+            supabase.from(table).select(
+                columns = columns
+            ) {
+                filter(block)
+            }
+        }
     }
 
     suspend inline fun <reified T : BaseObject> queryByForeign(

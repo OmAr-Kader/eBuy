@@ -6,14 +6,13 @@ import com.ramo.ebuy.data.model.UserSearch
 import com.ramo.ebuy.data.model.UserWatchlist
 
 interface UserSearchRepo {
-    suspend fun getUserSearches(): List<UserSearch>
-    suspend fun addNewUserSearch(item: UserSearch): UserSearch?
-    suspend fun editUserSearch(item: UserSearch): UserSearch?
-    suspend fun deleteUserSearch(id: Long): Int
+    suspend fun getUserSearches(userId: String): List<UserSearch>
+    suspend fun addEditUserSearch(item: UserSearch): UserSearch?
+    suspend fun deleteUserSearch(userId: String): Int
 }
 
 interface UserWatchlistRepo {
-    suspend fun getUserWatchlist(): List<UserWatchlist>
+    suspend fun getUserWatchlist(id: String): UserWatchlist?
     suspend fun addNewUserWatchlist(item: UserWatchlist): UserWatchlist?
     suspend fun editUserWatchlist(item: UserWatchlist): UserWatchlist?
     suspend fun deleteUserWatchlist(id: Long): Int

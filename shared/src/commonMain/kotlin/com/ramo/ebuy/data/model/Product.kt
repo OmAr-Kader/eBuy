@@ -50,6 +50,8 @@ data class Product(
     @SerialName("categories_search")
     val categoriesSearch: String = "",
     @Transient
+    var isWatchlist: Boolean = false,
+    @Transient
     val priceEditStr: String = if (price != -1F) price.toString() else "",
     @Transient
     val offerEditStr: String = if (offer != -1F) offer.toString() else "",

@@ -88,7 +88,7 @@ fun HomeSubScreen(
     val catoList = state.circleCato
 
     OnLaunchScreen {
-        viewModel.loadMainData()
+        //viewModel.loadMainData()
     }
     Box(Modifier.fillMaxSize()) {
         Column(
@@ -129,7 +129,7 @@ fun HomeSubScreen(
                     }
                     ProductList(list = state.productVer) {
                         stater.getScreenCount(RootComponent.Configuration.ProductDetailsRoute::class.java).let { count ->
-                            RootComponent.Configuration.ProductDetailsRoute(-1, count + 1).also { route ->
+                            RootComponent.Configuration.ProductDetailsRoute(it.id, count + 1).also { route ->
                                 scope.launch {
                                     stater.writeArguments(route = route, screenCount = count + 1)
                                     navigator.navigateTo(route)
@@ -217,7 +217,8 @@ fun ProfileSubScreen(
 fun SearchSubScreen(
     navigator: Navigator,
     viewModel: HomeViewModel,
-    theme: Theme = koinInject()
+    theme: Theme = koinInject(),
+    stater: Stater = koinInject(),
 ) {
     val scope = rememberCoroutineScope()
     val state by viewModel.uiState.collectAsState()
@@ -228,13 +229,27 @@ fun SearchSubScreen(
             focusRequester.requestFocus()
         }
     }
+
+    fun onSearchAction(searchText: String, typeSearch: Int) {
+        stater.getScreenCount(RootComponent.Configuration.SearchProcessRoute::class.java).let { count ->
+            RootComponent.Configuration.SearchProcessRoute(searchText, typeSearch, count + 1).also { route ->
+                scope.launch {
+                    stater.writeArguments(route = route, screenCount = count + 1)
+                    navigator.navigateTo(route)
+                }
+            }
+        }
+    }
     Column(Modifier.fillMaxSize()) {
         BarSearchScreen(theme, focusRequester, state.search, viewModel.onSearch) {
             when (it) {
                 0 -> {
-                    scope.launch {
-                        navigator.goBack()
-                    }
+                    focusRequester.freeFocus()
+                    viewModel.setSelectedPage(0)
+                }
+
+                1 -> {
+                    onSearchAction(state.search, 0)
                 }
             }
         }
@@ -249,24 +264,26 @@ fun SearchSubScreen(
                     items(state.userSearchList) {
                         Text(
                             modifier = Modifier
-                                .padding(start = 20.dp, end = 5.dp, top = 5.dp, bottom = 5.dp)
+                                .fillMaxWidth()
+                                .padding(start = 30.dp, end = 10.dp, top = 10.dp, bottom = 5.dp)
                                 .clickable {
-                                    scope.launch {
-                                        navigator.navigateTo(RootComponent.Configuration.SearchProcessRoute(state.search))
-                                    }
+                                    onSearchAction(it.search, 0)
                                 },
+                            fontSize = 18.sp,
                             text = it.search,
                             color = theme.textColor
                         )
+                        Spacer(Modifier.height(5.dp))
                     }
                     if (state.userSearchList.isNotEmpty()) {
                         item {
                             Text(
                                 modifier = Modifier
-                                    .padding(start = 20.dp, end = 5.dp, top = 5.dp, bottom = 5.dp)
+                                    .padding(start = 30.dp, end = 10.dp, top = 10.dp, bottom = 5.dp)
                                     .clickable {
 
                                     },
+                                fontSize = 18.sp,
                                 text = "CLEAR RECENT SEARCHES",
                                 color = theme.primary
                             )
@@ -278,15 +295,16 @@ fun SearchSubScreen(
                     items(state.userSearchSavedList) {
                         Text(
                             modifier = Modifier
-                                .padding(start = 20.dp, end = 5.dp, top = 5.dp, bottom = 5.dp)
+                                .fillMaxWidth()
+                                .padding(start = 30.dp, end = 10.dp, top = 10.dp, bottom = 5.dp)
                                 .clickable {
-                                    scope.launch {
-                                        navigator.navigateTo(RootComponent.Configuration.SearchProcessRoute(state.search))
-                                    }
+                                    onSearchAction(it.search, 1)
                                 },
+                            fontSize = 18.sp,
                             text = it.search,
                             color = theme.textColor
                         )
+                        Spacer(Modifier.height(5.dp))
                     }
                 }
             }

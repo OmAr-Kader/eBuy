@@ -8,10 +8,9 @@ import com.ramo.ebuy.data.model.UserWatchlist
 class UserSearchData(
     private val repo: UserSearchRepo,
 ) {
-    suspend fun getUserSearches(): List<UserSearch> = repo.getUserSearches()
-    suspend fun addNewUserSearch(item: UserSearch): UserSearch? = repo.addNewUserSearch(item)
-    suspend fun editUserSearch(item: UserSearch): UserSearch? = repo.editUserSearch(item)
-    suspend fun deleteUserSearch(id: Long): Int = repo.deleteUserSearch(id)
+    suspend fun getUserSearches(userId: String): List<UserSearch> = repo.getUserSearches(userId)
+    suspend fun addEditUserSearch(item: UserSearch): UserSearch? = repo.addEditUserSearch(item)
+    suspend fun deleteUserSearch(userId: String): Int = repo.deleteUserSearch(userId)
 }
 
 class UserBuyItemsData(
@@ -26,7 +25,7 @@ class UserBuyItemsData(
 class UserWatchlistData(
     private val repo: UserWatchlistRepo,
 ) {
-    suspend fun getUserWatchlist(): List<UserWatchlist> = repo.getUserWatchlist()
+    suspend fun getUserWatchlist(id: String): UserWatchlist? = repo.getUserWatchlist(id)
     suspend fun addNewUserWatchlist(item: UserWatchlist): UserWatchlist? = repo.addNewUserWatchlist(item)
     suspend fun editUserWatchlist(item: UserWatchlist): UserWatchlist? = repo.editUserWatchlist(item)
     suspend fun deleteUserWatchlist(id: Long): Int = repo.deleteUserWatchlist(id)

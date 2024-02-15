@@ -14,31 +14,32 @@ import io.github.jan.supabase.postgrest.query.Order
 
 class UserSearchRepoImp(supabase: SupabaseClient) : BaseRepoImp(supabase), UserSearchRepo {
 
-    override suspend fun getUserSearches(): List<UserSearch> = queryAllOrder(SUPA_USER_SEARCH) {
-        order("lastUse", order = Order.DESCENDING)
+    override suspend fun getUserSearches(userId: String): List<UserSearch> = queryAllOrder(SUPA_USER_SEARCH) {
+        order("last_use", order = Order.DESCENDING)
+        filter {
+            UserSearch::userId eq userId
+        }
     }
 
-    override suspend fun addNewUserSearch(item: UserSearch): UserSearch? = insert(
+    override suspend fun addEditUserSearch(item: UserSearch): UserSearch? = upsert(
         SUPA_USER_SEARCH,
+        "id_user_search",
         item
     )
 
-    override suspend fun editUserSearch(item: UserSearch): UserSearch? = edit(
+    override suspend fun deleteUserSearch(userId: String): Int = deleteFilter(
         SUPA_USER_SEARCH,
-        item.id,
-        item,
-    )
-
-    override suspend fun deleteUserSearch(id: Long): Int = delete(
-        SUPA_USER_SEARCH,
-        id
-    )
+    ) {
+        UserSearch::userId eq userId
+    }
 
 }
 
 class UserWatchlistRepoImp(supabase: SupabaseClient) : BaseRepoImp(supabase), UserWatchlistRepo {
 
-    override suspend fun getUserWatchlist(): List<UserWatchlist> = queryAll(SUPA_USER_WATCHLIST)
+    override suspend fun getUserWatchlist(id: String): UserWatchlist? = querySingle<UserWatchlist>(SUPA_USER_WATCHLIST) {
+        UserWatchlist::userId eq id
+    }
 
     override suspend fun addNewUserWatchlist(item: UserWatchlist): UserWatchlist? = insert(
         SUPA_USER_WATCHLIST,

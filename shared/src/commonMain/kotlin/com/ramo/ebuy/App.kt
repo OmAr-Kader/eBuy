@@ -24,6 +24,7 @@ import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.slid
 import com.arkivanov.decompose.extensions.compose.jetbrains.stack.animation.stackAnimation
 import com.arkivanov.decompose.extensions.compose.jetbrains.subscribeAsState
 import com.ramo.ebuy.di.Project
+import com.ramo.ebuy.di.Stater
 import com.ramo.ebuy.di.initApp
 import com.ramo.ebuy.global.base.MyApplicationTheme
 import com.ramo.ebuy.global.base.Theme
@@ -108,7 +109,7 @@ fun Main(root: RootComponent) {
                         is RootComponent.Screen.ProductShippingCostRoute -> ProductShippingCostScreen(instance.component)
                         is RootComponent.Screen.CategoryCreatingRoute -> CategoryCreatingScreen(instance.component)
                         is RootComponent.Screen.AdminHomeRoute -> AdminHomeScreen(instance.component)
-                        is RootComponent.Screen.SearchProcessRoute -> SearchProcessScreen(instance.component)
+                        is RootComponent.Screen.SearchProcessRoute -> SearchProcessScreen(instance.component, instance.searchText, instance.typeSearch)
                     }
                 }
             }
@@ -121,6 +122,7 @@ fun SplashScreen(
     navigator: Navigator,
     project: Project = koinInject(),
     theme: Theme = koinInject(),
+    stater: Stater = koinInject(),
     viewModel: AppViewModel = MokoModel {
         AppViewModel(project)
     }
@@ -134,6 +136,7 @@ fun SplashScreen(
         is SessionStatus.Authenticated -> {
             viewModel.fetchUser(sessionStatus.session).let { user ->
                 if (user != null) {
+                    stater.user = user
                     if (user.userType == 1) {
                         scope.launch {
                             navigator.navigateHome(RootComponent.Configuration.AdminHomeRoute)

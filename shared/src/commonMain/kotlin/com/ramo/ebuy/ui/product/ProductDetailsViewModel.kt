@@ -23,14 +23,19 @@ class ProductDetailsViewModel(project: Project) : BaseViewModel(project) {
         }
         setIsProcess(true)
         launchBack {
-            project.productData.getProductOnId(productId)?.let { product ->
-                project.productSpecsData.getProductSpecsOnId(productId)?.let { productSpecs ->
-                    project.deliveryData.getDeliveryOnId(productId)?.let { delivery ->
-                        _uiState.update { state ->
-                            state.copy(product = product, productSpecs = productSpecs, deliveryProcess = delivery, isProcess = false)
-                        }
-                    }
-                } ?: setIsProcess(false)
+            project.productData.getProductOnIdForeign(productId) { product, productSpecs, delivery ->
+                if (product == null || productSpecs == null) {
+                    setIsProcess(false)
+                    return@getProductOnIdForeign
+                }
+                _uiState.update { state ->
+                    state.copy(
+                        product = product,
+                        productSpecs = productSpecs,
+                        deliveryProcess = delivery ?: DeliveryProcess(),
+                        isProcess = false
+                    )
+                }
             }
         }
     }
@@ -60,6 +65,35 @@ class ProductDetailsViewModel(project: Project) : BaseViewModel(project) {
             }
         }
     }
+    /*fun changeWatchList(isWatchlist: Boolean, id: Long) {
+        uiState.value.watchlist?.also { userWatchList ->
+            userWatchList.watchlist.toMutableList().apply {
+                if (isWatchlist) {
+                    this@apply.remove(id)
+                } else {
+                    this@apply.add(id)
+                }
+            }.toTypedArray().let { userWatchList.copy(watchlist = it) }.also { newWatchList ->
+                _uiState.update { state ->
+                    state.copy(watchlist = newWatchList, dummy = state.dummy + 1).paste()
+                }
+                launchBack {
+                    project.userWatchlistData.editUserWatchlist(newWatchList)
+                }
+            }
+        } ?: uiState.value.userId?.also { userId ->
+            setIsProcess(true)
+            launchBack {
+                project.userWatchlistData.addNewUserWatchlist(
+                    UserWatchlist(userId = userId, watchlist = arrayOf(id))
+                )?.also {
+                    _uiState.update { state ->
+                        state.copy(watchlist = it, isProcess = false, dummy = state.dummy + 1).paste()
+                    }
+                }
+            }
+        }
+    }*/
 
     private fun setIsProcess(it: Boolean) {
         _uiState.update { state ->
@@ -70,7 +104,7 @@ class ProductDetailsViewModel(project: Project) : BaseViewModel(project) {
     data class State(
         val product: Product = Product(),
         val productSpecs: ProductBaseSpecs = ProductBaseSpecs(),
-        val deliveryProcess: DeliveryProcess = DeliveryProcess(product.id),
+        val deliveryProcess: DeliveryProcess = DeliveryProcess(),
         val specChosen: List<SpecChosen> = listOf(),
         val productVer: List<Product> = item(),
         val droppedIndex: Int = -1,
@@ -79,6 +113,7 @@ class ProductDetailsViewModel(project: Project) : BaseViewModel(project) {
         val isProcess: Boolean = true,
         val dummy: Int = 0,
     )
+
     data class SpecChosen(
         val index: Int,
         val userSpecIndex: Int,

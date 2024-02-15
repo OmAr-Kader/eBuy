@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
@@ -204,7 +205,7 @@ fun ProductMainSearchItem(
                             .clickable {
                                 favorite(item)
                             },
-                        imageVector = Icons.Default.Favorite,//if (item.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        imageVector = if (item.isWatchlist) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                         colorFilter = ColorFilter.tint(theme.primary),
                         contentScale = ContentScale.Fit,
                         contentDescription = "Expandable Category Image",
@@ -230,7 +231,7 @@ fun ProductMainSearchItem(
                             .clickable {
                                 favorite(item)
                             },
-                        imageVector = Icons.Default.Favorite,//if (item.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        imageVector = if (item.isWatchlist) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                         colorFilter = ColorFilter.tint(theme.primary),
                         contentScale = ContentScale.Fit,
                         contentDescription = "Expandable Category Image",

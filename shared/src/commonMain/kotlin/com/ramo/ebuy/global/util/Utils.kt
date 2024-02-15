@@ -98,6 +98,12 @@ internal val fetchTimeGap: (time: Long) -> TimeGap?
         }
     }
 
+
+internal val currentMillis: Long
+    get() {
+        return Clock.System.now().toEpochMilliseconds()
+    }
+
 internal val currentTime: TimeSplitter
     get() {
         return Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).let {

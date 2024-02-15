@@ -103,12 +103,14 @@ class HomeViewModel(
 
     fun loadSearchHistory(invoke: () -> Unit) {
         launchBack {
-            project.userSearchData.getUserSearches().toMutableList().apply {
-                doLoadSearchHistory(
-                    toMutableList().filter { it.typeSearch == 0 },
-                    toMutableList().filter { it.typeSearch == 1 },
-                    invoke
-                )
+            userInfo()?.also { user ->
+                project.userSearchData.getUserSearches(user.id).toMutableList().apply {
+                    doLoadSearchHistory(
+                        toMutableList().filter { it.typeSearch == 0 },
+                        toMutableList().filter { it.typeSearch == 1 },
+                        invoke
+                    )
+                }
             }
         }
     }
@@ -119,7 +121,7 @@ class HomeViewModel(
                 state.copy(
                     userSearchList = userSearchList,
                     userSearchSavedList = userSearchSavedList
-                )
+                ).paste()
             }
             invoke()
         }
@@ -128,7 +130,7 @@ class HomeViewModel(
 }
 
 data class StateHomeViewModel(
-    val isProcess: Boolean = true,
+    val isProcess: Boolean = false,
     val circleCato: List<Category> = listOf(),
     val productVer: List<Product> = listOf(),
     val userSearchList: List<UserSearch> = listOf(),

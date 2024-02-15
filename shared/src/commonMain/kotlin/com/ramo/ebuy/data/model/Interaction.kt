@@ -11,15 +11,17 @@ import kotlinx.serialization.json.jsonObject
 data class UserSearch(
     @SerialName("id")
     val id: Long = 0,
-    @SerialName("user_id")
-    val userId: Long,
-    @SerialName("search")
-    val search: String,
     @SerialName("type_search")
-    val typeSearch: Int, // Normal = 0 , Saved = 1
+    val typeSearch: Int = 0, // Normal = 0 , Saved = 1
     @SerialName("last_use")
-    val lastUse: Long,
-): BaseObject() {
+    val lastUse: Long = 0L,
+    @SerialName("id_user_search")
+    val idUserSearch: String = "",
+    @SerialName("user_id")
+    val userId: String = "",
+    @SerialName("search")
+    val search: String = "",
+) : BaseObject() {
     override fun json(): JsonObject {
         return kotlinx.serialization.json.Json.encodeToJsonElement(this).jsonObject.toMutableMap().apply {
             remove("id")
@@ -32,10 +34,10 @@ data class UserWatchlist(
     @SerialName("id")
     val id: Long = 0,
     @SerialName("user_id")
-    val userId: Long,
+    val userId: String = "",
     @SerialName("watchlist")
-    val watchlist: Array<Long>,
-): BaseObject() {
+    val watchlist: Array<Long> = arrayOf(),
+) : BaseObject() {
     override fun json(): JsonObject {
         return kotlinx.serialization.json.Json.encodeToJsonElement(this).jsonObject.toMutableMap().apply {
             remove("id")
@@ -73,7 +75,7 @@ data class UserBuyItems(
     val productTitle: String = "",
     @SerialName("last_purchase")
     val lastPurchase: Long = 0L,
-): BaseObject() {
+) : BaseObject() {
     override fun json(): JsonObject {
         return kotlinx.serialization.json.Json.encodeToJsonElement(this).jsonObject.toMutableMap().apply {
             remove("id")
@@ -91,7 +93,7 @@ data class UserRecentViewed(
     val productId: Long,
     @SerialName("last_use")
     val lastUse: Long,
-): BaseObject() {
+) : BaseObject() {
     override fun json(): JsonObject {
         return kotlinx.serialization.json.Json.encodeToJsonElement(this).jsonObject.toMutableMap().apply {
             remove("id")

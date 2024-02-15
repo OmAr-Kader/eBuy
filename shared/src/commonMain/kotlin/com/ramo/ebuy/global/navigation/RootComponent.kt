@@ -69,7 +69,7 @@ class RootComponent(
                 is Configuration.ProductShippingCostRoute -> Screen.ProductShippingCostRoute(newNav)
                 is Configuration.CategoryCreatingRoute -> Screen.CategoryCreatingRoute(newNav)
                 is Configuration.AdminHomeRoute -> Screen.AdminHomeRoute(newNav)
-                is Configuration.SearchProcessRoute -> Screen.SearchProcessRoute(newNav, config.searchText)
+                is Configuration.SearchProcessRoute -> Screen.SearchProcessRoute(newNav, config.searchText, config.typeSearch)
             }
         }
     }
@@ -101,65 +101,96 @@ class RootComponent(
         data class ProductShippingCostRoute(val component: Navigator) : Screen()
         data class CategoryCreatingRoute(val component: Navigator) : Screen()
         data class AdminHomeRoute(val component: Navigator) : Screen()
-        data class SearchProcessRoute(val component: Navigator, val searchText: String) : Screen()
+        data class SearchProcessRoute(val component: Navigator, val searchText: String, val typeSearch: Int) : Screen()
     }
 
     @Serializable
     sealed class Configuration {
         @Serializable
         data object SplashRoute : Configuration()
+
         @Serializable
         data object LogInRoute : Configuration()
+
         @Serializable
         data class LogInEmailRoute(@SerialName("log_in") val isRegister: Boolean) : Configuration()
+
         @Serializable
         data object HomeUserRoute : Configuration()
+
         @Serializable
-        data class ProductDetailsRoute(@SerialName("product_id_details") val productId: Long, @SerialName("count_screen") val countS: Int) : Configuration()
+        data class ProductDetailsRoute(@SerialName("product_id_details") val productId: Long, @SerialName("count_screen") val countS: Int) :
+            Configuration()
+
         @Serializable
         data class ProductSellingRoute(@SerialName("product_id") val productId: Long, @SerialName("is_admin") val isAdmin: Boolean) : Configuration()
+
         @Serializable
         data object ProductConditionMainRoute : Configuration()
+
         @Serializable
         data object ProductSellingPriceRoute : Configuration()
+
         @Serializable
         data object ProductSellingTitleRoute : Configuration()
+
         @Serializable
         data class ProductSellingSpecRoute(@SerialName("is_admin_spec") val isAdmin: Boolean) : Configuration()
+
         @Serializable
         data object ProductSellingCategoryRoute : Configuration()
+
         @Serializable
         data object ProductSellingConditionRoute : Configuration()
+
         @Serializable
         data object ProductSellingMadeInRoute : Configuration()
+
         @Serializable
         data object ProductSellingPlatformRoute : Configuration()
+
         @Serializable
         data object ProductSellingRatingRoute : Configuration()
+
         @Serializable
         data object ProductSellingReleaseYearRoute : Configuration()
+
         @Serializable
         data class ProductSellingCustomSpecRoute(@SerialName("index_spec") val index: Int) : Configuration()
+
         @Serializable
         data object ProductSellingCustomSpecExtraRoute : Configuration()
+
         @Serializable
         data class ProductSellingCustomSpecExtraListRoute(@SerialName("index_spec_extra") val index: Int) : Configuration()
+
         @Serializable
         data object ProductSellingMPNRoute : Configuration()
+
         @Serializable
         data object ProductSellingUPCRoute : Configuration()
+
         @Serializable
         data object ProductSellingQuantityRoute : Configuration()
+
         @Serializable
         data object ProductShippingRoute : Configuration()
+
         @Serializable
         data object ProductShippingCostRoute : Configuration()
+
         @Serializable
         data object AdminHomeRoute : Configuration()
+
         @Serializable
         data object CategoryCreatingRoute : Configuration()
+
         @Serializable
-        data class SearchProcessRoute(@SerialName("search_text") val searchText: String) : Configuration()
+        data class SearchProcessRoute(
+            @SerialName("search_text") val searchText: String,
+            @SerialName("type_search") val typeSearch: Int,
+            @SerialName("count_screen_search") val countS: Int
+        ) : Configuration()
 
     }
 }
