@@ -102,15 +102,25 @@ E-commerce built in Kotlin Multiplatform Mobile using Supabase auth, realtime, d
 
 [![Supabase](https://img.shields.io/static/v1?style=for-the-badge&message=Supabase&color=47A248&logo=Supabase&logoColor=FFFFFF&label=)](https://supabase.com/docs/reference/kotlin/installing)
 
-<!--suppress CheckImageSize -->
 ## Screenshots
-<img src="screenshots/1.png"  width="300" height="667" alt="1"/>
-<img src="screenshots/2.png"  width="300" height="667" alt="2"/>
-<img src="screenshots/3.png"  width="300" height="667" alt="3"/>
-<img src="screenshots/4.png"  width="300" height="667" alt="4"/>
-<img src="screenshots/5.png"  width="300" height="667" alt="5"/>
-<img src="screenshots/6.png"  width="300" height="667" alt="6"/>
-<img src="screenshots/7.png"  width="300" height="667" alt="7"/>
-<img src="screenshots/8.png"  width="300" height="667" alt="8"/>
-<img src="screenshots/9.png"  width="300" height="667" alt="9"/>
-<img src="screenshots/10.png"  width="300" height="667" alt="10"/>
+## Screenshots
+<table><tr>
+  <td> <img src="screenshots/1.png"  width="300" height="667" alt="1"/> </td>
+  <td> <img src="screenshots/8.png"  width="300" height="667" alt="8"/> </td>
+</tr>
+<tr>
+  <td> <img src="screenshots/2.png"  width="300" height="667" alt="2"/> </td>
+  <td> <img src="screenshots/3.png"  width="300" height="667" alt="3"/> </td>
+</tr>
+<tr>
+  <td> <img src="screenshots/4.png"  width="300" height="667" alt="4"/> </td>
+  <td> <img src="screenshots/5.png"  width="300" height="667" alt="5"/> </td>
+</tr>
+<tr>
+  <td> <img src="screenshots/6.png"  width="300" height="667" alt="6"/> </td>
+  <td> <img src="screenshots/7.png"  width="300" height="667" alt="7"/> </td>
+</tr>
+<tr>
+  <td> <img src="screenshots/9.png"  width="300" height="667" alt="9"/> </td>
+  <td> <img src="screenshots/10.png"  width="300" height="667" alt="10"/> </td>
+</tr></table>
