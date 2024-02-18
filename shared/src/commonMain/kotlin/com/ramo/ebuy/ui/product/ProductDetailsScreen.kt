@@ -135,11 +135,13 @@ fun ProductDetailsBottomSheet(state: ProductDetailsViewModel.State, theme: Theme
                 hide()
             },
             sheetState = rememberFlexibleBottomSheetState(
+                skipIntermediatelyExpanded = true,
                 flexibleSheetSize = FlexibleSheetSize(
-                    fullyExpanded = 0.9F,
-                    intermediatelyExpanded = 0.9F,
-                    slightlyExpanded = 0.9F,
+                    fullyExpanded = 0.7F,
+                    intermediatelyExpanded = 0.5F,
+                    slightlyExpanded = 0.0F,
                 ),
+                allowNestedScroll = true,
                 isModal = true,
                 skipSlightlyExpanded = false,
             ),
@@ -161,7 +163,7 @@ fun ProductDetailsBottomSheet(state: ProductDetailsViewModel.State, theme: Theme
                     ProductSellingSpecItem("UPC", state.product.productCode, theme)
                 }
                 items(state.productSpecs.specs) {
-                    Column(Modifier.fillMaxWidth().padding(horizontal = 15.dp)) {
+                    Column(Modifier.fillMaxWidth()) {
                         ProductSellingSpecItem(it.label, it.spec, theme)
                     }
                 }

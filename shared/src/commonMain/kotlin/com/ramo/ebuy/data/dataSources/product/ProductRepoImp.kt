@@ -11,6 +11,8 @@ import com.ramo.ebuy.global.base.SUPA_PRODUCT_SPECS
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.filter.TextSearchType
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 class ProductRepoImp(supabase: SupabaseClient) : BaseRepoImp(supabase), ProductRepo {
 
@@ -19,14 +21,17 @@ class ProductRepoImp(supabase: SupabaseClient) : BaseRepoImp(supabase), ProductR
     }
 
     override suspend fun getProductOnIdForeign(id: Long, invoke: (Product?, ProductBaseSpecs?, DeliveryProcess?) -> Unit) {
-        querySingleByForeign(SUPA_PRODUCT, Columns.raw("*, $SUPA_PRODUCT_SPECS(), $SUPA_DELIVERY_PROCESS()")) {
+        querySingleByForeign(SUPA_PRODUCT, Columns.raw("*, $SUPA_PRODUCT_SPECS(*), $SUPA_DELIVERY_PROCESS(*)")) {
             Product::id eq id
         }?.apply {
-            invoke(
-                toListOfObject<Product>()?.firstOrNull().let { if (it == Product()) null else it },
-                toListOfObject<ProductBaseSpecs>()?.firstOrNull().let { if (it == ProductBaseSpecs()) null else it },
-                toListOfObject<DeliveryProcess>()?.firstOrNull().let { if (it == DeliveryProcess()) null else it }
-            )
+            toListOfObject<Result>()?.firstOrNull().let { result ->
+                invoke(
+                    toListOfObject<Product>()?.firstOrNull().let { if (it == Product()) null else it },
+                    result?.productsSpecs?.firstOrNull()?.let { if (it == ProductBaseSpecs()) null else it },
+                    result?.deliveryProcess?.firstOrNull()?.let { if (it == DeliveryProcess()) null else it }
+                )
+            }
+
         } ?: invoke(null, null, null)
     }
 
@@ -62,4 +67,11 @@ class ProductRepoImp(supabase: SupabaseClient) : BaseRepoImp(supabase), ProductR
     override suspend fun editProduct(item: Product): Product? = edit(SUPA_PRODUCT, item.id, item)
 
     override suspend fun deleteProduct(id: Long): Int = delete(SUPA_PRODUCT, id)
+
+
+    @Serializable
+    data class Result(
+        @SerialName("products_specs") val productsSpecs: List<ProductBaseSpecs> = emptyList(),
+        @SerialName("delivery_process") val deliveryProcess: List<DeliveryProcess> = emptyList(),
+    )
 }

@@ -16,14 +16,14 @@ data class DeliveryProcess(
     val productId: Long = 0,
     @SerialName("shipping_id")
     val shippingID: Long = 0L,
-    @SerialName("service")
+    @SerialName("shipping_service")
     val shippingService: String = "",
-    @SerialName("from")
+    @SerialName("from_date")
     val fromDate: Int = 3,
-    @SerialName("up_to")
+    @SerialName("up_do_date")
     val upToDate: Int = 5,
     @SerialName("size_phys")
-    val size: String = "",
+    val sizePhys: String = "",
     @SerialName("delivery_cost")
     val deliveryCost: Float = -1F,
     @SerialName("delivery_type")

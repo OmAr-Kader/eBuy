@@ -319,7 +319,7 @@ fun ProductSellingSpecsScreen(
                     navigator.goBack()
                 }
             }
-            LazyColumn {
+            LazyColumn(Modifier.fillMaxWidth()) {
                 if (!isAdmin) {
                     ProductSellingSpecForEditItem("Condition", state.product.condition, theme) {
                         scope.launch {
@@ -377,6 +377,9 @@ fun ProductSellingSpecsScreen(
                             }
                         }.padding(15.dp), text = "ADD CUSTOM SPECIFIC", color = theme.primary)
                     }
+                }
+                item {
+                    Spacer(Modifier.height(50.dp))
                 }
             }
         }
@@ -1189,7 +1192,7 @@ fun ProductShippingScreen(
                 }
             }
             LazyColumn {
-                ProductSellingSpecForEditItem("Package Details", state.deliveryProcess.size, theme) {
+                ProductSellingSpecForEditItem("Package Details", state.deliveryProcess.sizePhys, theme) {
 
                 }
                 ProductSellingSpecForSubEditItem("Shipping Service", state.deliveryProcess.shippingService, state.deliveryProcess.durationStr, theme) {

@@ -444,7 +444,7 @@ fun LazyListScope.ProductSellingShipping(state: StateProductSelling, theme: Them
             .padding(horizontal = 10.dp, vertical = 5.dp),
         text = "Ship in ${state.user.businessCountryStr}", color = theme.textColor
     )
-    ProductSellingSpecItem("Package Details", state.deliveryProcess.size, theme)
+    ProductSellingSpecItem("Package Details", state.deliveryProcess.sizePhys, theme)
     ProductSellingSpecItemWithSub("Service", state.deliveryProcess.shippingService, state.deliveryProcess.durationStr, theme)
     ProductSellingSpecItem("Shipping Cost", state.deliveryProcess.deliveryCostStr, theme)
     Spacer(modifier = Modifier.height(10.dp))

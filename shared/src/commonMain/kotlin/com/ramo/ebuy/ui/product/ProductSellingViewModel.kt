@@ -219,13 +219,12 @@ class ProductSellingViewModel(
     }
 
     fun setCategory(it: Category) {
-        mutableListOf<Category>(it).also { catoList ->
-            uiState.value.listCategory.toMutableList().reversed().map { cato ->
+        mutableListOf(it).also { catoList ->
+            uiState.value.listCategory.toMutableList().sortedBy { it.id }.reversed().forEach { cato ->
                 val e = cato.id == it.id || catoList.find { c -> c.parentCato == cato.id } != null
                 if (e) {
                     catoList.add(cato)
                 }
-                e
             }
         }.distinct().let { catosList ->
             _uiState.update { state ->
@@ -242,10 +241,13 @@ class ProductSellingViewModel(
 
     fun addNewProduct(isAdmin: Boolean, invoke: () -> Unit, failed: () -> Unit) {
         setIsProcess(true)
+        android.util.Log.w("WW", "1")
         _uiState.value.apply {
             launchBack {
                 userInfo()?.let { user ->
+                    android.util.Log.w("WW", "2")
                     project.supaBase.uploadListFile(SUPA_STORAGE_PRODUCT, user.id, images) { imagesUrls ->
+                        android.util.Log.w("WW", "3")
                         doAddProduct(imagesUrls, isAdmin, invoke, failed)
                     }
                 } ?: failed()
@@ -254,16 +256,22 @@ class ProductSellingViewModel(
     }
 
     private fun StateProductSelling.doAddProduct(imagesUrls: List<String>, isAdmin: Boolean, invoke: () -> Unit, failed: () -> Unit) {
+        android.util.Log.w("WW", "4")
         publisherId { publisherId ->
             launchBack {
+                android.util.Log.w("WW", "5")
                 project.productData.addNewProduct(
                     product.copy(itemStatus = if (isAdmin) 0 else product.itemStatus, imageUris = imagesUrls.toTypedArray())
                 )?.let { pro ->
-                    project.productSpecsData.addNewProductSpecs(productSpecs.copy(productId = pro.id, publisherId = publisherId))?.let { _ ->
+                    android.util.Log.w("WW", "6")
+                    project.productSpecsData.addNewProductSpecs(productSpecs.copy(productId = pro.id, publisherId = publisherId))!!.let { _ ->
+                        android.util.Log.w("WW", "6")
                         if (isAdmin) {
                             invoke()
                         } else {
+                            android.util.Log.w("WW", "7")
                             project.deliveryData.addNewDelivery(deliveryProcess.copy(productId = pro.id))?.let {
+                                android.util.Log.w("WW", "8")
                                 invoke()
                             } ?: failed()
                         }

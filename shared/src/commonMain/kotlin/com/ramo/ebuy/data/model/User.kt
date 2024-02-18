@@ -31,6 +31,8 @@ data class User(
     val zip: Int = 0,
     @SerialName("is_verified")
     val isVerified: Boolean = true,
+    /** [userType] => Temporary differentiate solution
+     * */
     @SerialName("user_type")
     val userType: Int = 0, //USER = 0, ADMIN = 1
 ) : BaseObject() {

@@ -171,11 +171,13 @@ fun CategoryCreatingScreen(
                     viewModel.setModeModalBottom(-1)
                 },
                 sheetState = rememberFlexibleBottomSheetState(
+                    skipIntermediatelyExpanded = true,
                     flexibleSheetSize = FlexibleSheetSize(
-                        fullyExpanded = 0.9F,
-                        intermediatelyExpanded = 0.9F,
-                        slightlyExpanded = 0.9F,
+                        fullyExpanded = 0.7F,
+                        intermediatelyExpanded = 0.5F,
+                        slightlyExpanded = 0.0F,
                     ),
+                    allowNestedScroll = true,
                     isModal = true,
                     skipSlightlyExpanded = false,
                 ),

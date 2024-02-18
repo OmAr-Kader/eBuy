@@ -1,9 +1,14 @@
 package com.ramo.ebuy.data.util
 
-suspend inline fun <reified T : BaseObject> io.github.jan.supabase.postgrest.result.PostgrestResult.toListOfObject(): List<T>? {
+import kotlinx.serialization.json.Json
+
+@Suppress("JSON_FORMAT_REDUNDANT")
+suspend inline fun <reified T> io.github.jan.supabase.postgrest.result.PostgrestResult.toListOfObject(): List<T>? {
     return try {
         kotlinx.coroutines.coroutineScope {
-            kotlinx.serialization.json.Json{ ignoreUnknownKeys = true }.decodeFromString<List<T>?>(data)
+            Json {
+                ignoreUnknownKeys = true
+            }.decodeFromString<List<T>?>(data)
         }
     } catch (e: kotlinx.serialization.SerializationException) {
         android.util.Log.w("jsonToObject", e.stackTraceToString())

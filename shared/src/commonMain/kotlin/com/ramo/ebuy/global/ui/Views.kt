@@ -444,6 +444,7 @@ fun ImagesPageView(
             modifier = Modifier
                 .width(45.dp)
                 .height(45.dp)
+                .align(Alignment.BottomEnd)
                 .background(color = theme.backDark, shape = CircleShape)
                 .clip(CircleShape)
                 .padding(10.dp)
