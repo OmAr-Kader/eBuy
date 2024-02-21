@@ -12,5 +12,6 @@ xcuserdata
 ConstSecure.kt
 PreviewEditor.kt
 PreviewData.kt
-**/di/AppModule.kt
+di/
+
 payment/
