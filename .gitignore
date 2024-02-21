@@ -13,5 +13,5 @@ ConstSecure.kt
 PreviewEditor.kt
 PreviewData.kt
 di/
-
+di/AppModule.kt
 payment/
