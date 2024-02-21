@@ -9,9 +9,8 @@ captures
 local.properties
 xcuserdata
 *.log
-
-di
 ConstSecure.kt
-payment
 PreviewEditor.kt
 PreviewData.kt
+di
+payment

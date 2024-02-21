@@ -8,7 +8,6 @@ import com.ramo.ebuy.data.model.User
 import com.ramo.ebuy.data.model.UserCart
 import com.ramo.ebuy.di.Project
 import com.ramo.ebuy.global.navigation.BaseViewModel
-import com.ramo.ebuy.global.util.item
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -129,7 +128,7 @@ class ProductDetailsViewModel(project: Project) : BaseViewModel(project) {
         val deliveryProcess: DeliveryProcess = DeliveryProcess(),
         val userCart: UserCart? = null,
         val specChosen: List<SpecChosen> = listOf(),
-        val productVer: List<Product> = item(),
+        val productVer: List<Product> = listOf(),
         val droppedIndex: Int = -1,
         val user: User? = null,
         val isModalBottom: Boolean = false,
