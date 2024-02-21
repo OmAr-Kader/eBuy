@@ -10,7 +10,7 @@ local.properties
 xcuserdata
 *.log
 
-AppModule.kt
+di
 ConstSecure.kt
 payment
 PreviewEditor.kt
