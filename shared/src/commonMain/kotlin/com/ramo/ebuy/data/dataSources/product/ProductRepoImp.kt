@@ -3,10 +3,12 @@ package com.ramo.ebuy.data.dataSources.product
 import com.ramo.ebuy.data.model.DeliveryProcess
 import com.ramo.ebuy.data.model.Product
 import com.ramo.ebuy.data.model.ProductBaseSpecs
+import com.ramo.ebuy.data.model.ProductQuantity
 import com.ramo.ebuy.data.util.BaseRepoImp
 import com.ramo.ebuy.data.util.toListOfObject
 import com.ramo.ebuy.global.base.SUPA_DELIVERY_PROCESS
 import com.ramo.ebuy.global.base.SUPA_PRODUCT
+import com.ramo.ebuy.global.base.SUPA_PRODUCT_QUANTITY
 import com.ramo.ebuy.global.base.SUPA_PRODUCT_SPECS
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.query.Columns
@@ -20,19 +22,24 @@ class ProductRepoImp(supabase: SupabaseClient) : BaseRepoImp(supabase), ProductR
         Product::id eq id
     }
 
-    override suspend fun getProductOnIdForeign(id: Long, invoke: (Product?, ProductBaseSpecs?, DeliveryProcess?) -> Unit) {
-        querySingleByForeign(SUPA_PRODUCT, Columns.raw("*, $SUPA_PRODUCT_SPECS(*), $SUPA_DELIVERY_PROCESS(*)")) {
+    override suspend fun getProductOnIdForeign(id: Long, invoke: (Product?, ProductBaseSpecs?, ProductQuantity?, DeliveryProcess?) -> Unit) {
+        querySingleByForeign(SUPA_PRODUCT, Columns.raw("*, $SUPA_PRODUCT_SPECS(*), $SUPA_PRODUCT_QUANTITY(*), $SUPA_DELIVERY_PROCESS(*)")) {
             Product::id eq id
         }?.apply {
-            toListOfObject<Result>()?.firstOrNull().let { result ->
+            toListOfObject<Result>(kotlinx.serialization.json.Json {
+                ignoreUnknownKeys = true
+            })?.firstOrNull().let { result ->
                 invoke(
-                    toListOfObject<Product>()?.firstOrNull().let { if (it == Product()) null else it },
+                    toListOfObject<Product>(kotlinx.serialization.json.Json {
+                        ignoreUnknownKeys = true
+                    })?.firstOrNull().let { if (it == Product()) null else it },
                     result?.productsSpecs?.firstOrNull()?.let { if (it == ProductBaseSpecs()) null else it },
-                    result?.deliveryProcess?.firstOrNull()?.let { if (it == DeliveryProcess()) null else it }
+                    result?.productQuantity?.firstOrNull()?.let { if (it == ProductQuantity()) null else it },
+                    result?.deliveryProcess?.firstOrNull()?.let { if (it == DeliveryProcess()) null else it },
                 )
             }
 
-        } ?: invoke(null, null, null)
+        } ?: invoke(null, null, null, null)
     }
 
     override suspend fun getProductsOnCato(ids: Long): List<Product> = query<Product>(SUPA_PRODUCT) {
@@ -72,6 +79,7 @@ class ProductRepoImp(supabase: SupabaseClient) : BaseRepoImp(supabase), ProductR
     @Serializable
     data class Result(
         @SerialName("products_specs") val productsSpecs: List<ProductBaseSpecs> = emptyList(),
+        @SerialName("product_quantity") val productQuantity: List<ProductQuantity> = emptyList(),
         @SerialName("delivery_process") val deliveryProcess: List<DeliveryProcess> = emptyList(),
     )
 }

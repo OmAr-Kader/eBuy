@@ -52,6 +52,8 @@ data class Product(
     @Transient
     var isWatchlist: Boolean = false,
     @Transient
+    var cartQuantity: Int = 0,
+    @Transient
     val priceEditStr: String = if (price != -1F) price.toString() else "",
     @Transient
     val offerEditStr: String = if (offer != -1F) offer.toString() else "",
@@ -179,10 +181,6 @@ data class ProductBaseSpecs(
     val releaseYear: Long = 0L,
     @SerialName("mpn")
     val mpn: String = "",
-    @SerialName("quantity")
-    val quantity: Int = 0,
-    @SerialName("quantity_available")
-    val quantityAvailable: Int = 0,
     @SerialName("product_specs")
     val specs: Array<ProductSpecs> = arrayOf(),
     @SerialName("extra_product_specs")
@@ -191,8 +189,6 @@ data class ProductBaseSpecs(
     val publisherId: String = "",
     @SerialName("description")
     val description: String = "",
-    @Transient
-    val quantityEditStr: String = if (quantity != -1) quantity.toString() else "",
 ): BaseObject() {
 
     @Transient
@@ -215,18 +211,16 @@ data class ProductBaseSpecs(
         if (id != other.id) return false
         if (productId != other.productId) return false
         if (subTitle != other.subTitle) return false
-        if (publisherId != other.publisherId) return false
         if (conditionDetails != other.conditionDetails) return false
         if (countryProduct != other.countryProduct) return false
         if (platform != other.platform) return false
         if (descriptionUrl != other.descriptionUrl) return false
         if (releaseYear != other.releaseYear) return false
         if (mpn != other.mpn) return false
-        if (quantity != other.quantity) return false
-        if (quantityAvailable != other.quantityAvailable) return false
         if (!specs.contentEquals(other.specs)) return false
         if (!specsExtra.contentEquals(other.specsExtra)) return false
-        if (quantityEditStr != other.quantityEditStr) return false
+        if (publisherId != other.publisherId) return false
+        if (description != other.description) return false
         if (countryProductStr != other.countryProductStr) return false
         return releaseYearOnly == other.releaseYearOnly
     }
@@ -235,22 +229,21 @@ data class ProductBaseSpecs(
         var result = id.hashCode()
         result = 31 * result + productId.hashCode()
         result = 31 * result + subTitle.hashCode()
-        result = 31 * result + publisherId.hashCode()
         result = 31 * result + conditionDetails.hashCode()
         result = 31 * result + countryProduct
         result = 31 * result + platform.hashCode()
         result = 31 * result + descriptionUrl.hashCode()
         result = 31 * result + releaseYear.hashCode()
         result = 31 * result + mpn.hashCode()
-        result = 31 * result + quantity
-        result = 31 * result + quantityAvailable
         result = 31 * result + specs.contentHashCode()
         result = 31 * result + specsExtra.contentHashCode()
-        result = 31 * result + quantityEditStr.hashCode()
+        result = 31 * result + publisherId.hashCode()
+        result = 31 * result + description.hashCode()
         result = 31 * result + countryProductStr.hashCode()
         result = 31 * result + releaseYearOnly.hashCode()
         return result
     }
+
 }
 
 /**
@@ -272,56 +265,136 @@ data class ProductSpecsExtra(
     @SerialName("label_extra")
     val labelExtra: String = "",
     @SerialName("specs_extra")
-    val specExtra: List<SpecExtra> = emptyList(),
+    val specExtra: Array<SpecExtra> = arrayOf(),
     @Transient
     val dummy: Int = 0,
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ProductSpecsExtra
+
+        if (labelExtra != other.labelExtra) return false
+        if (!specExtra.contentEquals(other.specExtra)) return false
+        return dummy == other.dummy
+    }
+
+    override fun hashCode(): Int {
+        var result = labelExtra.hashCode()
+        result = 31 * result + specExtra.contentHashCode()
+        result = 31 * result + dummy
+        return result
+    }
+}
 
 /**
  * Embedded For [ProductSpecsExtra]
  */
 @Serializable
 data class SpecExtra(
+    @SerialName("spec_code")
+    var specCode: String = "",
     @SerialName("spec_label")
     var labelSpec: String,
-    @SerialName("spec_price")
+    @SerialName("plus_price_spec")
     var plusPriceSpec: Float,
-    @SerialName("spec_quantity")
-    var quantity: Int = 0,
-    @SerialName("spec_quantity_available")
-    val quantityAvailable: Int = 0,
     @Transient
     var priceSpecEditStr: String = if (plusPriceSpec != -1F) plusPriceSpec.toString() else "",
-    @Transient
-    var quantityEditStr: String = if (quantity != 0) quantity.toString() else "",
 )
-/*
+
+
 @Serializable
-data class ProductAvailability(
+data class ProductQuantity(
     @SerialName("id")
     val id: Long = 0,
     @SerialName("product_id")
-    val productID: Long = 0,
-    @SerialName("product_ava_code")
-    val productAvaCode: ProductAvaCode = ProductAvaCode(),
+    val productId: Long = 0,
+    @SerialName("specs_quantity")
+    val specsQuantity: Array<ProductQuantitySpec> = arrayOf(),
+    @SerialName("base_quantity")
+    val baseQuantity: Int = 0,
+    @SerialName("base_quantity_available")
+    val baseQuantityAvailable: Int = 0,
+    @SerialName("base_quantity_limit")
+    val baseQuantityLimit: Int = -1,
+    @Transient
+    val quantityEditStr: String = if (baseQuantity != 0) baseQuantity.toString() else "",
 ): BaseObject() {
+
     override fun json(): JsonObject {
-        return kotlinx.serialization.json.Json.encodeToJsonElement(this).jsonObject.toMutableMap().apply {
+        return kotlinx.serialization.json.Json.encodeToJsonElement(this.copy()).jsonObject.toMutableMap().apply {
             remove("id")
         }.let(::JsonObject)
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ProductQuantity
+
+        if (id != other.id) return false
+        if (productId != other.productId) return false
+        if (!specsQuantity.contentEquals(other.specsQuantity)) return false
+        if (baseQuantity != other.baseQuantity) return false
+        if (baseQuantityAvailable != other.baseQuantityAvailable) return false
+        if (baseQuantityLimit != other.baseQuantityLimit) return false
+        return quantityEditStr == other.quantityEditStr
+    }
+
+    override fun hashCode(): Int {
+        var result = id.hashCode()
+        result = 31 * result + productId.hashCode()
+        result = 31 * result + specsQuantity.contentHashCode()
+        result = 31 * result + baseQuantity
+        result = 31 * result + baseQuantityAvailable
+        result = 31 * result + baseQuantityLimit
+        result = 31 * result + quantityEditStr.hashCode()
+        return result
+    }
+}
+
+
+/**
+ * Embedded For [ProductQuantity]
+ */
+@Serializable
+data class ProductQuantitySpec(
+    @SerialName("spec_extra_quantity")
+    val specExtraQuantity: Array<ProductExtraSpecQuantity> = emptyArray(),
+    @Transient
+    val dummy: Int = 0,
+) {
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ProductQuantitySpec
+
+        return specExtraQuantity.contentEquals(other.specExtraQuantity)
+    }
+
+    override fun hashCode(): Int {
+        return specExtraQuantity.contentHashCode()
+    }
+
 }
 
 /**
- * Embedded For [ProductAvailability]
+ * Embedded For [ProductQuantitySpec]
  */
 @Serializable
-data class ProductAvaCode(
+data class ProductExtraSpecQuantity(
     @SerialName("spec_code")
-    val specCode: String = "",
-    @SerialName("quantity")
-    val quantity: Int = 0,
-    @SerialName("quantity_available")
-    val quantityAvailable: Int = 0,
+    var specCode: String = "",
+    @SerialName("spec_quantity")
+    var specQuantity: Int = 0,
+    @SerialName("spec_quantity_available")
+    var specQuantityAvailable: Int = 0,
+    @SerialName("spec_quantity_limit")
+    var specQuantityLimit: Int = -1,
+    @Transient
+    var quantityEditStr: String = if (specQuantity != 0) specQuantity.toString() else "",
 )
-*/

@@ -1,12 +1,14 @@
 package com.ramo.ebuy.data.dataSources.interaction
 
 import com.ramo.ebuy.data.model.UserBuyItems
+import com.ramo.ebuy.data.model.UserCart
 import com.ramo.ebuy.data.model.UserRecentViewed
 import com.ramo.ebuy.data.model.UserSearch
 import com.ramo.ebuy.data.model.UserWatchlist
 import com.ramo.ebuy.data.util.BaseRepoImp
 import com.ramo.ebuy.global.base.SUPA_RECENT_VIEWED
 import com.ramo.ebuy.global.base.SUPA_USER_BUY_ITEMS
+import com.ramo.ebuy.global.base.SUPA_USER_CART
 import com.ramo.ebuy.global.base.SUPA_USER_SEARCH
 import com.ramo.ebuy.global.base.SUPA_USER_WATCHLIST
 import io.github.jan.supabase.SupabaseClient
@@ -61,8 +63,8 @@ class UserWatchlistRepoImp(supabase: SupabaseClient) : BaseRepoImp(supabase), Us
 
 class UserBuyItemsRepoImp(supabase: SupabaseClient) : BaseRepoImp(supabase), UserBuyItemsRepo {
 
-    override suspend fun getUserBuyItems(): List<UserBuyItems> = queryAllOrder(SUPA_USER_BUY_ITEMS) {
-        order("last_purchase", order = Order.DESCENDING)
+    override suspend fun getUserBuyItems(id: String): UserBuyItems? = querySingle(SUPA_USER_BUY_ITEMS) {
+        UserBuyItems::userId eq id
     }
 
     override suspend fun addNewUserBuyItems(item: UserBuyItems): UserBuyItems? = insert(
@@ -84,8 +86,8 @@ class UserBuyItemsRepoImp(supabase: SupabaseClient) : BaseRepoImp(supabase), Use
 }
 
 class UserRecentViewedRepoImp(supabase: SupabaseClient) : BaseRepoImp(supabase), UserRecentViewedRepo {
-    override suspend fun getUserRecentViewed(): List<UserRecentViewed> = queryAllOrder(SUPA_RECENT_VIEWED) {
-        order("last_use", order = Order.DESCENDING)
+    override suspend fun getUserRecentViewed(id: String): UserRecentViewed? = querySingle(SUPA_RECENT_VIEWED) {
+        UserRecentViewed::userId eq id
     }
 
     override suspend fun addNewUserRecentViewed(item: UserRecentViewed): UserRecentViewed? = insert(
@@ -103,4 +105,30 @@ class UserRecentViewedRepoImp(supabase: SupabaseClient) : BaseRepoImp(supabase),
         SUPA_RECENT_VIEWED,
         id
     )
+}
+
+
+class UserCartRepoImp(supabase: SupabaseClient) : BaseRepoImp(supabase), UserCartRepo {
+
+    override suspend fun getUserCart(id: String): List<UserCart> {
+        return query(SUPA_USER_CART) {
+            UserCart::userId eq id
+        }
+    }
+
+    override suspend fun addNewUserCart(item: UserCart): UserCart? {
+        return insert(SUPA_USER_CART, item)
+    }
+
+    override suspend fun editUserCart(item: UserCart): UserCart? {
+        return edit(SUPA_USER_CART, item.id, item)
+    }
+
+    override suspend fun deleteUserCart(userId: String): Int {
+        return deleteFilter(
+            SUPA_USER_CART,
+        ) {
+            UserCart::userId eq userId
+        }
+    }
 }

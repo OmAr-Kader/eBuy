@@ -109,9 +109,9 @@ fun LoadingScreen(
     theme: Theme,
 ) {
     if (isLoading) {
-        Surface(
+        Card(
             modifier = Modifier.fillMaxSize().clickable { },
-            color = theme.backDarkAlpha
+            colors = CardDefaults.cardColors(containerColor = theme.backDarkAlpha),
         ) {
             Box(
                 modifier = Modifier.fillMaxSize(),

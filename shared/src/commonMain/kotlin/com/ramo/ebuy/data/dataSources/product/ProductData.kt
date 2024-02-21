@@ -3,12 +3,13 @@ package com.ramo.ebuy.data.dataSources.product
 import com.ramo.ebuy.data.model.DeliveryProcess
 import com.ramo.ebuy.data.model.Product
 import com.ramo.ebuy.data.model.ProductBaseSpecs
+import com.ramo.ebuy.data.model.ProductQuantity
 
 class ProductData(
     private val repo: ProductRepo
 ) {
     suspend fun getProductOnId(id: Long): Product? = repo.getProductOnId(id)
-    suspend fun getProductOnIdForeign(id: Long, invoke: (Product?, ProductBaseSpecs?, DeliveryProcess?) -> Unit) {
+    suspend fun getProductOnIdForeign(id: Long, invoke: (Product?, ProductBaseSpecs?, ProductQuantity?, DeliveryProcess?) -> Unit) {
         repo.getProductOnIdForeign(id, invoke)
     }
     //suspend fun getProductsOnCato(catoId: Long): List<Product> = repo.getProductsOnCato(catoId)

@@ -42,6 +42,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ramo.ebuy.data.model.ProductExtraSpecQuantity
+import com.ramo.ebuy.data.model.ProductQuantitySpec
 import com.ramo.ebuy.data.model.ProductSpecs
 import com.ramo.ebuy.data.model.ProductSpecsExtra
 import com.ramo.ebuy.data.model.SpecExtra
@@ -326,7 +328,7 @@ fun ProductSellingSpecsScreen(
                             navigator.navigateTo(RootComponent.Configuration.ProductSellingConditionRoute)
                         }
                     }
-                    ProductSellingSpecForEditItem("Quantities", state.productSpecs.quantityEditStr, theme) {
+                    ProductSellingSpecForEditItem("Quantities", state.productQuantity.quantityEditStr, theme) {
                         scope.launch {
                             navigator.navigateTo(RootComponent.Configuration.ProductSellingQuantityRoute)
                         }
@@ -766,7 +768,7 @@ fun ProductSellingCustomSpecExtraScreen(
                             .padding(horizontal = 10.dp, vertical = 5.dp)
                     ) {
                         Text(modifier = Modifier.width(130.dp), text = it.labelExtra, color = theme.textGrayColor)
-                        Text(modifier = Modifier.weight(1F), text = it.specExtra.joinToString("\n"){ it1 -> it1.labelSpec }, color = theme.textColor)
+                        Text(modifier = Modifier.weight(1F), text = it.specExtra.joinToString("\n") { it1 -> it1.labelSpec }, color = theme.textColor)
                         Image(
                             modifier = Modifier
                                 .width(40.dp)
@@ -800,7 +802,7 @@ fun ProductSellingCustomSpecExtraScreen(
 }
 
 @Composable
-fun ProductSellingCustomSpecExtraListScreen(
+fun ProductSellingCustomSpecListScreen(
     navigator: Navigator,
     customSpecExtraIndex: Int,
     theme: Theme = koinInject(),
@@ -819,10 +821,21 @@ fun ProductSellingCustomSpecExtraListScreen(
     val customSpecExtra = remember {
         mutableStateOf(
             if (customSpecExtraIndex == -1) {
-                ProductSpecsExtra("", listOf(SpecExtra("", -1F,1, 1, "")))
+                ProductSpecsExtra("", arrayOf(SpecExtra("0", "", -1F)))
             } else {
                 state.productSpecs.specsExtra.getOrElse(customSpecExtraIndex) {
-                    ProductSpecsExtra("", listOf(SpecExtra("", -1F,1, 1,"")))
+                    ProductSpecsExtra("", arrayOf(SpecExtra("0", "", -1F)))
+                }
+            }
+        )
+    }
+    val availabilityQuantity = remember {
+        mutableStateOf(
+            if (customSpecExtraIndex == -1) {
+                ProductQuantitySpec(specExtraQuantity = arrayOf(ProductExtraSpecQuantity("0")))
+            } else {
+                state.productQuantity.specsQuantity.getOrElse(customSpecExtraIndex) {
+                    ProductQuantitySpec(specExtraQuantity = arrayOf(ProductExtraSpecQuantity("0")))
                 }
             }
         )
@@ -835,7 +848,7 @@ fun ProductSellingCustomSpecExtraListScreen(
                 .background(color = theme.background)
         ) {
             ProductSellingSpecsHeadBar("Custom Listed Specific", theme) {
-                viewModel.addOrEditCustomSpecExtra(customSpecExtra.value, customSpecExtraIndex)
+                viewModel.addOrEditCustomSpecExtra(customSpecExtra.value, availabilityQuantity.value, customSpecExtraIndex)
                 scope.launch {
                     navigator.goBack()
                 }
@@ -866,6 +879,7 @@ fun ProductSellingCustomSpecExtraListScreen(
             Spacer(Modifier.height(20.dp))
             LazyColumn {
                 itemsIndexed(customSpecExtra.value.specExtra) { i, spec ->
+                    val specQuan = availabilityQuantity.value.specExtraQuantity[i]
                     Row(
                         Modifier
                             .fillMaxWidth()
@@ -879,7 +893,7 @@ fun ProductSellingCustomSpecExtraListScreen(
                                 onValueChange = { change ->
                                     customSpecExtra.value.specExtra.toMutableList().apply {
                                         getOrNull(i)?.labelSpec = change
-                                    }.also {
+                                    }.toTypedArray().also {
                                         customSpecExtra.value = customSpecExtra.value.copy(specExtra = it, dummy = customSpecExtra.value.dummy + 1)
                                     }
                                 },
@@ -911,8 +925,9 @@ fun ProductSellingCustomSpecExtraListScreen(
                                                 }
                                                 priceSpecEditStr = change
                                             }
-                                        }.also {
-                                            customSpecExtra.value = customSpecExtra.value.copy(specExtra = it, dummy = customSpecExtra.value.dummy + 1)
+                                        }.toTypedArray().also {
+                                            customSpecExtra.value =
+                                                customSpecExtra.value.copy(specExtra = it, dummy = customSpecExtra.value.dummy + 1)
                                         }
                                     },
                                     shape = RoundedCornerShape(12.dp),
@@ -933,26 +948,28 @@ fun ProductSellingCustomSpecExtraListScreen(
                                 )
                                 OutlinedTextField(
                                     modifier = Modifier.weight(1F).padding(horizontal = 5.dp),
-                                    value = spec.quantityEditStr,
+                                    value = specQuan.quantityEditStr,
                                     onValueChange = { change ->
-                                        customSpecExtra.value.specExtra.toMutableList().apply {
+                                        availabilityQuantity.value.specExtraQuantity.toMutableList().apply {
                                             getOrNull(i)?.apply f@{
                                                 change.toIntOrNull()?.let { it1 ->
-                                                    quantity = it1
+                                                    this@f.specQuantity = it1
+                                                    this@f.specQuantityAvailable = viewModel.availableSpecQuantity(it1, customSpecExtraIndex, i)
                                                 }
                                                 quantityEditStr = change
                                             }
-                                        }.also {
-                                            customSpecExtra.value = customSpecExtra.value.copy(specExtra = it, dummy = customSpecExtra.value.dummy + 1)
+                                        }.toTypedArray().also {
+                                            availabilityQuantity.value =
+                                                availabilityQuantity.value.copy(specExtraQuantity = it, dummy = customSpecExtra.value.dummy + 1)
                                         }
                                     },
                                     shape = RoundedCornerShape(12.dp),
                                     //placeholder = { Text(text = "Spec Quantity", fontSize = 14.sp) },
                                     label = { Text(text = "Spec Quantity", fontSize = 14.sp) },
-                                    isError = spec.quantityEditStr.length > 12,
+                                    isError = viewModel.isSpecQuantityError(specQuan.specQuantity, customSpecExtraIndex, i),
                                     supportingText = {
                                         Text(
-                                            text = "${spec.quantityEditStr.length} / 12",
+                                            text = "The new quantity is smaller than the previous one",
                                             modifier = Modifier.fillMaxWidth(),
                                             color = theme.textHintColor,
                                             textAlign = TextAlign.End,
@@ -971,7 +988,7 @@ fun ProductSellingCustomSpecExtraListScreen(
                                     .height(40.dp).clickable {
                                         customSpecExtra.value.specExtra.toMutableList().apply {
                                             removeAt(i)
-                                        }.also {
+                                        }.toTypedArray().also {
                                             customSpecExtra.value = customSpecExtra.value.copy(specExtra = it)
                                         }
                                     }
@@ -988,9 +1005,14 @@ fun ProductSellingCustomSpecExtraListScreen(
                     Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(modifier = Modifier.clickable {
                             customSpecExtra.value.specExtra.toMutableList().apply {
-                                add(SpecExtra("", -1F))
-                            }.also {
+                                add(SpecExtra("${customSpecExtra.value.specExtra}", "0", -1F))
+                            }.toTypedArray().also {
                                 customSpecExtra.value = customSpecExtra.value.copy(specExtra = it)
+                            }
+                            availabilityQuantity.value.specExtraQuantity.toMutableList().apply {
+                                add(ProductExtraSpecQuantity("${customSpecExtra.value.specExtra}"))
+                            }.toTypedArray().also {
+                                availabilityQuantity.value = availabilityQuantity.value.copy(specExtraQuantity = it)
                             }
                         }.padding(15.dp), text = "ADD SECTION", color = theme.primary)
                     }
@@ -1135,14 +1157,33 @@ fun ProductSellingQuantityScreen(
                     navigator.goBack()
                 }
             }
-            ProductSellingSpecEditItemFull(
-                "Product Quantities",
-                state.productSpecs.quantityEditStr,
-                KeyboardType.Text,
-                12,
-                theme
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 10.dp, vertical = 5.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                viewModel.setQuantity(it)
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = state.productQuantity.quantityEditStr,
+                    onValueChange = { change ->
+                        viewModel.setQuantity(change)
+                    },
+                    shape = RoundedCornerShape(12.dp),
+                    placeholder = { Text(text = "Enter Product Quantities", fontSize = 14.sp) },
+                    label = { Text(text = "Product Quantities", fontSize = 14.sp) },
+                    isError = viewModel.isQuantityError(state.productQuantity.baseQuantity),
+                    supportingText = {
+                        Text(
+                            text = "The new quantity is smaller than the previous one",
+                            modifier = Modifier.fillMaxWidth(),
+                            color = theme.textHintColor,
+                            textAlign = TextAlign.End,
+                        )
+                    },
+                    colors = theme.outlinedTextFieldStyle(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                )
             }
             Text("Tip: If Item Listed Specifics quantities added, this value will be ignored", color = theme.textHintColor)
         }
@@ -1195,7 +1236,12 @@ fun ProductShippingScreen(
                 ProductSellingSpecForEditItem("Package Details", state.deliveryProcess.sizePhys, theme) {
 
                 }
-                ProductSellingSpecForSubEditItem("Shipping Service", state.deliveryProcess.shippingService, state.deliveryProcess.durationStr, theme) {
+                ProductSellingSpecForSubEditItem(
+                    "Shipping Service",
+                    state.deliveryProcess.shippingService,
+                    state.deliveryProcess.durationStr,
+                    theme
+                ) {
 
                 }
                 ProductSellingSpecForEditItem("Shipping Coast", state.deliveryProcess.deliveryCostStr, theme) {
@@ -1273,6 +1319,7 @@ fun LazyListScope.ProductSellingSpecForEditItem(specTitle: String, spec: String,
         Text(spec, color = theme.primary)
     }
 }
+
 fun LazyListScope.ProductSellingSpecForSubEditItem(specTitle: String, spec: String, specSub: String, theme: Theme, onClick: () -> Unit) = item {
     /*if (spec.isEmpty()) {
         return

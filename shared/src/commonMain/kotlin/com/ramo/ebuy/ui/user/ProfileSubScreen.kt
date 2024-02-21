@@ -20,36 +20,32 @@ import com.ramo.ebuy.global.navigation.Navigator
 import com.ramo.ebuy.global.navigation.RootComponent
 import com.ramo.ebuy.global.ui.LoadingScreen
 import com.ramo.ebuy.global.ui.OnLaunchScreenScope
-import com.ramo.ebuy.ui.common.BarSearchProcess
-import com.ramo.ebuy.ui.common.ProductMainSearch
+import com.ramo.ebuy.ui.common.BarCartScreen
+import com.ramo.ebuy.ui.common.BarWatchListScreen
+import com.ramo.ebuy.ui.common.ProductsUserCart
+import com.ramo.ebuy.ui.common.ProductsWatchList
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 @Composable
-fun SearchProcessScreen(
+fun WatchlistScreen(
     navigator: Navigator,
-    search: String,
-    typeSearch: Int,
     theme: Theme = koinInject(),
     stater: Stater = koinInject(),
     project: Project = koinInject(),
-    viewModel: SearchProcessViewModel = MokoModel {
-        SearchProcessViewModel(project, stater.stateSearchProcessModel.copy()) {
-            apply {
-                stater.stateSearchProcess = this@apply
-            }
-        }
+    viewModel: ProfileSubViewModel = MokoModel {
+        ProfileSubViewModel(project)
     }
 ) {
     val scope = rememberCoroutineScope()
     val state by viewModel.uiState.collectAsState()
 
     OnLaunchScreenScope {
-        viewModel.loadData(search, typeSearch)
+        viewModel.displayWatchList()
     }
     Scaffold { pad ->
         Column(Modifier.fillMaxSize().padding(pad)) {
-            BarSearchProcess(theme, search) {
+            BarWatchListScreen(theme) {
                 when (it) {
                     0 -> {
                         scope.launch {
@@ -58,14 +54,58 @@ fun SearchProcessScreen(
                     }
                     1 -> {
                         scope.launch {
+                            stater.stateHomeViewModel?.copy(selectedPage = 2)?.apply {
+                                stater.stateHomeViewModel = this
+                            }
                             navigator.goBack()
                         }
                     }
                 }
             }
             Spacer(modifier = Modifier.height(10.dp))
-            ProductMainSearch(state.products, {
-                viewModel.changeWatchList(it.isWatchlist, it.id)
+            ProductsWatchList(state.productsWatchList) {
+                stater.getScreenCount(RootComponent.Configuration.ProductDetailsRoute::class.java).let { count ->
+                    RootComponent.Configuration.ProductDetailsRoute(it.id, count + 1).also { route ->
+                        scope.launch {
+                            stater.writeArguments(route = route, screenCount = count + 1)
+                            navigator.navigateTo(route)
+                        }
+                    }
+                }
+            }
+        }
+        LoadingScreen(state.isProcess, theme)
+    }
+
+}
+
+
+@Composable
+fun CartScreen(
+    navigator: Navigator,
+    theme: Theme = koinInject(),
+    stater: Stater = koinInject(),
+    project: Project = koinInject(),
+    viewModel: ProfileSubViewModel = MokoModel {
+        ProfileSubViewModel(project)
+    }
+) {
+    val scope = rememberCoroutineScope()
+    val state by viewModel.uiState.collectAsState()
+
+    OnLaunchScreenScope {
+        viewModel.loadCartProducts()
+    }
+    Scaffold { pad ->
+        Column(Modifier.fillMaxSize().padding(pad)) {
+            BarCartScreen(theme) {
+                scope.launch {
+                    navigator.goBack()
+                }
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+            ProductsUserCart(state.productsWatchList, { item, it ->
+                viewModel.cartQuantityChanged(item, it)
             }) {
                 stater.getScreenCount(RootComponent.Configuration.ProductDetailsRoute::class.java).let { count ->
                     RootComponent.Configuration.ProductDetailsRoute(it.id, count + 1).also { route ->

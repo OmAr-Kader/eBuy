@@ -98,6 +98,33 @@ fun ProductMainSearch(
 }
 
 @Composable
+fun ProductsWatchList(
+    list: List<Product>,
+    onClick: (Product) -> Unit,
+) {
+    LazyColumn {
+        items(list) { item ->
+            ProductWatchListItem(item, onClick)
+        }
+    }
+}
+
+
+@Composable
+fun ProductsUserCart(
+    list: List<Product>,
+    onQuantityChanged: (Product, Int) -> Unit,
+    onClick: (Product) -> Unit,
+) {
+    LazyColumn {
+        items(list) { item ->
+            ProductUserCartItem(item, onQuantityChanged, onClick)
+        }
+    }
+}
+
+
+@Composable
 fun ExpandableCato(
     id: Long,
     list: List<Category>,

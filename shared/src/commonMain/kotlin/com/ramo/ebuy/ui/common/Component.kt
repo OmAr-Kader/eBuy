@@ -366,6 +366,107 @@ fun BarProductScreen(
     }
 }
 
+
+@Composable
+fun BarWatchListScreen(
+    theme: Theme = koinInject(),
+    onClick: (Int) -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .background(theme.background)
+            .padding(start = 10.dp, end = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Image(
+                modifier = Modifier
+                    .width(48.dp)
+                    .height(48.dp)
+                    .clip(CircleShape)
+                    .clickable {
+                        onClick(0)
+                    }
+                    .padding(7.dp),
+                imageVector = rememberArrowBack(theme.textColor),
+                contentScale = ContentScale.Fit,
+                contentDescription = null,
+            )
+            Spacer(Modifier.width(5.dp))
+            Text("WatchList", color = theme.textColor, fontSize = 22.sp)
+        }
+        Row {
+            Image(
+                modifier = Modifier
+                    .clickable {
+                        onClick(1)
+                    }
+                    .width(40.dp)
+                    .height(40.dp)
+                    .background(color = theme.backDark, shape = CircleShape)
+                    .clip(CircleShape)
+                    .padding(8.dp),
+                imageVector = rememberSearch(theme.textColor),
+                contentScale = ContentScale.Fit,
+                contentDescription = null,
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Image(
+                modifier = Modifier
+                    .clickable {
+                        onClick(2)
+                    }
+                    .width(40.dp)
+                    .height(40.dp)
+                    .background(color = theme.backDark, shape = CircleShape)
+                    .clip(CircleShape)
+                    .padding(8.dp),
+                imageVector = rememberShoppingCart(theme.textColor),
+                colorFilter = ColorFilter.tint(theme.textColor),
+                contentScale = ContentScale.Fit,
+                contentDescription = null,
+            )
+        }
+    }
+}
+
+@Composable
+fun BarCartScreen(
+    theme: Theme = koinInject(),
+    onBack: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .background(theme.background)
+            .padding(start = 10.dp, end = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Image(
+                modifier = Modifier
+                    .width(48.dp)
+                    .height(48.dp)
+                    .clip(CircleShape)
+                    .clickable {
+                        onBack()
+                    }
+                    .padding(7.dp),
+                imageVector = rememberArrowBack(theme.textColor),
+                contentScale = ContentScale.Fit,
+                contentDescription = null,
+            )
+            Spacer(Modifier.width(5.dp))
+            Text("eBuy shopping cart", color = theme.textColor, fontSize = 22.sp)
+        }
+    }
+}
+
 @Composable
 fun SearchBarMainScreen(
     theme: Theme = koinInject(),

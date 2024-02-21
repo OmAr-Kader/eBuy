@@ -68,6 +68,7 @@ fun ProductDetailsScreen(
     val state by viewModel.uiState.collectAsState()
     val scope = rememberCoroutineScope()
     OnLaunchScreen {
+        android.util.Log.w("WW$$$$ ", productId.toString())
         viewModel.loadProDetails(productId)
     }
     Scaffold { pad ->
@@ -265,7 +266,7 @@ fun LazyListScope.ProductDetailsExtraSpecs(viewModel: ProductDetailsViewModel, s
     }
 }
 
-fun LazyListScope.ProductDetailsActions(@Suppress("UNUSED_PARAMETER") viewModel: ProductDetailsViewModel, theme: Theme) = item {
+fun LazyListScope.ProductDetailsActions(viewModel: ProductDetailsViewModel, theme: Theme) = item {
     Column(Modifier.fillMaxWidth().padding(horizontal = 15.dp)) {
         OutlinedButton(
             modifier = Modifier.fillMaxWidth().height(50.dp),
@@ -299,7 +300,7 @@ fun LazyListScope.ProductDetailsActions(@Suppress("UNUSED_PARAMETER") viewModel:
                 color = theme.primary,
             ),
             onClick = {
-
+                viewModel.addToCart()
             },
         ) {
             Row {

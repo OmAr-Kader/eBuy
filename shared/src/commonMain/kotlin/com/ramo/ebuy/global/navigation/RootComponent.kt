@@ -70,6 +70,8 @@ class RootComponent(
                 is Configuration.CategoryCreatingRoute -> Screen.CategoryCreatingRoute(newNav)
                 is Configuration.AdminHomeRoute -> Screen.AdminHomeRoute(newNav)
                 is Configuration.SearchProcessRoute -> Screen.SearchProcessRoute(newNav, config.searchText, config.typeSearch)
+                is Configuration.WatchListRoute -> Screen.WatchListRoute(newNav)
+                is Configuration.CartRoute -> Screen.CartRoute(newNav)
             }
         }
     }
@@ -102,6 +104,8 @@ class RootComponent(
         data class CategoryCreatingRoute(val component: Navigator) : Screen()
         data class AdminHomeRoute(val component: Navigator) : Screen()
         data class SearchProcessRoute(val component: Navigator, val searchText: String, val typeSearch: Int) : Screen()
+        data class WatchListRoute(val component: Navigator) : Screen()
+        data class CartRoute(val component: Navigator) : Screen()
     }
 
     @Serializable
@@ -192,5 +196,10 @@ class RootComponent(
             @SerialName("count_screen_search") val countS: Int
         ) : Configuration()
 
+        @Serializable
+        data object WatchListRoute : Configuration()
+
+        @Serializable
+        data object CartRoute : Configuration()
     }
 }

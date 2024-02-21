@@ -121,6 +121,11 @@ class SearchProcessViewModel(
         }
     }
 
+    override fun onCleared() {
+        uiState.value.copy(products = emptyList()).paste()
+        super.onCleared()
+    }
+
 }
 
 

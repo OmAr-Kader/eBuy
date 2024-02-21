@@ -46,7 +46,6 @@ import com.ramo.ebuy.global.base.Theme
 import com.ramo.ebuy.global.navigation.Navigator
 import com.ramo.ebuy.global.navigation.RootComponent
 import com.ramo.ebuy.global.ui.HotBar
-import com.ramo.ebuy.global.ui.LoadingScreen
 import com.ramo.ebuy.global.ui.OnLaunchScreen
 import com.ramo.ebuy.global.ui.OnLaunchScreenScope
 import com.ramo.ebuy.global.ui.PagerTab
@@ -59,6 +58,7 @@ import com.ramo.ebuy.global.ui.collapse.rememberCollapsingToolbarScaffoldState
 import com.ramo.ebuy.global.ui.collapse.rememberCollapsingToolbarState
 import com.ramo.ebuy.global.ui.rememberProfile
 import com.ramo.ebuy.global.util.hotBarData
+import com.ramo.ebuy.global.util.ifEmptyOrNull
 import com.ramo.ebuy.global.util.profileData
 import com.ramo.ebuy.global.util.profileIcons
 import com.ramo.ebuy.global.util.urlCheckIfEmpty
@@ -88,7 +88,7 @@ fun HomeSubScreen(
     val catoList = state.circleCato
 
     OnLaunchScreen {
-        //viewModel.loadMainData()
+        viewModel.loadMainData()
     }
     Box(Modifier.fillMaxSize()) {
         Column(
@@ -141,23 +141,23 @@ fun HomeSubScreen(
             }
         }
         BarMainScreen(offsetY)
-        LoadingScreen(isLoading = state.isProcess, theme)
     }
 }
 
 
 @Composable
 fun ProfileSubScreen(
-    //navigator: Navigator,
+    navigator: Navigator,
     viewModel: HomeViewModel,
     theme: Theme = koinInject()
 ) {
+    val scope = rememberCoroutineScope()
     val state by viewModel.uiState.collectAsState()
-    OnLaunchScreenScope {
-        viewModel.loadUserData()
-    }
     val painter = state.user?.image.urlCheckIfEmpty?.let {
         rememberImagePainter(url = it)
+    }
+    OnLaunchScreen {
+        viewModel.loadUserData()
     }
     Column(Modifier.fillMaxSize()) {
         BarMainScreen(-112)
@@ -193,7 +193,7 @@ fun ProfileSubScreen(
                         }
                     }
                     Spacer(modifier = Modifier.height(15.dp))
-                    Text(modifier = Modifier.padding(), text = "User Name", color = theme.textColor, fontSize = 16.sp)
+                    Text(modifier = Modifier.padding(), text = state.user?.name.ifEmptyOrNull { state.user?.email ?: "User Name" }, color = theme.textColor, fontSize = 16.sp)
                 }
             }
             itemsIndexed(profileData) { i, it ->
@@ -203,7 +203,9 @@ fun ProfileSubScreen(
                         i.profileIcons(theme.textGrayColor)
                     },
                 ) {
-
+                    scope.launch {
+                        navigator.navigateTo(RootComponent.Configuration.WatchListRoute)
+                    }
                 }
                 if (i == 0 || i == 6) {
                     Divider(color = theme.textColor, modifier = Modifier.padding(horizontal = 30.dp))
@@ -225,12 +227,20 @@ fun SearchSubScreen(
     val pagerState = rememberPagerState(initialPage = 0, pageCount = { 2 })
     val focusRequester = remember { FocusRequester() }
     OnLaunchScreenScope {
-        viewModel.loadSearchHistory {
+        if (state.isSearchNeedRefresh) {
+            viewModel.setIsProcess(true)
+            viewModel.loadSearchHistory {
+                scope.launch {
+                    focusRequester.requestFocus()
+                }
+            }
+        } else {
             focusRequester.requestFocus()
         }
     }
 
     fun onSearchAction(searchText: String, typeSearch: Int) {
+        viewModel.makeIsSearchNeedRefresh()
         stater.getScreenCount(RootComponent.Configuration.SearchProcessRoute::class.java).let { count ->
             RootComponent.Configuration.SearchProcessRoute(searchText, typeSearch, count + 1).also { route ->
                 scope.launch {

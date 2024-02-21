@@ -14,7 +14,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Favorite
@@ -22,9 +24,12 @@ import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,6 +40,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
@@ -43,6 +49,8 @@ import androidx.compose.ui.unit.sp
 import com.ramo.ebuy.data.model.Category
 import com.ramo.ebuy.data.model.Product
 import com.ramo.ebuy.global.base.Theme
+import com.ramo.ebuy.global.base.outlinedTextFieldStyle
+import com.ramo.ebuy.global.ui.rememberCorrect
 import com.seiko.imageloader.rememberImagePainter
 import org.koin.compose.koinInject
 
@@ -235,6 +243,236 @@ fun ProductMainSearchItem(
                         colorFilter = ColorFilter.tint(theme.primary),
                         contentScale = ContentScale.Fit,
                         contentDescription = "Expandable Category Image",
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ProductWatchListItem(
+    item: Product,
+    onClick: (Product) -> Unit,
+    theme: Theme = koinInject(),
+) {
+    val painter = rememberImagePainter(url = item.imageUris.firstOrNull() ?: "")
+    Row(
+        modifier = Modifier.clickable {
+            onClick(item)
+        }
+    ) {
+        Image(
+            modifier = Modifier
+                .width(120.dp)
+                .height(120.dp)
+                .padding(10.dp)
+                .clip(RoundedCornerShape(20.dp))
+                .background(theme.backDark),
+            painter = painter,
+            contentDescription = ""
+        )
+        Column(
+            modifier = Modifier.padding(10.dp)
+        ) {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = item.title,
+                color = theme.textColor,
+                fontSize = 14.sp,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = item.condition,
+                color = theme.textHintColor,
+                fontSize = 12.sp,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis,
+            )
+            item.timeGap?.let {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = "$" + item.offer.toString(),
+                    color = theme.textColor,
+                    fontSize = 14.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = buildAnnotatedString {
+                            withStyle(
+                                style = SpanStyle(
+                                    textDecoration = TextDecoration.LineThrough,
+                                    color = theme.textHintColor,
+                                    fontSize = 12.sp
+                                )
+                            ) { // AnnotatedString.Builder
+                                append("$" + item.price.toString())
+                            }
+                            append("." + item.discountPer + "% OFF")
+                        },
+                        //text = gap.days.toString() + "d " + gap.hours.toString() + "h",
+                        color = theme.textHintColor,
+                        fontSize = 12.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            } ?: run {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "$" + item.price.toString(),
+                        color = theme.textColor,
+                        fontSize = 14.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ProductUserCartItem(
+    item: Product,
+    onQuantityChanged: (Product, Int) -> Unit,
+    onClick: (Product) -> Unit,
+    theme: Theme = koinInject(),
+) {
+    val stateQuantity = remember {
+        mutableStateOf(item.cartQuantity.toString())
+    }
+    val notSame = stateQuantity.value.toIntOrNull() != item.cartQuantity
+    val painter = rememberImagePainter(url = item.imageUris.firstOrNull() ?: "")
+    Row(
+        modifier = Modifier.clickable {
+            onClick(item)
+        }
+    ) {
+        Column {
+            Image(
+                modifier = Modifier
+                    .width(120.dp)
+                    .height(120.dp)
+                    .padding(10.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(theme.backDark),
+                painter = painter,
+                contentDescription = ""
+            )
+            Spacer(Modifier.height(30.dp))
+            Row(
+                modifier = Modifier
+                    .width(120.dp),
+                horizontalArrangement = Arrangement.SpaceAround
+            ) {
+                OutlinedTextField(
+                    modifier = Modifier.width(60.dp),
+                    value = stateQuantity.value,
+                    onValueChange = { name ->
+                        stateQuantity.value = name
+                    },
+                    shape = RoundedCornerShape(12.dp),
+                    //placeholder = { Text(text = "Enter Your Name", fontSize = 14.sp) },
+                    label = { Text(text = "Quantity", fontSize = 14.sp) },
+                    isError = stateQuantity.value.toIntOrNull() == null,
+                    singleLine = true,
+                    colors = theme.outlinedTextFieldStyle(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                )
+                Image(
+                    modifier = Modifier
+                        .clickable {
+                            stateQuantity.value.toIntOrNull()?.let {
+                                if (it != item.cartQuantity) {
+                                    onQuantityChanged(item, it)
+                                }
+                            }
+                        }
+                        .width(40.dp)
+                        .height(40.dp)
+                        .background(color = if (notSame) Color.Green else theme.backDark, shape = CircleShape)
+                        .clip(RoundedCornerShape(5.dp))
+                        .padding(8.dp),
+                    imageVector = rememberCorrect(if (notSame) Color.Black else theme.textColor),
+                    contentScale = ContentScale.Fit,
+                    contentDescription = null,
+                )
+            }
+        }
+        Column(
+            modifier = Modifier.padding(10.dp)
+        ) {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = item.title,
+                color = theme.textColor,
+                fontSize = 14.sp,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis,
+            )
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = item.condition,
+                color = theme.textHintColor,
+                fontSize = 12.sp,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis,
+            )
+            item.timeGap?.let {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = "$" + item.offer.toString(),
+                    color = theme.textColor,
+                    fontSize = 14.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = buildAnnotatedString {
+                            withStyle(
+                                style = SpanStyle(
+                                    textDecoration = TextDecoration.LineThrough,
+                                    color = theme.textHintColor,
+                                    fontSize = 12.sp
+                                )
+                            ) { // AnnotatedString.Builder
+                                append("$" + item.price.toString())
+                            }
+                            append("." + item.discountPer + "% OFF")
+                        },
+                        //text = gap.days.toString() + "d " + gap.hours.toString() + "h",
+                        color = theme.textHintColor,
+                        fontSize = 12.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            } ?: run {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "$" + item.price.toString(),
+                        color = theme.textColor,
+                        fontSize = 14.sp,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
             }

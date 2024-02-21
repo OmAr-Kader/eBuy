@@ -31,6 +31,7 @@ import com.ramo.ebuy.global.base.Theme
 import com.ramo.ebuy.global.navigation.MokoModel
 import com.ramo.ebuy.global.navigation.Navigator
 import com.ramo.ebuy.global.navigation.RootComponent
+import com.ramo.ebuy.global.navigation.RootComponent.Screen
 import com.ramo.ebuy.global.ui.OnLaunchScreen
 import com.ramo.ebuy.global.ui.OnLaunchScreenScope
 import com.ramo.ebuy.global.ui.rememberEbuy
@@ -41,8 +42,8 @@ import com.ramo.ebuy.ui.product.ProductConditionMainScreen
 import com.ramo.ebuy.ui.product.ProductDetailsScreen
 import com.ramo.ebuy.ui.product.ProductSellingCategoryScreen
 import com.ramo.ebuy.ui.product.ProductSellingConditionScreen
-import com.ramo.ebuy.ui.product.ProductSellingCustomSpecExtraListScreen
 import com.ramo.ebuy.ui.product.ProductSellingCustomSpecExtraScreen
+import com.ramo.ebuy.ui.product.ProductSellingCustomSpecListScreen
 import com.ramo.ebuy.ui.product.ProductSellingCustomSpecScreen
 import com.ramo.ebuy.ui.product.ProductSellingMPNScreen
 import com.ramo.ebuy.ui.product.ProductSellingMadeInScreen
@@ -59,8 +60,10 @@ import com.ramo.ebuy.ui.product.ProductShippingCostScreen
 import com.ramo.ebuy.ui.product.ProductShippingScreen
 import com.ramo.ebuy.ui.sign.LogInEmailScreen
 import com.ramo.ebuy.ui.sign.LogInScreen
+import com.ramo.ebuy.ui.user.CartScreen
 import com.ramo.ebuy.ui.user.HomeUserScreen
 import com.ramo.ebuy.ui.user.SearchProcessScreen
+import com.ramo.ebuy.ui.user.WatchlistScreen
 import io.github.jan.supabase.gotrue.SessionStatus
 import kotlinx.coroutines.launch
 import org.koin.compose.KoinApplication
@@ -73,43 +76,50 @@ fun Main(root: RootComponent) {
     ) {
         val childStack by root.childStack.subscribeAsState()
         val theme: Theme = koinInject()
+        val project: Project = koinInject()
+        val stater: Stater = koinInject()
         MyApplicationTheme(theme = theme) {
             Surface(
                 modifier = Modifier.fillMaxSize(),
                 color = theme.background
             ) {
+                val appViewModel: AppViewModel = MokoModel {
+                    AppViewModel(project, stater)
+                }
                 Children(
                     stack = childStack,
                     animation = stackAnimation(slide())
                 ) { child ->
                     when (val instance = child.instance) {
-                        is RootComponent.Screen.SplashRoute -> SplashScreen(instance.component)
-                        is RootComponent.Screen.LogInRoute -> LogInScreen(instance.component)
-                        is RootComponent.Screen.LogInEmailRoute -> LogInEmailScreen(instance.component, instance.isRegister)
-                        is RootComponent.Screen.HomeUserRoute -> HomeUserScreen(instance.component)
-                        is RootComponent.Screen.ProductDetailsRoute -> ProductDetailsScreen(instance.component, instance.productId)
-                        is RootComponent.Screen.ProductSellingRoute -> ProductSellingScreen(instance.component, instance.productId, instance.isAdmin)
-                        is RootComponent.Screen.ProductConditionMainRoute -> ProductConditionMainScreen(instance.component)
-                        is RootComponent.Screen.ProductSellingPriceRoute -> ProductSellingPriceScreen(instance.component)
-                        is RootComponent.Screen.ProductSellingTitleRoute -> ProductSellingTitleScreen(instance.component)
-                        is RootComponent.Screen.ProductSellingSpecRoute -> ProductSellingSpecsScreen(instance.component, instance.isAdmin)
-                        is RootComponent.Screen.ProductSellingCategoryRoute -> ProductSellingCategoryScreen(instance.component)
-                        is RootComponent.Screen.ProductSellingConditionRoute -> ProductSellingConditionScreen(instance.component)
-                        is RootComponent.Screen.ProductSellingMadeInRoute -> ProductSellingMadeInScreen(instance.component)
-                        is RootComponent.Screen.ProductSellingPlatformRoute -> ProductSellingPlatformScreen(instance.component)
-                        is RootComponent.Screen.ProductSellingRatingRoute -> ProductSellingRatingScreen(instance.component)
-                        is RootComponent.Screen.ProductSellingReleaseYearRoute -> ProductSellingReleaseYearScreen(instance.component)
-                        is RootComponent.Screen.ProductSellingCustomSpecRoute -> ProductSellingCustomSpecScreen(instance.component, instance.index)
-                        is RootComponent.Screen.ProductSellingMPNRoute -> ProductSellingMPNScreen(instance.component)
-                        is RootComponent.Screen.ProductSellingUPCRoute -> ProductSellingUPCScreen(instance.component)
-                        is RootComponent.Screen.ProductSellingQuantityRoute -> ProductSellingQuantityScreen(instance.component)
-                        is RootComponent.Screen.ProductSellingCustomSpecExtraRoute -> ProductSellingCustomSpecExtraScreen(instance.component)
-                        is RootComponent.Screen.ProductSellingCustomSpecExtraListRoute -> ProductSellingCustomSpecExtraListScreen(instance.component, instance.index)
-                        is RootComponent.Screen.ProductShippingRoute -> ProductShippingScreen(instance.component)
-                        is RootComponent.Screen.ProductShippingCostRoute -> ProductShippingCostScreen(instance.component)
-                        is RootComponent.Screen.CategoryCreatingRoute -> CategoryCreatingScreen(instance.component)
-                        is RootComponent.Screen.AdminHomeRoute -> AdminHomeScreen(instance.component)
-                        is RootComponent.Screen.SearchProcessRoute -> SearchProcessScreen(instance.component, instance.searchText, instance.typeSearch)
+                        is Screen.SplashRoute -> SplashScreen(instance.component, appViewModel = appViewModel)
+                        is Screen.LogInRoute -> LogInScreen(instance.component)
+                        is Screen.LogInEmailRoute -> LogInEmailScreen(instance.component, instance.isRegister)
+                        is Screen.HomeUserRoute -> HomeUserScreen(instance.component)
+                        is Screen.ProductDetailsRoute -> ProductDetailsScreen(instance.component, instance.productId)
+                        is Screen.ProductSellingRoute -> ProductSellingScreen(instance.component, instance.productId, instance.isAdmin)
+                        is Screen.ProductConditionMainRoute -> ProductConditionMainScreen(instance.component)
+                        is Screen.ProductSellingPriceRoute -> ProductSellingPriceScreen(instance.component)
+                        is Screen.ProductSellingTitleRoute -> ProductSellingTitleScreen(instance.component)
+                        is Screen.ProductSellingSpecRoute -> ProductSellingSpecsScreen(instance.component, instance.isAdmin)
+                        is Screen.ProductSellingCategoryRoute -> ProductSellingCategoryScreen(instance.component)
+                        is Screen.ProductSellingConditionRoute -> ProductSellingConditionScreen(instance.component)
+                        is Screen.ProductSellingMadeInRoute -> ProductSellingMadeInScreen(instance.component)
+                        is Screen.ProductSellingPlatformRoute -> ProductSellingPlatformScreen(instance.component)
+                        is Screen.ProductSellingRatingRoute -> ProductSellingRatingScreen(instance.component)
+                        is Screen.ProductSellingReleaseYearRoute -> ProductSellingReleaseYearScreen(instance.component)
+                        is Screen.ProductSellingCustomSpecRoute -> ProductSellingCustomSpecScreen(instance.component, instance.index)
+                        is Screen.ProductSellingMPNRoute -> ProductSellingMPNScreen(instance.component)
+                        is Screen.ProductSellingUPCRoute -> ProductSellingUPCScreen(instance.component)
+                        is Screen.ProductSellingQuantityRoute -> ProductSellingQuantityScreen(instance.component)
+                        is Screen.ProductSellingCustomSpecExtraRoute -> ProductSellingCustomSpecExtraScreen(instance.component)
+                        is Screen.ProductSellingCustomSpecExtraListRoute -> ProductSellingCustomSpecListScreen(instance.component, instance.index)
+                        is Screen.ProductShippingRoute -> ProductShippingScreen(instance.component)
+                        is Screen.ProductShippingCostRoute -> ProductShippingCostScreen(instance.component)
+                        is Screen.CategoryCreatingRoute -> CategoryCreatingScreen(instance.component)
+                        is Screen.AdminHomeRoute -> AdminHomeScreen(instance.component)
+                        is Screen.SearchProcessRoute -> SearchProcessScreen(instance.component, instance.searchText, instance.typeSearch)
+                        is Screen.WatchListRoute -> WatchlistScreen(instance.component)
+                        is Screen.CartRoute -> CartScreen(instance.component)
                     }
                 }
             }
@@ -120,30 +130,30 @@ fun Main(root: RootComponent) {
 @Composable
 fun SplashScreen(
     navigator: Navigator,
-    project: Project = koinInject(),
     theme: Theme = koinInject(),
     stater: Stater = koinInject(),
-    viewModel: AppViewModel = MokoModel {
-        AppViewModel(project)
-    }
+    appViewModel: AppViewModel
 ) {
     val scope = rememberCoroutineScope()
-    val state by viewModel.uiState.collectAsState()
+    val state by appViewModel.uiState.collectAsState()
     OnLaunchScreenScope {
-        viewModel.init()
+        appViewModel.init()
     }
-    when(val sessionStatus = state.sessionStatus) {
+    when (val sessionStatus = state.sessionStatus) {
         is SessionStatus.Authenticated -> {
-            viewModel.fetchUser(sessionStatus.session).let { user ->
+            appViewModel.fetchUser(sessionStatus.session).let { user ->
+                appViewModel.cancelSession()
                 if (user != null) {
-                    stater.user = user
                     if (user.userType == 1) {
                         scope.launch {
                             navigator.navigateHome(RootComponent.Configuration.AdminHomeRoute)
                         }
                     } else {
-                        scope.launch {
-                            navigator.navigateHome(RootComponent.Configuration.HomeUserRoute)
+                        appViewModel.preLoadMainData { cato, products ->
+                            scope.launch {
+                                stater.stateHomeViewModel = stater.stateHomeModel.copy(circleCato = cato, productVer = products)
+                                navigator.navigateHome(RootComponent.Configuration.HomeUserRoute)
+                            }
                         }
                     }
                 } else {
@@ -153,6 +163,7 @@ fun SplashScreen(
                 }
             }
         }
+
         is SessionStatus.NotAuthenticated -> {
             OnLaunchScreen {
                 scope.launch {
@@ -160,6 +171,7 @@ fun SplashScreen(
                 }
             }
         }
+
         is SessionStatus.NetworkError -> {
             Scaffold { pad ->
                 Surface(
@@ -184,6 +196,7 @@ fun SplashScreen(
                 }
             }
         }
+
         is SessionStatus.LoadingFromStorage -> {
             Scaffold { pad ->
                 Surface(

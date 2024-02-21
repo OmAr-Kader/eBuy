@@ -4,12 +4,16 @@ import com.ramo.ebuy.data.model.Category
 import com.ramo.ebuy.data.model.DeliveryProcess
 import com.ramo.ebuy.data.model.Product
 import com.ramo.ebuy.data.model.ProductBaseSpecs
+import com.ramo.ebuy.data.model.ProductQuantity
+import com.ramo.ebuy.data.model.ProductQuantitySpec
 import com.ramo.ebuy.data.model.ProductSpecs
 import com.ramo.ebuy.data.model.ProductSpecsExtra
 import com.ramo.ebuy.data.model.User
 import com.ramo.ebuy.data.supaBase.deleteFile
 import com.ramo.ebuy.data.supaBase.uploadListFile
 import com.ramo.ebuy.data.util.rearrange
+import com.ramo.ebuy.data.util.rewriteExtraSpecs
+import com.ramo.ebuy.data.util.rewriteQuantity
 import com.ramo.ebuy.di.Project
 import com.ramo.ebuy.global.base.SUPA_STORAGE_PRODUCT
 import com.ramo.ebuy.global.navigation.BaseViewModel
@@ -33,22 +37,24 @@ class ProductSellingViewModel(
         }
         setIsProcess(true)
         launchBack {
-            project.productData.getProductOnId(productId)?.let { product ->
-                project.productSpecsData.getProductSpecsOnId(productId)?.let { productSpecs ->
-                    project.deliveryData.getDeliveryOnId(productId)?.let { delivery ->
-                        _uiState.update { state ->
-                            state.copy(
-                                product = product,
-                                productGet = product,
-                                productSpecs = productSpecs,
-                                productSpecsGet = productSpecs,
-                                deliveryProcess = delivery,
-                                deliveryProcessGet = delivery,
-                                isProcess = false
-                            ).paste()
-                        }
-                    }
-                } ?: setIsProcess(false)
+            project.productData.getProductOnIdForeign(productId) { product, productSpecs, productQuantity, delivery ->
+                if (product == null || productSpecs == null) {
+                    setIsProcess(false)
+                    return@getProductOnIdForeign
+                }
+                _uiState.update { state ->
+                    state.copy(
+                        product = product.copy(),
+                        productGet = product.copy(),
+                        productSpecs = productSpecs.copy(),
+                        productSpecsGet = productSpecs.copy(),
+                        productQuantity = productQuantity?.copy() ?: state.productQuantity,
+                        productQuantityGet = productQuantity?.copy(),
+                        deliveryProcess = delivery?.copy() ?: state.deliveryProcess,
+                        deliveryProcessGet = delivery?.copy(),
+                        isProcess = false
+                    ).paste()
+                }
             }
         }
     }
@@ -117,7 +123,7 @@ class ProductSellingViewModel(
         }
     }
 
-    fun addOrEditCustomSpecExtra(it: ProductSpecsExtra, customSpecExtraIndex: Int) {
+    fun addOrEditCustomSpecExtra(it: ProductSpecsExtra, itQuantity: ProductQuantitySpec, customSpecExtraIndex: Int) {
         _uiState.update { state ->
             state.productSpecs.specsExtra.toMutableList().apply {
                 if (customSpecExtraIndex == -1) {
@@ -128,7 +134,20 @@ class ProductSellingViewModel(
                     }
                 }
             }.let { newList ->
-                state.copy(productSpecs = state.productSpecs.copy(specsExtra = newList.toTypedArray())).paste()
+                state.productQuantity.specsQuantity.toMutableList().apply {
+                    if (customSpecExtraIndex == -1) {
+                        this@apply.add(itQuantity)
+                    } else {
+                        runCatching {
+                            this@apply[customSpecExtraIndex] = itQuantity
+                        }
+                    }
+                }.let { newListQuantity ->
+                    state.copy(
+                        productSpecs = state.productSpecs.copy(specsExtra = newList.toTypedArray()),
+                        productQuantity = state.productQuantity.copy(specsQuantity = newListQuantity.toTypedArray())
+                    ).paste()
+                }
             }
         }
     }
@@ -212,9 +231,59 @@ class ProductSellingViewModel(
         }
     }
 
+    val isSpecQuantityError: (Int, Int, Int) -> Boolean
+        get() = { quantity, index, i ->
+            uiState.value.let {
+                if (it.productQuantityGet == null) {
+                    false
+                } else {
+                    it.productQuantityGet.specsQuantity[index].specExtraQuantity[i].specQuantity < quantity
+                }
+            }
+        }
+
+    val availableSpecQuantity: (Int, Int, Int) -> Int
+        get() = { quantity, index, i ->
+            uiState.value.let {
+                if (it.productQuantityGet == null) {
+                    quantity
+                } else {
+                    quantity - it.productQuantityGet.specsQuantity[index].specExtraQuantity[i].specQuantity + it.productQuantityGet.baseQuantityAvailable
+                }
+            }
+        }
+
+    val isQuantityError: (Int) -> Boolean
+        get() = { quantity ->
+            uiState.value.let {
+                if (it.productQuantityGet == null) {
+                    false
+                } else {
+                    it.productQuantityGet.baseQuantity < quantity
+                }
+            }
+        }
+
+    val StateProductSelling.availableQuantity: (Int) -> Int
+        get() = { quantity ->
+            if (productQuantityGet == null) {
+                quantity
+            } else {
+                quantity - productQuantityGet.baseQuantity + productQuantityGet.baseQuantityAvailable
+            }
+        }
+
     fun setQuantity(it: String) {
         _uiState.update { state ->
-            state.copy(productSpecs = state.productSpecs.copy(quantityEditStr = it, quantity = it.toIntOrNull() ?: state.productSpecs.quantity))
+            (it.toIntOrNull() ?: state.productQuantity.baseQuantity).let { quantity ->
+                state.copy(
+                    productQuantity = state.productQuantity.copy(
+                        quantityEditStr = it,
+                        baseQuantity = quantity,
+                        baseQuantityAvailable = state.availableQuantity(quantity)
+                    )
+                )
+            }
         }
     }
 
@@ -256,24 +325,20 @@ class ProductSellingViewModel(
     }
 
     private fun StateProductSelling.doAddProduct(imagesUrls: List<String>, isAdmin: Boolean, invoke: () -> Unit, failed: () -> Unit) {
-        android.util.Log.w("WW", "4")
         publisherId { publisherId ->
             launchBack {
-                android.util.Log.w("WW", "5")
                 project.productData.addNewProduct(
                     product.copy(itemStatus = if (isAdmin) 0 else product.itemStatus, imageUris = imagesUrls.toTypedArray())
                 )?.let { pro ->
-                    android.util.Log.w("WW", "6")
-                    project.productSpecsData.addNewProductSpecs(productSpecs.copy(productId = pro.id, publisherId = publisherId))!!.let { _ ->
-                        android.util.Log.w("WW", "6")
+                    project.productSpecsData.addNewProductSpecs(productSpecs.copy(productId = pro.id, publisherId = publisherId))?.let { _ ->
                         if (isAdmin) {
                             invoke()
                         } else {
-                            android.util.Log.w("WW", "7")
-                            project.deliveryData.addNewDelivery(deliveryProcess.copy(productId = pro.id))?.let {
-                                android.util.Log.w("WW", "8")
-                                invoke()
-                            } ?: failed()
+                            project.productQuantityData.addNewProductQuantity(productQuantity.copy(productId = pro.id)).let {
+                                project.deliveryData.addNewDelivery(deliveryProcess.copy(productId = pro.id))?.let {
+                                    invoke()
+                                } ?: failed()
+                            }
                         }
                     } ?: failed()
                 } ?: failed()
@@ -295,8 +360,10 @@ class ProductSellingViewModel(
                     launchBack {
                         editProductObject(product.copy(imageUris = newUrls), oriProduct, {
                             editProductSpecsObject(productSpecs, oriProductSpecs, {
-                                editDeliveryObject(isAdmin, deliveryProcess, deliveryProcessGet, {
-                                    invoke()
+                                editProductQuantityObject(isAdmin, productQuantity, productQuantityGet, {
+                                    editDeliveryObject(isAdmin, deliveryProcess, deliveryProcessGet, {
+                                        invoke()
+                                    }, failed)
                                 }, failed)
                             }, failed)
                         }, failed)
@@ -356,12 +423,34 @@ class ProductSellingViewModel(
     ) {
         if (oriProductSpecs != newProductSpecs) {
             project.productSpecsData.editProductSpecs(
-                newProductSpecs
+                newProductSpecs.rewriteExtraSpecs()
             )?.apply {
                 invoke(this)
             } ?: failed()
         } else {
             invoke(newProductSpecs)
+        }
+    }
+
+    private suspend fun editProductQuantityObject(
+        isAdmin: Boolean,
+        newProductQuantity: ProductQuantity,
+        oriProductQuantity: ProductQuantity?,
+        invoke: suspend (ProductQuantity?) -> Unit,
+        failed: () -> Unit
+    ) {
+        if (isAdmin || oriProductQuantity == null) {
+            invoke(null)
+        } else {
+            if (oriProductQuantity != newProductQuantity) {
+                project.productQuantityData.editProductQuantity(
+                    newProductQuantity.copy().rewriteQuantity()
+                )?.apply {
+                    invoke(this)
+                } ?: failed()
+            } else {
+                invoke(newProductQuantity)
+            }
         }
     }
 
@@ -461,6 +550,7 @@ data class StateProductSelling(
     val isProcess: Boolean = true,
     val product: Product = Product(),
     val productSpecs: ProductBaseSpecs = ProductBaseSpecs(),
+    val productQuantity: ProductQuantity = ProductQuantity(),
     val deliveryProcess: DeliveryProcess = DeliveryProcess(shippingService = "USPS"),//.copy(shippingService = "USPS")
     val images: List<ByteArray> = listOf(),
     val imagesUrlToDelete: List<String> = listOf(),
@@ -472,5 +562,6 @@ data class StateProductSelling(
     val dummy: Int = 0,
     val productGet: Product? = null,
     val productSpecsGet: ProductBaseSpecs? = null,
+    val productQuantityGet: ProductQuantity? = null,
     val deliveryProcessGet: DeliveryProcess? = null,
 )

@@ -129,7 +129,11 @@ abstract class BaseRepoImp(val supabase: SupabaseClient) {
             ) {
                 order("id", Order.DESCENDING)
                 filter(block)
-            }.toListOfObject<T>()
+            }.toListOfObject<T>(
+                kotlinx.serialization.json.Json {
+                    ignoreUnknownKeys = true
+                }
+            )
         } ?: listOf()
     }
 

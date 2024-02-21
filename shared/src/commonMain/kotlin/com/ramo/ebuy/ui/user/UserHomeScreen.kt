@@ -18,6 +18,8 @@ import com.ramo.ebuy.global.base.Theme
 import com.ramo.ebuy.global.navigation.MokoModel
 import com.ramo.ebuy.global.navigation.Navigator
 import com.ramo.ebuy.global.ui.AddItem
+import com.ramo.ebuy.global.ui.LoadingScreen
+import com.ramo.ebuy.global.ui.OnLaunchScreen
 import com.ramo.ebuy.global.util.bottomBarData
 import org.koin.compose.koinInject
 
@@ -37,6 +39,9 @@ fun HomeUserScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val scaffoldState = remember { SnackbarHostState() }
+    OnLaunchScreen {
+        viewModel.initHome()
+    }
     Scaffold(
         snackbarHost = {
             SnackbarHost(scaffoldState) {
@@ -63,11 +68,12 @@ fun HomeUserScreen(
         Box(Modifier.padding(it)) {
             when (state.selectedPage) {
                 0 -> HomeSubScreen(navigator, viewModel)
-                1 -> ProfileSubScreen(viewModel)
+                1 -> ProfileSubScreen(navigator, viewModel)
                 2 -> SearchSubScreen(navigator, viewModel)
                 4 -> SellingSubScreen(navigator, viewModel)
             }
         }
+        LoadingScreen(state.isProcess, theme)
     }
 }
 

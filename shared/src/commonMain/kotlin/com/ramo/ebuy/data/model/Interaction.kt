@@ -68,7 +68,7 @@ data class UserBuyItems(
     @SerialName("id")
     val id: Long = 0,
     @SerialName("user_id")
-    val userId: Long = -1L,
+    val userId: String = "",
     @SerialName("product_id")
     val productId: Long = -1L,
     @SerialName("product_title")
@@ -88,11 +88,56 @@ data class UserRecentViewed(
     @SerialName("id")
     val id: Long = 0,
     @SerialName("user_id")
-    val userId: Long,
+    val userId: String = "",
+    @SerialName("user_recent")
+    val userRecent: Array<UserRecent> = emptyArray()
+) : BaseObject() {
+    override fun json(): JsonObject {
+        return kotlinx.serialization.json.Json.encodeToJsonElement(this).jsonObject.toMutableMap().apply {
+            remove("id")
+        }.let(::JsonObject)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as UserRecentViewed
+
+        if (id != other.id) return false
+        if (userId != other.userId) return false
+        return userRecent.contentEquals(other.userRecent)
+    }
+
+    override fun hashCode(): Int {
+        var result = id.hashCode()
+        result = 31 * result + userId.hashCode()
+        result = 31 * result + userRecent.contentHashCode()
+        return result
+    }
+}
+
+/**
+ * Embedded For [UserRecentViewed]
+ */
+@Serializable
+data class UserRecent(
     @SerialName("product_id")
     val productId: Long,
     @SerialName("last_use")
     val lastUse: Long,
+)
+
+@Serializable
+data class UserCart(
+    @SerialName("id")
+    val id: Long = 0,
+    @SerialName("user_id")
+    val userId: String,
+    @SerialName("product_id")
+    val productId: Long,
+    @SerialName("quantity")
+    val quantity: Int
 ) : BaseObject() {
     override fun json(): JsonObject {
         return kotlinx.serialization.json.Json.encodeToJsonElement(this).jsonObject.toMutableMap().apply {
@@ -100,3 +145,4 @@ data class UserRecentViewed(
         }.let(::JsonObject)
     }
 }
+

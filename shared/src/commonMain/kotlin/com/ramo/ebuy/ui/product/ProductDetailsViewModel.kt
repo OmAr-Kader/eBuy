@@ -3,7 +3,9 @@ package com.ramo.ebuy.ui.product
 import com.ramo.ebuy.data.model.DeliveryProcess
 import com.ramo.ebuy.data.model.Product
 import com.ramo.ebuy.data.model.ProductBaseSpecs
+import com.ramo.ebuy.data.model.ProductQuantity
 import com.ramo.ebuy.data.model.User
+import com.ramo.ebuy.data.model.UserCart
 import com.ramo.ebuy.di.Project
 import com.ramo.ebuy.global.navigation.BaseViewModel
 import com.ramo.ebuy.global.util.item
@@ -23,7 +25,7 @@ class ProductDetailsViewModel(project: Project) : BaseViewModel(project) {
         }
         setIsProcess(true)
         launchBack {
-            project.productData.getProductOnIdForeign(productId) { product, productSpecs, delivery ->
+            project.productData.getProductOnIdForeign(productId) { product, productSpecs, productQuantity, delivery ->
                 if (product == null || productSpecs == null) {
                     setIsProcess(false)
                     return@getProductOnIdForeign
@@ -32,6 +34,7 @@ class ProductDetailsViewModel(project: Project) : BaseViewModel(project) {
                     state.copy(
                         product = product,
                         productSpecs = productSpecs,
+                        productQuantity = productQuantity ?: ProductQuantity(),
                         deliveryProcess = delivery ?: DeliveryProcess(),
                         isProcess = false
                     )
@@ -65,6 +68,24 @@ class ProductDetailsViewModel(project: Project) : BaseViewModel(project) {
             }
         }
     }
+
+    fun addToCart() {
+        setIsProcess(true)
+        launchBack {
+            userInfo()?.also {
+                uiState.value.also { state ->
+                    project.userCartData.addNewUserCart(
+                        UserCart(userId = it.id, productId = state.product.id, quantity = 1)
+                    ).also {
+                        _uiState.update { newState ->
+                            newState.copy(userCart = it, isProcess = false)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     /*fun changeWatchList(isWatchlist: Boolean, id: Long) {
         uiState.value.watchlist?.also { userWatchList ->
             userWatchList.watchlist.toMutableList().apply {
@@ -104,7 +125,9 @@ class ProductDetailsViewModel(project: Project) : BaseViewModel(project) {
     data class State(
         val product: Product = Product(),
         val productSpecs: ProductBaseSpecs = ProductBaseSpecs(),
+        val productQuantity: ProductQuantity = ProductQuantity(),
         val deliveryProcess: DeliveryProcess = DeliveryProcess(),
+        val userCart: UserCart? = null,
         val specChosen: List<SpecChosen> = listOf(),
         val productVer: List<Product> = item(),
         val droppedIndex: Int = -1,

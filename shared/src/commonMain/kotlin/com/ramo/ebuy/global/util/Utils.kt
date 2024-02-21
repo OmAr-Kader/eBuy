@@ -26,7 +26,11 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.toLocalDateTime
 
-expect fun getByteArray(it: String): ByteArray?
+inline fun String?.ifEmptyOrNull(invoke: () -> String): String {
+    return if (isNullOrEmpty()) {
+        invoke()
+    } else this
+}
 
 val String?.urlCheckIfEmpty: String?
     get() {
@@ -227,6 +231,7 @@ inline val ratings: Array<AgeRate>
             AgeRate(4, "NC-17 – Adults Only"),
         )
     }
+
 fun countries(): List<Country> {
     return buildList {
         add(Country(0, "US", "USA America United State"))
