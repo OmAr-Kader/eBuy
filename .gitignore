@@ -11,6 +11,7 @@ xcuserdata
 *.log
 
 ConstSecure.kt
+AppModule.kt
 payment
 PreviewEditor.kt
 PreviewData.kt
