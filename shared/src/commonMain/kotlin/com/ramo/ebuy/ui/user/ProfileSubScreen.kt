@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.ramo.ebuy.AppViewModel
 import com.ramo.ebuy.di.Project
 import com.ramo.ebuy.di.Stater
 import com.ramo.ebuy.global.base.Theme
@@ -30,11 +31,12 @@ import org.koin.compose.koinInject
 @Composable
 fun WatchlistScreen(
     navigator: Navigator,
+    appModel: AppViewModel,
     theme: Theme = koinInject(),
     stater: Stater = koinInject(),
     project: Project = koinInject(),
     viewModel: ProfileSubViewModel = MokoModel {
-        ProfileSubViewModel(project)
+        ProfileSubViewModel(project, appModel.cartList, appModel.pasteCart, appModel.watchlist)
     }
 ) {
     val scope = rememberCoroutineScope()
@@ -45,7 +47,7 @@ fun WatchlistScreen(
     }
     Scaffold { pad ->
         Column(Modifier.fillMaxSize().padding(pad)) {
-            BarWatchListScreen(theme) {
+            BarWatchListScreen(appModel.uiState.collectAsState().value.cartList.size, theme) {
                 when (it) {
                     0 -> {
                         scope.launch {
@@ -58,6 +60,16 @@ fun WatchlistScreen(
                                 stater.stateHomeViewModel = this
                             }
                             navigator.goBack()
+                        }
+                    }
+                    2 -> {
+                        stater.getScreenCount(RootComponent.Configuration.CartRoute::class.java).let { count ->
+                            RootComponent.Configuration.CartRoute(count + 1).also { route ->
+                                scope.launch {
+                                    stater.writeArguments(route = route, screenCount = count + 1)
+                                    navigator.navigateTo(route)
+                                }
+                            }
                         }
                     }
                 }
@@ -83,11 +95,12 @@ fun WatchlistScreen(
 @Composable
 fun CartScreen(
     navigator: Navigator,
+    appModel: AppViewModel,
     theme: Theme = koinInject(),
     stater: Stater = koinInject(),
     project: Project = koinInject(),
     viewModel: ProfileSubViewModel = MokoModel {
-        ProfileSubViewModel(project)
+        ProfileSubViewModel(project, appModel.cartList, appModel.pasteCart, appModel.watchlist)
     }
 ) {
     val scope = rememberCoroutineScope()
@@ -104,7 +117,7 @@ fun CartScreen(
                 }
             }
             Spacer(modifier = Modifier.height(10.dp))
-            ProductsUserCart(state.productsWatchList, { item, it ->
+            ProductsUserCart(state.cartProducts, { item, it ->
                 viewModel.cartQuantityChanged(item, it)
             }) {
                 stater.getScreenCount(RootComponent.Configuration.ProductDetailsRoute::class.java).let { count ->

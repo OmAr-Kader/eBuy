@@ -54,30 +54,31 @@ E-commerce built in Kotlin Multiplatform Mobile using Supabase auth, realtime, d
 - Task ~~3.1.3~~: Implement category creating functionality
   - [Category Creating Model](https://github.com/OmAr-Kader/eBuy/tree/master/shared/src/commonMain/kotlin/com/ramo/ebuy/ui/admin/CategoryCreatingViewModel.kt)
 - Task 3.1.4: Write tests for category creating
+---
 
-## Epic 4: UX
-### Story 4.1: User Confirmations Layer
-- Task 4.1.1: Implement user confirmation screens design
-- Task 4.1.2: Implement user confirmation functionality
-- Task 4.1.3: Write tests for checkout
-### Story 4.2: User Interaction Layer
-- Task ~~4.2.1~~: Create database schema for interactions
-  - [Interactions](https://github.com/OmAr-Kader/eBuy/tree/master/shared/src/commonMain/kotlin/com/ramo/ebuy/data/dataSources/interaction)
-- Task ~~4.2.2~~: Implement user interactions functionality
-  - [Search History](https://github.com/OmAr-Kader/eBuy/tree/master/shared/src/commonMain/kotlin/com/ramo/ebuy/ui/user/UserHomeViewModel.kt#L104) - [User Watchlist](https://github.com/OmAr-Kader/eBuy/tree/master/shared/src/commonMain/kotlin/com/ramo/ebuy/ui/user/ProfileSubViewModel.kt#L18) ---
-- Task 4.2.3: Write tests for interaction
-
-## Epic 5: Shopping Cart
-### Story 5.1: Add to Cart
-- Task ~~5.1.1~~: Implement “Add to Cart” functionality
+## Epic 4: Shopping Cart
+### Story 4.1: Add to Cart
+- Task ~~4.1.1~~: Implement “Add to Cart” functionality
   - [Search History](https://github.com/OmAr-Kader/eBuy/tree/master/shared/src/commonMain/kotlin/com/ramo/ebuy/ui/product/ProductDetailsViewModel.kt#L72)
-- Task 5.1.2: Write tests for “Add to Cart”
-### Story 5.2: View Cart
-- Task ~~5.2.1~~: Implement shopping cart page design
+- Task 4.1.2: Write tests for “Add to Cart”
+### Story 4.2: View Cart
+- Task ~~4.2.1~~: Implement shopping cart page design
   - [Shopping Cart Screen](https://github.com/OmAr-Kader/eBuy/tree/master/shared/src/commonMain/kotlin/com/ramo/ebuy/ui/user/ProfileSubScreen.kt#L84)
-- Task ~~5.2.2~~: Implement shopping cart functionality
+- Task ~~4.2.2~~: Implement shopping cart functionality
   - [User Cart Products](https://github.com/OmAr-Kader/eBuy/tree/master/shared/src/commonMain/kotlin/com/ramo/ebuy/ui/user/ProfileSubViewModel.kt#L55)
-- Task 5.2.3: Write tests for shopping cart
+- Task 4.2.3: Write tests for shopping cart
+
+## Epic 5: UX
+### Story 5.1: User Interaction Layer
+- Task ~~5.1.1~~: Create database schema for interactions
+  - [Interactions](https://github.com/OmAr-Kader/eBuy/tree/master/shared/src/commonMain/kotlin/com/ramo/ebuy/data/dataSources/interaction)
+- Task ~~5.1.2~~: Implement user interactions functionality
+  - [Search History](https://github.com/OmAr-Kader/eBuy/tree/master/shared/src/commonMain/kotlin/com/ramo/ebuy/ui/user/UserHomeViewModel.kt#L104) - [User Watchlist](https://github.com/OmAr-Kader/eBuy/tree/master/shared/src/commonMain/kotlin/com/ramo/ebuy/ui/user/ProfileSubViewModel.kt#L18) ---
+- Task 5.1.3: Write tests for interaction
+### Story 5.2: User Confirmations Layer
+- Task 5.2.1: Implement user confirmation screens design
+- Task 5.2.2: Implement user confirmation functionality
+- Task 5.2.3: Write tests for checkout
 
 ## Epic 6: Payment Process
 ### Story 6.1: Checkout

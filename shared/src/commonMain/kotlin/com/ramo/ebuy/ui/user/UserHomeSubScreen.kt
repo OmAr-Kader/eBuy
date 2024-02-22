@@ -78,6 +78,7 @@ import org.koin.compose.koinInject
 fun HomeSubScreen(
     navigator: Navigator,
     viewModel: HomeViewModel,
+    cartSize: Int,
     theme: Theme = koinInject(),
     stater: Stater = koinInject(),
 ) {
@@ -140,7 +141,16 @@ fun HomeSubScreen(
                 }
             }
         }
-        BarMainScreen(offsetY)
+        BarMainScreen(offsetY, cartSize) {
+            stater.getScreenCount(RootComponent.Configuration.CartRoute::class.java).let { count ->
+                RootComponent.Configuration.CartRoute(count + 1).also { route ->
+                    scope.launch {
+                        stater.writeArguments(route = route, screenCount = count + 1)
+                        navigator.navigateTo(route)
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -149,7 +159,9 @@ fun HomeSubScreen(
 fun ProfileSubScreen(
     navigator: Navigator,
     viewModel: HomeViewModel,
-    theme: Theme = koinInject()
+    cartSize: Int,
+    theme: Theme = koinInject(),
+    stater: Stater = koinInject(),
 ) {
     val scope = rememberCoroutineScope()
     val state by viewModel.uiState.collectAsState()
@@ -160,7 +172,16 @@ fun ProfileSubScreen(
         viewModel.loadUserData()
     }
     Column(Modifier.fillMaxSize()) {
-        BarMainScreen(-112)
+        BarMainScreen(-112, cartSize) {
+            stater.getScreenCount(RootComponent.Configuration.CartRoute::class.java).let { count ->
+                RootComponent.Configuration.CartRoute(count + 1).also { route ->
+                    scope.launch {
+                        stater.writeArguments(route = route, screenCount = count + 1)
+                        navigator.navigateTo(route)
+                    }
+                }
+            }
+        }
         Spacer(modifier = Modifier.height(10.dp))
         LazyColumn {
             item {

@@ -6,13 +6,20 @@ import com.ramo.ebuy.data.model.ProductBaseSpecs
 import com.ramo.ebuy.data.model.ProductQuantity
 import com.ramo.ebuy.data.model.User
 import com.ramo.ebuy.data.model.UserCart
+import com.ramo.ebuy.data.model.UserWatchlist
 import com.ramo.ebuy.di.Project
 import com.ramo.ebuy.global.navigation.BaseViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-class ProductDetailsViewModel(project: Project) : BaseViewModel(project) {
+class ProductDetailsViewModel(
+    private val watchlist: UserWatchlist?,
+    private val pasteWatchlist: UserWatchlist.() -> UserWatchlist,
+    private val userCartList: List<UserCart>,
+    private val pastCartList: List<UserCart>.() -> List<UserCart>,
+    project: Project
+) : BaseViewModel(project) {
 
     private val _uiState = MutableStateFlow(State())
     val uiState = _uiState.asStateFlow()
@@ -29,14 +36,21 @@ class ProductDetailsViewModel(project: Project) : BaseViewModel(project) {
                     setIsProcess(false)
                     return@getProductOnIdForeign
                 }
-                _uiState.update { state ->
-                    state.copy(
-                        product = product,
-                        productSpecs = productSpecs,
-                        productQuantity = productQuantity ?: ProductQuantity(),
-                        deliveryProcess = delivery ?: DeliveryProcess(),
-                        isProcess = false
-                    )
+                userCartList.toMutableList().find {
+                    it.productId == productId
+                }.also { usProductCart ->
+                    product.copy(isWatchlist = watchlist?.watchlist?.find { product.id == it } != null).also { pro ->
+                        _uiState.update { state ->
+                            state.copy(
+                                product = pro,
+                                productSpecs = productSpecs,
+                                productQuantity = productQuantity ?: ProductQuantity(),
+                                deliveryProcess = delivery ?: DeliveryProcess(),
+                                userCart = usProductCart,
+                                isProcess = false
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -69,24 +83,60 @@ class ProductDetailsViewModel(project: Project) : BaseViewModel(project) {
     }
 
     fun addToCart() {
+        if (uiState.value.product.id == 0L) {
+            return
+        }
         setIsProcess(true)
         launchBack {
             userInfo()?.also {
                 uiState.value.also { state ->
                     project.userCartData.addNewUserCart(
                         UserCart(userId = it.id, productId = state.product.id, quantity = 1)
-                    ).also {
-                        _uiState.update { newState ->
-                            newState.copy(userCart = it, isProcess = false)
+                    )?.also { addedCart ->
+                        pastCartList(userCartList.toMutableList().apply { add(addedCart) }).also {
+                            _uiState.update { newState ->
+                                newState.copy(userCart = addedCart, isProcess = false)
+                            }
                         }
+                    } ?: setIsProcess(false)
+                }
+            }
+        }
+    }
+
+    fun changeWatchList(isWatchlist: Boolean, id: Long) {
+        watchlist?.also { userWatchList ->
+            editChangeList(userWatchList, isWatchlist, id) { newWatchList ->
+                launchBack {
+                    project.userWatchlistData.editUserWatchlist(newWatchList)
+                }
+            }
+        } ?: run<Unit> {
+            launchBack {
+                userInfo()?.id?.also { userId ->
+                    setIsProcess(true)
+                    launchBack {
+                        project.userWatchlistData.addNewUserWatchlist(
+                            UserWatchlist(userId = userId, watchlist = arrayOf(id))
+                        )?.also { newWatchList ->
+                            uiState.value.product.apply {
+                                this@apply.isWatchlist = true
+                            }.also { newProduct ->
+                                pasteWatchlist(newWatchList).also {
+                                    _uiState.update { state ->
+                                        state.copy(product = newProduct, isProcess = false, dummy = state.dummy + 1)
+                                    }
+                                }
+                            }
+                        } ?: setIsProcess(false)
                     }
                 }
             }
         }
     }
 
-    /*fun changeWatchList(isWatchlist: Boolean, id: Long) {
-        uiState.value.watchlist?.also { userWatchList ->
+    private fun editChangeList(userWatchList: UserWatchlist, isWatchlist: Boolean, id: Long, invoke: (UserWatchlist) -> Unit) {
+        launchBack {
             userWatchList.watchlist.toMutableList().apply {
                 if (isWatchlist) {
                     this@apply.remove(id)
@@ -94,26 +144,19 @@ class ProductDetailsViewModel(project: Project) : BaseViewModel(project) {
                     this@apply.add(id)
                 }
             }.toTypedArray().let { userWatchList.copy(watchlist = it) }.also { newWatchList ->
-                _uiState.update { state ->
-                    state.copy(watchlist = newWatchList, dummy = state.dummy + 1).paste()
-                }
-                launchBack {
-                    project.userWatchlistData.editUserWatchlist(newWatchList)
-                }
-            }
-        } ?: uiState.value.userId?.also { userId ->
-            setIsProcess(true)
-            launchBack {
-                project.userWatchlistData.addNewUserWatchlist(
-                    UserWatchlist(userId = userId, watchlist = arrayOf(id))
-                )?.also {
-                    _uiState.update { state ->
-                        state.copy(watchlist = it, isProcess = false, dummy = state.dummy + 1).paste()
+                uiState.value.product.apply {
+                    this@apply.isWatchlist = true
+                }.also { newProduct ->
+                    pasteWatchlist(newWatchList).also {
+                        _uiState.update { state ->
+                            state.copy(product = newProduct, dummy = state.dummy + 1)
+                        }
                     }
                 }
+                invoke(newWatchList)
             }
         }
-    }*/
+    }
 
     private fun setIsProcess(it: Boolean) {
         _uiState.update { state ->

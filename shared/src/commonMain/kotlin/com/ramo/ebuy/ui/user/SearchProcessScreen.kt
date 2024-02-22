@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.ramo.ebuy.AppViewModel
 import com.ramo.ebuy.di.Project
 import com.ramo.ebuy.di.Stater
 import com.ramo.ebuy.global.base.Theme
@@ -28,17 +29,14 @@ import org.koin.compose.koinInject
 @Composable
 fun SearchProcessScreen(
     navigator: Navigator,
+    appViewModel: AppViewModel,
     search: String,
     typeSearch: Int,
     theme: Theme = koinInject(),
     stater: Stater = koinInject(),
     project: Project = koinInject(),
     viewModel: SearchProcessViewModel = MokoModel {
-        SearchProcessViewModel(project, stater.stateSearchProcessModel.copy()) {
-            apply {
-                stater.stateSearchProcess = this@apply
-            }
-        }
+        SearchProcessViewModel(project, appViewModel.watchlist, appViewModel.pasteWatchlist)
     }
 ) {
     val scope = rememberCoroutineScope()
@@ -49,16 +47,28 @@ fun SearchProcessScreen(
     }
     Scaffold { pad ->
         Column(Modifier.fillMaxSize().padding(pad)) {
-            BarSearchProcess(theme, search) {
+            BarSearchProcess(theme, search, appViewModel.uiState.collectAsState().value.cartList.size) {
                 when (it) {
                     0 -> {
                         scope.launch {
                             navigator.goBack()
                         }
                     }
+
                     1 -> {
                         scope.launch {
                             navigator.goBack()
+                        }
+                    }
+
+                    2 -> {
+                        stater.getScreenCount(RootComponent.Configuration.CartRoute::class.java).let { count ->
+                            RootComponent.Configuration.CartRoute(count + 1).also { route ->
+                                scope.launch {
+                                    stater.writeArguments(route = route, screenCount = count + 1)
+                                    navigator.navigateTo(route)
+                                }
+                            }
                         }
                     }
                 }

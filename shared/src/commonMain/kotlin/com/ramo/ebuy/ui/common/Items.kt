@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -50,7 +49,7 @@ import com.ramo.ebuy.data.model.Category
 import com.ramo.ebuy.data.model.Product
 import com.ramo.ebuy.global.base.Theme
 import com.ramo.ebuy.global.base.outlinedTextFieldStyle
-import com.ramo.ebuy.global.ui.rememberCorrect
+import com.ramo.ebuy.global.ui.rememberDone
 import com.seiko.imageloader.rememberImagePainter
 import org.koin.compose.koinInject
 
@@ -352,7 +351,7 @@ fun ProductUserCartItem(
     val stateQuantity = remember {
         mutableStateOf(item.cartQuantity.toString())
     }
-    val notSame = stateQuantity.value.toIntOrNull() != item.cartQuantity
+    val notSame = stateQuantity.value.toIntOrNull().let { it != null && it  != item.cartQuantity }
     val painter = rememberImagePainter(url = item.imageUris.firstOrNull() ?: "")
     Row(
         modifier = Modifier.clickable {
@@ -370,26 +369,26 @@ fun ProductUserCartItem(
                 painter = painter,
                 contentDescription = ""
             )
-            Spacer(Modifier.height(30.dp))
-            Row(
+            Spacer(Modifier.height(10.dp))
+            Column(
                 modifier = Modifier
                     .width(120.dp),
-                horizontalArrangement = Arrangement.SpaceAround
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 OutlinedTextField(
-                    modifier = Modifier.width(60.dp),
+                    modifier = Modifier.width(110.dp),
                     value = stateQuantity.value,
                     onValueChange = { name ->
                         stateQuantity.value = name
                     },
                     shape = RoundedCornerShape(12.dp),
-                    //placeholder = { Text(text = "Enter Your Name", fontSize = 14.sp) },
                     label = { Text(text = "Quantity", fontSize = 14.sp) },
                     isError = stateQuantity.value.toIntOrNull() == null,
                     singleLine = true,
                     colors = theme.outlinedTextFieldStyle(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                 )
+                Spacer(Modifier.height(10.dp))
                 Image(
                     modifier = Modifier
                         .clickable {
@@ -401,10 +400,10 @@ fun ProductUserCartItem(
                         }
                         .width(40.dp)
                         .height(40.dp)
-                        .background(color = if (notSame) Color.Green else theme.backDark, shape = CircleShape)
-                        .clip(RoundedCornerShape(5.dp))
-                        .padding(8.dp),
-                    imageVector = rememberCorrect(if (notSame) Color.Black else theme.textColor),
+                        .background(color = if (notSame) Color.Green else theme.backDarkSec, shape = RoundedCornerShape(10.dp))
+                        .padding(5.dp),
+                    imageVector = rememberDone(if (notSame) Color.Black else theme.textColor),
+                    colorFilter = ColorFilter.tint(if (notSame) Color.Black else theme.textColor),
                     contentScale = ContentScale.Fit,
                     contentDescription = null,
                 )

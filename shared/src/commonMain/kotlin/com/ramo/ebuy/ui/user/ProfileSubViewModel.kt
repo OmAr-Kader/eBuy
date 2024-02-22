@@ -11,41 +11,28 @@ import kotlinx.coroutines.flow.update
 
 class ProfileSubViewModel(
     project: Project,
+    private val userCartList: List<UserCart>,
+    private val pastCartList: List<UserCart>.() -> List<UserCart>,
+    private val watchlist: UserWatchlist?
 ) : BaseViewModel(project) {
 
     private val _uiState = MutableStateFlow(State())
     val uiState = _uiState.asStateFlow()
 
     fun displayWatchList() {
-        loadWatchlist { watchlist, _ ->
-            if (watchlist == null) {
-                _uiState.update { state ->
-                    state.copy(isProcess = false)
-                }
-                return@loadWatchlist
+        if (watchlist == null) {
+            _uiState.update { state ->
+                state.copy(isProcess = false)
             }
-            launchBack {
-                project.productData.getProductsOnIds(watchlist.watchlist.toList()).also { productsWatchlist ->
-                    _uiState.update { state ->
-                        state.copy(
-                            productsWatchList = productsWatchlist,
-                            isProcess = false
-                        )
-                    }
-                }
-            }
+            return
         }
-    }
-
-    private fun loadWatchlist(invoke: (UserWatchlist?, String?) -> Unit) {
         launchBack {
-            userInfo().apply {
-                if (this == null) {
-                    invoke(null, null)
-                    return@launchBack
-                }
-                project.userWatchlistData.getUserWatchlist(this@apply.id).also {
-                    invoke(it, id)
+            project.productData.getProductsOnIds(watchlist.watchlist.toList()).also { productsWatchlist ->
+                _uiState.update { state ->
+                    state.copy(
+                        productsWatchList = productsWatchlist,
+                        isProcess = false
+                    )
                 }
             }
         }
@@ -53,12 +40,12 @@ class ProfileSubViewModel(
 
 
     fun loadCartProducts() {
-        loadUserCart { userCart ->
+        launchBack {
             project.productData.getProductsOnIds(
-                userCart.map { it.productId }
-            ).rewriteQuantity(userCart).let {
+                userCartList.map { it.productId }
+            ).rewriteQuantity(userCartList).let {
                 _uiState.update { state ->
-                    state.copy(userCartList = userCart, cartProducts = it)
+                    state.copy(cartProducts = it, isProcess = false)
                 }
             }
         }
@@ -73,14 +60,14 @@ class ProfileSubViewModel(
     fun cartQuantityChanged(item: Product, new: Int) {
         setIsProcess(true)
         launchBack {
-            uiState.value.userCartList.indexOfFirst {
+            userCartList.indexOfFirst {
                 it.productId == item.id
             }.let { i ->
                 if (i != -1) {
-                    project.userCartData.editUserCart(uiState.value.userCartList[i].copy(quantity = new))?.also { us ->
-                        uiState.value.userCartList.toMutableList().apply {
+                    project.userCartData.editUserCart(userCartList[i].copy(quantity = new))?.also { us ->
+                        userCartList.toMutableList().apply {
                             this[i] = us
-                        }.also { newList ->
+                        }.let(pastCartList).also { newList ->
                             uiState.value.cartProducts.rewriteQuantity(newList).also { newProducts ->
                                 _uiState.update { state ->
                                     state.copy(cartProducts = newProducts, isProcess = false, dummy = state.dummy + 1)
@@ -90,16 +77,6 @@ class ProfileSubViewModel(
                     } ?: setIsProcess(false)
                 } else {
                     setIsProcess(false)
-                }
-            }
-        }
-    }
-
-    private fun loadUserCart(invoke: suspend (List<UserCart>) -> Unit) {
-        launchBack {
-            userInfo()?.apply {
-                project.userCartData.getUserCart(this@apply.id).also {
-                    invoke(it)
                 }
             }
         }
@@ -115,7 +92,6 @@ class ProfileSubViewModel(
     data class State(
         val isProcess: Boolean = true,
         val productsWatchList: List<Product> = emptyList(),
-        val userCartList: List<UserCart> = emptyList(),
         val cartProducts: List<Product> = emptyList(),
         val dummy: Int = 0,
     )

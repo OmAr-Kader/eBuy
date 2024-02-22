@@ -18,6 +18,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.OutlinedButton
@@ -30,12 +33,14 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ramo.ebuy.AppViewModel
 import com.ramo.ebuy.di.Project
 import com.ramo.ebuy.di.Stater
 import com.ramo.ebuy.global.base.Theme
@@ -47,7 +52,6 @@ import com.ramo.ebuy.global.ui.LoadingScreen
 import com.ramo.ebuy.global.ui.OnLaunchScreen
 import com.ramo.ebuy.global.ui.SheetBottomTitle
 import com.ramo.ebuy.global.ui.rememberArrowDropDown
-import com.ramo.ebuy.global.ui.rememberFavorite
 import com.ramo.ebuy.ui.common.BarProductScreen
 import com.ramo.ebuy.ui.common.ProductList
 import com.skydoves.flexible.bottomsheet.material3.FlexibleBottomSheet
@@ -59,24 +63,43 @@ import org.koin.compose.koinInject
 @Composable
 fun ProductDetailsScreen(
     navigator: Navigator,
+    appModel: AppViewModel,
     productId: Long,
     project: Project = koinInject(),
     theme: Theme = koinInject(),
     stater: Stater = koinInject(),
-    viewModel: ProductDetailsViewModel = MokoModel { ProductDetailsViewModel(project) }
+    viewModel: ProductDetailsViewModel = MokoModel {
+        ProductDetailsViewModel(
+            appModel.watchlist,
+            appModel.pasteWatchlist,
+            appModel.cartList,
+            appModel.pasteCart,
+            project
+        )
+    }
 ) {
     val state by viewModel.uiState.collectAsState()
     val scope = rememberCoroutineScope()
     OnLaunchScreen {
-        android.util.Log.w("WW$$$$ ", productId.toString())
         viewModel.loadProDetails(productId)
     }
     Scaffold { pad ->
         Column(Modifier.padding(pad)) {
-            BarProductScreen {
+            BarProductScreen(appModel.uiState.collectAsState().value.cartList.size) {
                 when (it) {
                     0 -> scope.launch {
                         navigator.goBack()
+                    }
+
+                    2 -> {
+                        stater.getScreenCount(RootComponent.Configuration.CartRoute::class.java).let { count ->
+                            RootComponent.Configuration.CartRoute(count + 1).also { route ->
+                                scope.launch {
+                                    stater.writeArguments(route = route, screenCount = count + 1)
+                                    navigator.navigateTo(route)
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -90,7 +113,30 @@ fun ProductDetailsScreen(
                 }
                 ProductDetailsTitle(state, theme)
                 ProductDetailsExtraSpecs(viewModel, state, theme)
-                ProductDetailsActions(viewModel, theme)
+                ProductDetailsActions(state, theme) {
+                    when (it) {
+                        1 -> viewModel.addToCart()
+                        2 -> {
+                            stater.getScreenCount(RootComponent.Configuration.CartRoute::class.java).let { count ->
+                                RootComponent.Configuration.CartRoute(count + 1).also { route ->
+                                    scope.launch {
+                                        stater.writeArguments(route = route, screenCount = count + 1)
+                                        navigator.navigateTo(route)
+                                    }
+                                }
+                            }
+                        }
+
+                        3 -> {
+                            state.product.apply {
+                                if (id == 0L) {
+                                    return@apply
+                                }
+                                viewModel.changeWatchList(isWatchlist, id)
+                            }
+                        }
+                    }
+                }
                 item {
                     Spacer(Modifier.height(5.dp))
                     Text(
@@ -266,7 +312,7 @@ fun LazyListScope.ProductDetailsExtraSpecs(viewModel: ProductDetailsViewModel, s
     }
 }
 
-fun LazyListScope.ProductDetailsActions(viewModel: ProductDetailsViewModel, theme: Theme) = item {
+fun LazyListScope.ProductDetailsActions(state: ProductDetailsViewModel.State, theme: Theme, onClick: (Int) -> Unit) = item {
     Column(Modifier.fillMaxWidth().padding(horizontal = 15.dp)) {
         OutlinedButton(
             modifier = Modifier.fillMaxWidth().height(50.dp),
@@ -300,12 +346,16 @@ fun LazyListScope.ProductDetailsActions(viewModel: ProductDetailsViewModel, them
                 color = theme.primary,
             ),
             onClick = {
-                viewModel.addToCart()
+                if (state.userCart == null) {
+                    onClick(1)
+                } else {
+                    onClick(2)
+                }
             },
         ) {
             Row {
                 Text(
-                    text = "Add to cart",
+                    text = if (state.userCart == null) "Add to cart" else "View In Cart",
                     color = theme.primary,
                     fontSize = 18.sp,
                 )
@@ -323,14 +373,14 @@ fun LazyListScope.ProductDetailsActions(viewModel: ProductDetailsViewModel, them
                 color = theme.primary,
             ),
             onClick = {
-
+                onClick(3)
             },
         ) {
             Row {
-                Image(rememberFavorite(theme.primary), null, modifier = Modifier.width(20.dp).height(20.dp))
+                Image(if (state.product.isWatchlist) Icons.Default.Favorite else Icons.Default.FavoriteBorder, null, colorFilter = ColorFilter.tint(theme.primary), modifier = Modifier.width(20.dp).height(20.dp))
                 Spacer(modifier = Modifier.width(5.dp))
                 Text(
-                    text = "Add to watchlist",
+                    text = if (state.product.isWatchlist) "Remove from watchlist" else "Add to watchlist",
                     color = theme.primary,
                     fontSize = 18.sp,
                 )

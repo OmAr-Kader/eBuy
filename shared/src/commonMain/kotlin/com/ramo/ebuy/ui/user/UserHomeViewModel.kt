@@ -3,7 +3,6 @@ package com.ramo.ebuy.ui.user
 import com.ramo.ebuy.data.model.Category
 import com.ramo.ebuy.data.model.Product
 import com.ramo.ebuy.data.model.User
-import com.ramo.ebuy.data.model.UserCart
 import com.ramo.ebuy.data.model.UserSearch
 import com.ramo.ebuy.di.Project
 import com.ramo.ebuy.global.navigation.BaseViewModel
@@ -48,19 +47,16 @@ class HomeViewModel(
         launchBack {
             doLoadMainData { catos, products ->
                 doLoadUserData { user ->
-                    doLoadUserCart(user.id) { cartList ->
-                        doLoadSearchHistory(user.id) { userSearchList, userSearchSavedList ->
-                            _uiState.update { state ->
-                                state.copy(
-                                    circleCato = catos,
-                                    productVer = products,
-                                    user = user,
-                                    userCart = cartList,
-                                    userSearchList = userSearchList,
-                                    userSearchSavedList = userSearchSavedList,
-                                    isProcess = false,
-                                ).paste()
-                            }
+                    doLoadSearchHistory(user.id) { userSearchList, userSearchSavedList ->
+                        _uiState.update { state ->
+                            state.copy(
+                                circleCato = catos,
+                                productVer = products,
+                                user = user,
+                                userSearchList = userSearchList,
+                                userSearchSavedList = userSearchSavedList,
+                                isProcess = false,
+                            ).paste()
                         }
                     }
                 }
@@ -85,8 +81,14 @@ class HomeViewModel(
     }
 
     private suspend fun doLoadMainData(invoke: suspend (List<Category>, List<Product>) -> Unit) {
+        uiState.value.apply {
+            if (circleCato.isNotEmpty() && productVer.isNotEmpty()) {
+                invoke(circleCato, productVer)
+                return
+            }
+        }
         project.categoryData.getMainCategories().let { catos ->
-            project.productData.getProductsOnIds(listOf(17, 16)).let { products ->
+            project.productData.getProductsOnIds(listOf(15, 17, 18)).let { products ->
                 invoke(catos, products)
             }
         }
@@ -94,12 +96,6 @@ class HomeViewModel(
 
     private suspend fun doLoadUserData(invoke: suspend (User) -> Unit) {
         userInfo()?.also {
-            invoke(it)
-        }
-    }
-
-    private suspend fun doLoadUserCart(userId: String, invoke: suspend (List<UserCart>) -> Unit) {
-        project.userCartData.getUserCart(userId).toMutableList().also {
             invoke(it)
         }
     }
@@ -198,7 +194,6 @@ data class StateHomeViewModel(
     val productVer: List<Product> = listOf(),
     val userSearchList: List<UserSearch> = listOf(),
     val userSearchSavedList: List<UserSearch> = listOf(),
-    val userCart: List<UserCart> = listOf(),
     val isSearchNeedRefresh: Boolean = false,
     val user: User? = null,
     val search: String = "",

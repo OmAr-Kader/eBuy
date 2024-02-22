@@ -6,6 +6,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -32,10 +33,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -56,7 +59,9 @@ import org.koin.compose.koinInject
 @Composable
 fun BarMainScreen(
     offsetY: Int,
+    cartSize: Int,
     theme: Theme = koinInject(),
+    onCart: () -> Unit,
 ) {
     val last = remember {
         mutableFloatStateOf(-150F)
@@ -102,15 +107,43 @@ fun BarMainScreen(
                 contentDescription = null,
             )
             Spacer(modifier = Modifier.width(10.dp))
+            ShoppingCartItem(cartSize, theme, onCart)
+        }
+    }
+}
+
+@Composable
+fun ShoppingCartItem(cartSize: Int, theme: Theme, onClick: () -> Unit) {
+    Box {
+        Box(Modifier.padding(10.dp)) {
             Image(
                 modifier = Modifier
                     .width(40.dp)
                     .height(40.dp)
+                    .align(Alignment.Center)
                     .background(color = theme.backDark, shape = CircleShape)
+                    .clickable(onClick = onClick)
                     .padding(8.dp),
                 imageVector = rememberShoppingCart(theme.textColor),
                 contentScale = ContentScale.Fit,
                 contentDescription = null,
+            )
+        }
+        Box(
+            Modifier
+                .align(Alignment.TopEnd)
+        ) {
+            Text(
+                text = cartSize.toString(),
+                fontSize = 12.sp,
+                modifier = Modifier
+                    .width(25.dp)
+                    .height(25.dp)
+                    .background(color = Color(red = 155, green = 0, blue = 0), shape = CircleShape),
+                color = Color.White,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
@@ -205,6 +238,7 @@ fun BarSearchScreen(
 fun BarSearchProcess(
     theme: Theme,
     search: String,
+    cartSize: Int,
     onClick: (Int) -> Unit,
 ) {
     Row(
@@ -249,27 +283,16 @@ fun BarSearchProcess(
                 contentDescription = null,
             )
             Spacer(modifier = Modifier.width(10.dp))
-            Image(
-                modifier = Modifier
-                    .clickable {
-                        onClick(2)
-                    }
-                    .width(40.dp)
-                    .height(40.dp)
-                    .background(color = theme.backDark, shape = CircleShape)
-                    .clip(CircleShape)
-                    .padding(8.dp),
-                imageVector = rememberShoppingCart(theme.textColor),
-                colorFilter = ColorFilter.tint(theme.textColor),
-                contentScale = ContentScale.Fit,
-                contentDescription = null,
-            )
+            ShoppingCartItem(cartSize, theme) {
+                onClick(2)
+            }
         }
     }
 }
 
 @Composable
 fun BarProductScreen(
+    cartSize: Int,
     theme: Theme = koinInject(),
     onClick: (Int) -> Unit,
 ) {
@@ -315,21 +338,9 @@ fun BarProductScreen(
                 contentDescription = null,
             )
             Spacer(modifier = Modifier.width(10.dp))
-            Image(
-                modifier = Modifier
-                    .clickable {
-                        onClick(2)
-                    }
-                    .width(40.dp)
-                    .height(40.dp)
-                    .background(color = theme.backDark, shape = CircleShape)
-                    .clip(CircleShape)
-                    .padding(8.dp),
-                imageVector = rememberShoppingCart(theme.textColor),
-                colorFilter = ColorFilter.tint(theme.textColor),
-                contentScale = ContentScale.Fit,
-                contentDescription = null,
-            )
+            ShoppingCartItem(cartSize, theme) {
+                onClick(2)
+            }
             Spacer(modifier = Modifier.width(10.dp))
             Image(
                 modifier = Modifier
@@ -369,6 +380,7 @@ fun BarProductScreen(
 
 @Composable
 fun BarWatchListScreen(
+    cartSize: Int,
     theme: Theme = koinInject(),
     onClick: (Int) -> Unit,
 ) {
@@ -414,21 +426,9 @@ fun BarWatchListScreen(
                 contentDescription = null,
             )
             Spacer(modifier = Modifier.width(10.dp))
-            Image(
-                modifier = Modifier
-                    .clickable {
-                        onClick(2)
-                    }
-                    .width(40.dp)
-                    .height(40.dp)
-                    .background(color = theme.backDark, shape = CircleShape)
-                    .clip(CircleShape)
-                    .padding(8.dp),
-                imageVector = rememberShoppingCart(theme.textColor),
-                colorFilter = ColorFilter.tint(theme.textColor),
-                contentScale = ContentScale.Fit,
-                contentDescription = null,
-            )
+            ShoppingCartItem(cartSize, theme) {
+                onClick(2)
+            }
         }
     }
 }

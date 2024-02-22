@@ -200,6 +200,6 @@ class RootComponent(
         data object WatchListRoute : Configuration()
 
         @Serializable
-        data object CartRoute : Configuration()
+        data class CartRoute(@SerialName("count_screen") val countS: Int) : Configuration()
     }
 }

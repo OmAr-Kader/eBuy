@@ -13,15 +13,15 @@ import kotlinx.coroutines.flow.update
 
 class SearchProcessViewModel(
     project: Project,
-    state: StateSearchProcessViewModel,
-    private val paste: StateSearchProcessViewModel.() -> StateSearchProcessViewModel
+    private val watchlist: UserWatchlist?,
+    private val pasteWatchlist: UserWatchlist.() -> UserWatchlist,
 ) : BaseViewModel(project) {
-    private val _uiState = MutableStateFlow(state)
+    private val _uiState = MutableStateFlow(State())
     val uiState = _uiState.asStateFlow()
 
     fun loadData(text: String, typeSearch: Int) {
-        loadWatchlist { watchlist, userId ->
-            launchBack {
+        launchBack {
+            userInfo()?.id.also { userId ->
                 project.productData.getProductsOnSearch(text).let { products ->
                     products.toMutableList().apply {
                         watchlist?.let { refreshFavorites(it) }
@@ -29,10 +29,9 @@ class SearchProcessViewModel(
                         _uiState.update { state ->
                             state.copy(
                                 products = productsList,
-                                watchlist = watchlist,
                                 userId = userId,
                                 isProcess = false
-                            ).paste()
+                            )
                         }
                         userId?.let { updateSearchData(typeSearch = typeSearch, userId = it, searchText = text) }
                     }
@@ -55,22 +54,8 @@ class SearchProcessViewModel(
         }
     }
 
-    private fun loadWatchlist(invoke: (UserWatchlist?, String?) -> Unit) {
-        launchBack {
-            userInfo().apply {
-                if (this == null) {
-                    invoke(null, null)
-                    return@launchBack
-                }
-                project.userWatchlistData.getUserWatchlist(this@apply.id).also {
-                    invoke(it, id)
-                }
-            }
-        }
-    }
-
     fun changeWatchList(isWatchlist: Boolean, id: Long) {
-        uiState.value.watchlist?.also { userWatchList ->
+        watchlist?.also { userWatchList ->
             editChangeList(userWatchList, isWatchlist, id) { newWatchList ->
                 launchBack {
                     project.userWatchlistData.editUserWatchlist(newWatchList)
@@ -85,8 +70,10 @@ class SearchProcessViewModel(
                     uiState.value.products.toMutableList().apply {
                         refreshFavorites(newWatchList)
                     }.also { newProducts ->
-                        _uiState.update { state ->
-                            state.copy(products = newProducts, watchlist = newWatchList, isProcess = false, dummy = state.dummy + 1).paste()
+                        pasteWatchlist(newWatchList).also {
+                            _uiState.update { state ->
+                                state.copy(products = newProducts, isProcess = false, dummy = state.dummy + 1)
+                            }
                         }
                     }
                 } ?: setIsProcess(false)
@@ -106,8 +93,10 @@ class SearchProcessViewModel(
                 uiState.value.products.toMutableList().apply {
                     refreshFavorites(newWatchList)
                 }.also { newProducts ->
-                    _uiState.update { state ->
-                        state.copy(products = newProducts, watchlist = newWatchList, dummy = state.dummy + 1).paste()
+                    pasteWatchlist(newWatchList).also {
+                        _uiState.update { state ->
+                            state.copy(products = newProducts, dummy = state.dummy + 1)
+                        }
                     }
                 }
                 invoke(newWatchList)
@@ -121,18 +110,10 @@ class SearchProcessViewModel(
         }
     }
 
-    override fun onCleared() {
-        uiState.value.copy(products = emptyList()).paste()
-        super.onCleared()
-    }
-
+    data class State(
+        val isProcess: Boolean = true,
+        val products: List<Product> = emptyList(),
+        val userId: String? = null,
+        val dummy: Int = 0,
+    )
 }
-
-
-data class StateSearchProcessViewModel(
-    val isProcess: Boolean = true,
-    val products: List<Product> = emptyList(),
-    val watchlist: UserWatchlist? = null,
-    val userId: String? = null,
-    val dummy: Int = 0,
-)

@@ -12,6 +12,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import com.ramo.ebuy.AppViewModel
 import com.ramo.ebuy.di.Project
 import com.ramo.ebuy.di.Stater
 import com.ramo.ebuy.global.base.Theme
@@ -26,6 +27,7 @@ import org.koin.compose.koinInject
 @Composable
 fun HomeUserScreen(
     navigator: Navigator,
+    appViewModel: AppViewModel,
     project: Project = koinInject(),
     theme: Theme = koinInject(),
     stater: Stater = koinInject(),
@@ -38,6 +40,7 @@ fun HomeUserScreen(
     }
 ) {
     val state by viewModel.uiState.collectAsState()
+    val stateApp by appViewModel.uiState.collectAsState()
     val scaffoldState = remember { SnackbarHostState() }
     OnLaunchScreen {
         viewModel.initHome()
@@ -67,8 +70,8 @@ fun HomeUserScreen(
     ) {
         Box(Modifier.padding(it)) {
             when (state.selectedPage) {
-                0 -> HomeSubScreen(navigator, viewModel)
-                1 -> ProfileSubScreen(navigator, viewModel)
+                0 -> HomeSubScreen(navigator, viewModel, stateApp.cartList.size)
+                1 -> ProfileSubScreen(navigator, viewModel, stateApp.cartList.size)
                 2 -> SearchSubScreen(navigator, viewModel)
                 4 -> SellingSubScreen(navigator, viewModel)
             }

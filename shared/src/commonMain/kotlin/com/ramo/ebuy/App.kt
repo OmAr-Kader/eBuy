@@ -13,6 +13,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -74,18 +75,23 @@ fun Main(root: RootComponent) {
     KoinApplication(
         application = initApp(isDarkMode = isSystemInDarkTheme())
     ) {
-        val childStack by root.childStack.subscribeAsState()
         val theme: Theme = koinInject()
         val project: Project = koinInject()
         val stater: Stater = koinInject()
+        val appViewModel: AppViewModel = MokoModel {
+            AppViewModel(project)
+        }
+        DisposableEffect(Unit) {
+            onDispose {
+                stater.onCleared()
+            }
+        }
+        val childStack by root.childStack.subscribeAsState()
         MyApplicationTheme(theme = theme) {
             Surface(
                 modifier = Modifier.fillMaxSize(),
                 color = theme.background
             ) {
-                val appViewModel: AppViewModel = MokoModel {
-                    AppViewModel(project, stater)
-                }
                 Children(
                     stack = childStack,
                     animation = stackAnimation(slide())
@@ -94,8 +100,8 @@ fun Main(root: RootComponent) {
                         is Screen.SplashRoute -> SplashScreen(instance.component, appViewModel = appViewModel)
                         is Screen.LogInRoute -> LogInScreen(instance.component)
                         is Screen.LogInEmailRoute -> LogInEmailScreen(instance.component, instance.isRegister)
-                        is Screen.HomeUserRoute -> HomeUserScreen(instance.component)
-                        is Screen.ProductDetailsRoute -> ProductDetailsScreen(instance.component, instance.productId)
+                        is Screen.HomeUserRoute -> HomeUserScreen(instance.component, appViewModel)
+                        is Screen.ProductDetailsRoute -> ProductDetailsScreen(instance.component, appViewModel, instance.productId)
                         is Screen.ProductSellingRoute -> ProductSellingScreen(instance.component, instance.productId, instance.isAdmin)
                         is Screen.ProductConditionMainRoute -> ProductConditionMainScreen(instance.component)
                         is Screen.ProductSellingPriceRoute -> ProductSellingPriceScreen(instance.component)
@@ -117,9 +123,9 @@ fun Main(root: RootComponent) {
                         is Screen.ProductShippingCostRoute -> ProductShippingCostScreen(instance.component)
                         is Screen.CategoryCreatingRoute -> CategoryCreatingScreen(instance.component)
                         is Screen.AdminHomeRoute -> AdminHomeScreen(instance.component)
-                        is Screen.SearchProcessRoute -> SearchProcessScreen(instance.component, instance.searchText, instance.typeSearch)
-                        is Screen.WatchListRoute -> WatchlistScreen(instance.component)
-                        is Screen.CartRoute -> CartScreen(instance.component)
+                        is Screen.SearchProcessRoute -> SearchProcessScreen(instance.component, appViewModel, instance.searchText, instance.typeSearch)
+                        is Screen.WatchListRoute -> WatchlistScreen(instance.component, appViewModel)
+                        is Screen.CartRoute -> CartScreen(instance.component, appViewModel)
                     }
                 }
             }
@@ -142,7 +148,6 @@ fun SplashScreen(
     when (val sessionStatus = state.sessionStatus) {
         is SessionStatus.Authenticated -> {
             appViewModel.fetchUser(sessionStatus.session).let { user ->
-                appViewModel.cancelSession()
                 if (user != null) {
                     if (user.userType == 1) {
                         scope.launch {
@@ -162,12 +167,40 @@ fun SplashScreen(
                     }
                 }
             }
+            Scaffold { pad ->
+                Surface(
+                    modifier = Modifier.fillMaxSize().padding(pad),
+                    color = MaterialTheme.colorScheme.background,
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Image(
+                            modifier = Modifier.width(100.dp),
+                            imageVector = rememberEbuy(),
+                            contentDescription = ""
+                        )
+                    }
+                }
+            }
         }
 
         is SessionStatus.NotAuthenticated -> {
             OnLaunchScreen {
                 scope.launch {
                     navigator.navigateHome(RootComponent.Configuration.LogInRoute)
+                }
+            }
+            Scaffold { pad ->
+                Surface(
+                    modifier = Modifier.fillMaxSize().padding(pad),
+                    color = MaterialTheme.colorScheme.background,
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Image(
+                            modifier = Modifier.width(100.dp),
+                            imageVector = rememberEbuy(),
+                            contentDescription = ""
+                        )
+                    }
                 }
             }
         }
