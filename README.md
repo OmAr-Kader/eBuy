@@ -1,6 +1,6 @@
-# eBuy Demo "Clone App" (Under Dev)
+# eBuy Demo "Clone App"
 
-E-commerce built in Kotlin Multiplatform Mobile using Supabase auth, realtime, database and storage.
+E-commerce application built using Kotlin Multiplatform Mobile (KMM) and Supabase. It leverages Supabase's authentication, real-time capabilities, database, and storage to provide a seamless shopping experience.
 
 # Agile Scrum
 ## Epic 1: User Management
@@ -90,7 +90,6 @@ E-commerce built in Kotlin Multiplatform Mobile using Supabase auth, realtime, d
 - Task 6.2.2: Implement Payment methods validation
 - Task 6.2.3: Write tests for checkout
 
----
 ---
 ---
 
