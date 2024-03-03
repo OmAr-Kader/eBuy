@@ -89,7 +89,7 @@ fun BarMainScreen(
             contentScale = ContentScale.Fit,
             contentDescription = null,
         )
-        Row {
+        Row(Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically,) {
             Image(
                 modifier = Modifier
                     .graphicsLayer {
@@ -114,8 +114,8 @@ fun BarMainScreen(
 
 @Composable
 fun ShoppingCartItem(cartSize: Int, theme: Theme, onClick: () -> Unit) {
-    Box {
-        Box(Modifier.padding(10.dp)) {
+    Box(Modifier.fillMaxHeight()) {
+        Box(Modifier.fillMaxHeight().padding(horizontal = 10.dp)) {
             Image(
                 modifier = Modifier
                     .width(40.dp)
@@ -166,7 +166,7 @@ fun BarSearchScreen(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically) {
             Image(
                 modifier = Modifier
                     .width(48.dp)
@@ -198,7 +198,7 @@ fun BarSearchScreen(
                 })
             )
         }
-        Row {
+        Row(Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically) {
             Image(
                 modifier = Modifier
                     .clickable {
@@ -250,7 +250,7 @@ fun BarSearchProcess(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically) {
             Image(
                 modifier = Modifier
                     .width(48.dp)
@@ -267,7 +267,7 @@ fun BarSearchProcess(
             Spacer(Modifier.width(5.dp))
             Text(search, color = theme.textColor, fontSize = 22.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
-        Row {
+        Row(Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically) {
             Image(
                 modifier = Modifier
                     .clickable {
@@ -305,7 +305,7 @@ fun BarProductScreen(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically) {
             Image(
                 modifier = Modifier
                     .width(48.dp)
@@ -322,7 +322,7 @@ fun BarProductScreen(
             Spacer(Modifier.width(5.dp))
             Text("Item", color = theme.textColor, fontSize = 22.sp)
         }
-        Row {
+        Row(Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically) {
             Image(
                 modifier = Modifier
                     .clickable {
@@ -393,7 +393,7 @@ fun BarWatchListScreen(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically) {
             Image(
                 modifier = Modifier
                     .width(48.dp)
@@ -410,7 +410,7 @@ fun BarWatchListScreen(
             Spacer(Modifier.width(5.dp))
             Text("WatchList", color = theme.textColor, fontSize = 22.sp)
         }
-        Row {
+        Row(Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically) {
             Image(
                 modifier = Modifier
                     .clickable {
@@ -447,7 +447,7 @@ fun BarCartScreen(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.fillMaxHeight(), verticalAlignment = Alignment.CenterVertically) {
             Image(
                 modifier = Modifier
                     .width(48.dp)

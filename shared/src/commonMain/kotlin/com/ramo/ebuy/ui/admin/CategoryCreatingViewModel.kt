@@ -181,9 +181,10 @@ class CategoryCreatingViewModel(
         val modeModalBottom: Int = -1,
         val dummy: Int = 0,
     ) {
+
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
-            if (javaClass != other?.javaClass) return false
+            if (other == null || this::class != other::class) return false
 
             other as State
 
@@ -197,7 +198,9 @@ class CategoryCreatingViewModel(
                 if (!newCategoryImage.contentEquals(other.newCategoryImage)) return false
             } else if (other.newCategoryImage != null) return false
             if (modeModalBottom != other.modeModalBottom) return false
-            return dummy == other.dummy
+            if (dummy != other.dummy) return false
+
+            return true
         }
 
         override fun hashCode(): Int {

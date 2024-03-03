@@ -7,7 +7,7 @@ import Metal
 struct iosApp: App {
     func metal()-> String {
         let device = MTLCreateSystemDefaultDevice()
-        print(device)
+        print(device ?? "")
         return ""
     }
     var body: some Scene {
@@ -25,7 +25,7 @@ struct ContentView: View {
 
 struct ComposeView: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> UIViewController {
-        AppKt.MainViewController()
+        MainViewKt.MainViewController()
     }
 
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}

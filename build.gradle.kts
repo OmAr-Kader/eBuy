@@ -13,3 +13,14 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
         jvmTarget = "17"
     }
 }
+
+val cmpVersion = "1.6.0"
+configurations.configureEach {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "androidx.collection" && requested.name.startsWith("collection")) {
+            useTarget("org.jetbrains.compose.collection-internal:collection:$cmpVersion")
+        } else if (requested.group == "androidx.annotation" && requested.name.startsWith("annotation")) {
+            useTarget("org.jetbrains.compose.annotation-internal:annotation:1.8.0-alpha01")
+        }
+    }
+}

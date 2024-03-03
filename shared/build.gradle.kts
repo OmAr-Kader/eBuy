@@ -10,7 +10,7 @@ kotlin {
     androidTarget {
         compilations.all {
             kotlinOptions {
-                jvmTarget = "17"
+                jvmTarget = libs.versions.jvmTarget.get()
             }
         }
     }
@@ -68,12 +68,14 @@ kotlin {
             implementation(libs.napier)
             implementation(libs.peekaboo.ui)
             implementation(libs.peekaboo.image.picker)
+            implementation(libs.compose.collection)
             api(libs.moko.mvvm.core)
             api(libs.moko.mvvm.compose)
             api(libs.moko.mvvm.flow)
             api(libs.moko.mvvm.flow.compose)
             api(libs.moko.mvvm.livedata.compose)
             implementation(libs.flexible.bottomsheet)
+            implementation(libs.ktor.touch)
             // https://mvnrepository.com/artifact/com.google.mlkit/vision-common
             //implementation("com.google.mlkit:vision-common:17.3.0")
 
@@ -99,18 +101,19 @@ kotlin {
 }
 
 android {
-    namespace = "com.ramo.myapplication"
-    compileSdk = 34
-    sourceSets["main"].resources.srcDirs("src/commonMain/resources")
+    namespace = libs.versions.applicationId.get()
+    //namespace = "com.ramo.ebuy.android"
+    compileSdk = libs.versions.compileSdk.get().toInt()
+    //sourceSets["main"].resources.srcDirs("src/commonMain/resources")
     defaultConfig {
-        minSdk = 24
+        minSdk = libs.versions.minSdk.get().toInt()
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
     java {
-        toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+        toolchain.languageVersion.set(JavaLanguageVersion.of(libs.versions.jvmTarget.get().toInt()))
     }
 }
 

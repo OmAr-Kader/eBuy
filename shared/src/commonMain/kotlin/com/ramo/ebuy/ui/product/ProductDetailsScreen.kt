@@ -92,7 +92,7 @@ fun ProductDetailsScreen(
                     }
 
                     2 -> {
-                        stater.getScreenCount(RootComponent.Configuration.CartRoute::class.java).let { count ->
+                        stater.getScreenCount(RootComponent.Configuration.CartRoute::class).let { count ->
                             RootComponent.Configuration.CartRoute(count + 1).also { route ->
                                 scope.launch {
                                     stater.writeArguments(route = route, screenCount = count + 1)
@@ -117,7 +117,7 @@ fun ProductDetailsScreen(
                     when (it) {
                         1 -> viewModel.addToCart()
                         2 -> {
-                            stater.getScreenCount(RootComponent.Configuration.CartRoute::class.java).let { count ->
+                            stater.getScreenCount(RootComponent.Configuration.CartRoute::class).let { count ->
                                 RootComponent.Configuration.CartRoute(count + 1).also { route ->
                                     scope.launch {
                                         stater.writeArguments(route = route, screenCount = count + 1)
@@ -156,7 +156,7 @@ fun ProductDetailsScreen(
                     Spacer(Modifier.height(20.dp))
                 }
                 ProductList(list = state.productVer) {
-                    stater.getScreenCount(RootComponent.Configuration.ProductDetailsRoute::class.java).let { count ->
+                    stater.getScreenCount(RootComponent.Configuration.ProductDetailsRoute::class).let { count ->
                         RootComponent.Configuration.ProductDetailsRoute(it.id, count + 1).also { route ->
                             scope.launch {
                                 stater.writeArguments(route = route, screenCount = count + 1)

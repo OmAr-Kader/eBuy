@@ -12,7 +12,7 @@ suspend fun io.github.jan.supabase.SupabaseClient.uploadFile(
     invoke: suspend (String) -> Unit,
 ) {
     storage.from(bucket).apply {
-        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
             supabase {
                 upload(
                     baseName + "_" + Clock.System.now().toEpochMilliseconds() + "_" + kotlin.random.Random.nextInt(),
@@ -34,7 +34,7 @@ suspend fun io.github.jan.supabase.SupabaseClient.uploadListFile(
     images: List<ByteArray>,
     invoke: suspend (List<String>) -> Unit,
 ) {
-    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
         images.map {
             supabase {
                 storage.from(bucket).upload(
@@ -57,7 +57,7 @@ suspend fun io.github.jan.supabase.SupabaseClient.deleteFile(
     invoke: suspend (Unit?) -> Unit,
 ) {
     storage.from(bucket).apply {
-        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
             urls.forEach { url ->
                 supabase {
                     url.split("${bucket}/").lastOrNull()?.let {

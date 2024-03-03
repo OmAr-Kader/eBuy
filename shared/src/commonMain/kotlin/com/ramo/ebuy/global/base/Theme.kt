@@ -9,15 +9,11 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.graphics.blue
-import androidx.core.graphics.green
-import androidx.core.graphics.red
 
 data class Theme(
     val isDarkMode: Boolean,
@@ -35,15 +31,9 @@ data class Theme(
     val textHintColor: Color,
     val pri: Color
 ) {
-    val priAlpha: Color = pri.toArgb().let {
-        Color(it.red, it.green, it.blue, 63)
-    }
-    val textHintAlpha = textHintColor.toArgb().let {
-        Color(it.red, it.green, it.blue, 150)
-    }
-    val backDarkAlpha = backDark.toArgb().let {
-        Color(it.red, it.green, it.blue, 150)
-    }
+    val priAlpha: Color = pri.copy(alpha = 0.14F)
+    val textHintAlpha = textHintColor.copy(alpha = 0.5F)
+    val backDarkAlpha = backDark.copy(alpha = 0.5F)
 }
 
 fun generateTheme(isDarkMode: Boolean): Theme {

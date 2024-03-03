@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -129,7 +130,7 @@ fun HomeSubScreen(
 
                     }
                     ProductList(list = state.productVer) {
-                        stater.getScreenCount(RootComponent.Configuration.ProductDetailsRoute::class.java).let { count ->
+                        stater.getScreenCount(RootComponent.Configuration.ProductDetailsRoute::class).let { count ->
                             RootComponent.Configuration.ProductDetailsRoute(it.id, count + 1).also { route ->
                                 scope.launch {
                                     stater.writeArguments(route = route, screenCount = count + 1)
@@ -142,7 +143,7 @@ fun HomeSubScreen(
             }
         }
         BarMainScreen(offsetY, cartSize) {
-            stater.getScreenCount(RootComponent.Configuration.CartRoute::class.java).let { count ->
+            stater.getScreenCount(RootComponent.Configuration.CartRoute::class).let { count ->
                 RootComponent.Configuration.CartRoute(count + 1).also { route ->
                     scope.launch {
                         stater.writeArguments(route = route, screenCount = count + 1)
@@ -173,7 +174,7 @@ fun ProfileSubScreen(
     }
     Column(Modifier.fillMaxSize()) {
         BarMainScreen(-112, cartSize) {
-            stater.getScreenCount(RootComponent.Configuration.CartRoute::class.java).let { count ->
+            stater.getScreenCount(RootComponent.Configuration.CartRoute::class).let { count ->
                 RootComponent.Configuration.CartRoute(count + 1).also { route ->
                     scope.launch {
                         stater.writeArguments(route = route, screenCount = count + 1)
@@ -214,7 +215,12 @@ fun ProfileSubScreen(
                         }
                     }
                     Spacer(modifier = Modifier.height(15.dp))
-                    Text(modifier = Modifier.padding(), text = state.user?.name.ifEmptyOrNull { state.user?.email ?: "User Name" }, color = theme.textColor, fontSize = 16.sp)
+                    Text(
+                        modifier = Modifier.padding(),
+                        text = state.user?.name.ifEmptyOrNull { state.user?.email ?: "User Name" },
+                        color = theme.textColor,
+                        fontSize = 16.sp
+                    )
                 }
             }
             itemsIndexed(profileData) { i, it ->
@@ -262,7 +268,7 @@ fun SearchSubScreen(
 
     fun onSearchAction(searchText: String, typeSearch: Int) {
         viewModel.makeIsSearchNeedRefresh()
-        stater.getScreenCount(RootComponent.Configuration.SearchProcessRoute::class.java).let { count ->
+        stater.getScreenCount(RootComponent.Configuration.SearchProcessRoute::class).let { count ->
             RootComponent.Configuration.SearchProcessRoute(searchText, typeSearch, count + 1).also { route ->
                 scope.launch {
                     stater.writeArguments(route = route, screenCount = count + 1)
@@ -293,49 +299,58 @@ fun SearchSubScreen(
             if (screen == 0) {
                 LazyColumn {
                     items(state.userSearchList) {
-                        Text(
-                            modifier = Modifier
+                        Row(
+                            Modifier
                                 .fillMaxWidth()
-                                .padding(start = 30.dp, end = 10.dp, top = 10.dp, bottom = 5.dp)
                                 .clickable {
                                     onSearchAction(it.search, 0)
-                                },
-                            fontSize = 18.sp,
-                            text = it.search,
-                            color = theme.textColor
-                        )
-                        Spacer(Modifier.height(5.dp))
+                                }
+                        ) {
+                            Text(
+                                modifier = Modifier.padding(start = 30.dp, end = 10.dp, top = 10.dp, bottom = 5.dp),
+                                fontSize = 18.sp,
+                                text = it.search,
+                                color = theme.textColor
+                            )
+                            Spacer(Modifier.height(5.dp))
+                        }
                     }
                     if (state.userSearchList.isNotEmpty()) {
                         item {
-                            Text(
-                                modifier = Modifier
-                                    .padding(start = 30.dp, end = 10.dp, top = 10.dp, bottom = 5.dp)
-                                    .clickable {
+                            Row(
+                                Modifier
+                                    .fillMaxWidth().clickable {
 
-                                    },
-                                fontSize = 18.sp,
-                                text = "CLEAR RECENT SEARCHES",
-                                color = theme.primary
-                            )
+                                    }
+                            ) {
+                                Text(
+                                    modifier = Modifier.padding(start = 30.dp, end = 10.dp, top = 10.dp, bottom = 5.dp),
+                                    fontSize = 18.sp,
+                                    text = "CLEAR RECENT SEARCHES",
+                                    color = theme.primary
+                                )
+                                Spacer(Modifier.height(5.dp))
+                            }
                         }
                     }
                 }
             } else {
                 LazyColumn {
                     items(state.userSearchSavedList) {
-                        Text(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 30.dp, end = 10.dp, top = 10.dp, bottom = 5.dp)
-                                .clickable {
-                                    onSearchAction(it.search, 1)
-                                },
-                            fontSize = 18.sp,
-                            text = it.search,
-                            color = theme.textColor
-                        )
-                        Spacer(Modifier.height(5.dp))
+                        Row(
+                            Modifier
+                            .fillMaxWidth().clickable {
+                                onSearchAction(it.search, 1)
+                            }
+                        ) {
+                            Text(
+                                modifier = Modifier.padding(start = 30.dp, end = 10.dp, top = 10.dp, bottom = 5.dp),
+                                fontSize = 18.sp,
+                                text = it.search,
+                                color = theme.textColor
+                            )
+                            Spacer(Modifier.height(5.dp))
+                        }
                     }
                 }
             }

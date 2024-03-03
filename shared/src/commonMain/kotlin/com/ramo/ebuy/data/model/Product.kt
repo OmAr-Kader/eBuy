@@ -96,7 +96,7 @@ data class Product(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (javaClass != other?.javaClass) return false
+        if (other == null || this::class != other::class) return false
 
         other as Product
 
@@ -204,7 +204,7 @@ data class ProductBaseSpecs(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (javaClass != other?.javaClass) return false
+        if (other == null || this::class != other::class) return false
 
         other as ProductBaseSpecs
 
@@ -271,7 +271,7 @@ data class ProductSpecsExtra(
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (javaClass != other?.javaClass) return false
+        if (other == null || this::class != other::class) return false
 
         other as ProductSpecsExtra
 
@@ -330,7 +330,7 @@ data class ProductQuantity(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (javaClass != other?.javaClass) return false
+        if (other == null || this::class != other::class) return false
 
         other as ProductQuantity
 
@@ -369,7 +369,7 @@ data class ProductQuantitySpec(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (javaClass != other?.javaClass) return false
+        if (other == null || this::class != other::class) return false
 
         other as ProductQuantitySpec
 

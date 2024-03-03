@@ -71,7 +71,7 @@ import org.koin.compose.KoinApplication
 import org.koin.compose.koinInject
 
 @Composable
-fun Main(root: RootComponent) {
+fun Main(root: RootComponent?) {
     KoinApplication(
         application = initApp(isDarkMode = isSystemInDarkTheme())
     ) {
@@ -85,6 +85,23 @@ fun Main(root: RootComponent) {
             onDispose {
                 stater.onCleared()
             }
+        }
+        if (root == null) {
+            Scaffold { pad ->
+                Surface(
+                    modifier = Modifier.fillMaxSize().padding(pad),
+                    color = MaterialTheme.colorScheme.background,
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Image(
+                            modifier = Modifier.width(100.dp),
+                            imageVector = rememberEbuy(),
+                            contentDescription = ""
+                        )
+                    }
+                }
+            }
+            return@KoinApplication
         }
         val childStack by root.childStack.subscribeAsState()
         MyApplicationTheme(theme = theme) {
@@ -220,7 +237,7 @@ fun SplashScreen(
                             )
                             Spacer(Modifier.height(15.dp))
                             Image(
-                                modifier = Modifier.width(50.dp),
+                                modifier = Modifier.width(100.dp).padding(20.dp),
                                 imageVector = rememberWifiOff(theme.textGrayColor),
                                 contentDescription = ""
                             )

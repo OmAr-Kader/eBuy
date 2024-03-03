@@ -310,13 +310,10 @@ class ProductSellingViewModel(
 
     fun addNewProduct(isAdmin: Boolean, invoke: () -> Unit, failed: () -> Unit) {
         setIsProcess(true)
-        android.util.Log.w("WW", "1")
         _uiState.value.apply {
             launchBack {
                 userInfo()?.let { user ->
-                    android.util.Log.w("WW", "2")
                     project.supaBase.uploadListFile(SUPA_STORAGE_PRODUCT, user.id, images) { imagesUrls ->
-                        android.util.Log.w("WW", "3")
                         doAddProduct(imagesUrls, isAdmin, invoke, failed)
                     }
                 } ?: failed()

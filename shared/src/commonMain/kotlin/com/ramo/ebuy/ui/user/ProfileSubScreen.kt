@@ -63,7 +63,7 @@ fun WatchlistScreen(
                         }
                     }
                     2 -> {
-                        stater.getScreenCount(RootComponent.Configuration.CartRoute::class.java).let { count ->
+                        stater.getScreenCount(RootComponent.Configuration.CartRoute::class).let { count ->
                             RootComponent.Configuration.CartRoute(count + 1).also { route ->
                                 scope.launch {
                                     stater.writeArguments(route = route, screenCount = count + 1)
@@ -76,7 +76,7 @@ fun WatchlistScreen(
             }
             Spacer(modifier = Modifier.height(10.dp))
             ProductsWatchList(state.productsWatchList) {
-                stater.getScreenCount(RootComponent.Configuration.ProductDetailsRoute::class.java).let { count ->
+                stater.getScreenCount(RootComponent.Configuration.ProductDetailsRoute::class).let { count ->
                     RootComponent.Configuration.ProductDetailsRoute(it.id, count + 1).also { route ->
                         scope.launch {
                             stater.writeArguments(route = route, screenCount = count + 1)
@@ -120,7 +120,7 @@ fun CartScreen(
             ProductsUserCart(state.cartProducts, { item, it ->
                 viewModel.cartQuantityChanged(item, it)
             }) {
-                stater.getScreenCount(RootComponent.Configuration.ProductDetailsRoute::class.java).let { count ->
+                stater.getScreenCount(RootComponent.Configuration.ProductDetailsRoute::class).let { count ->
                     RootComponent.Configuration.ProductDetailsRoute(it.id, count + 1).also { route ->
                         scope.launch {
                             stater.writeArguments(route = route, screenCount = count + 1)

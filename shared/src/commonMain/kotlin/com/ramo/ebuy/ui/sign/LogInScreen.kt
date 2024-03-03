@@ -357,7 +357,7 @@ fun LogInEmailScreen(
                                 if (isRegister) {
                                     viewModel.createNewUser(invoke = {
                                         scope.launch {
-                                            navigator.navigateTo(RootComponent.Configuration.HomeUserRoute)
+                                            navigator.navigateHome(RootComponent.Configuration.HomeUserRoute)
                                         }
                                     }) {
                                         scope.launch {
@@ -367,7 +367,7 @@ fun LogInEmailScreen(
                                 } else {
                                     viewModel.loginUser(invoke = {
                                         scope.launch {
-                                            navigator.navigateTo(RootComponent.Configuration.HomeUserRoute)
+                                            navigator.navigateHome(RootComponent.Configuration.HomeUserRoute)
                                         }
                                     }) {
                                         scope.launch {

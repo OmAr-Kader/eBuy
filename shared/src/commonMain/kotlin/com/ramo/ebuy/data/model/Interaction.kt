@@ -46,13 +46,15 @@ data class UserWatchlist(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (javaClass != other?.javaClass) return false
+        if (other == null || this::class != other::class) return false
 
         other as UserWatchlist
 
         if (id != other.id) return false
         if (userId != other.userId) return false
-        return watchlist.contentEquals(other.watchlist)
+        if (!watchlist.contentEquals(other.watchlist)) return false
+
+        return true
     }
 
     override fun hashCode(): Int {
@@ -100,7 +102,7 @@ data class UserRecentViewed(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (javaClass != other?.javaClass) return false
+        if (other == null || this::class != other::class) return false
 
         other as UserRecentViewed
 

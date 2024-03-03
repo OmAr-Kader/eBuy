@@ -4,12 +4,12 @@ plugins {
 }
 
 android {
-    namespace = "com.ramo.ebuy.android"
-    compileSdk = 34
+    namespace = libs.versions.applicationId.get()
+    compileSdk = libs.versions.compileSdk.get().toInt()
     defaultConfig {
-        applicationId = "com.ramo.ebuy.android"
-        minSdk = 24
-        targetSdk = 34
+        applicationId = libs.versions.applicationId.get()
+        minSdk = libs.versions.minSdk.get().toInt()
+        targetSdk = libs.versions.compileSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
     }
@@ -18,7 +18,7 @@ android {
     }
     buildToolsVersion = "34.0.0"
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.9"
+        kotlinCompilerExtensionVersion = libs.versions.kotlinCompiler.get()
     }
     packaging {
         resources {
@@ -35,10 +35,10 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "17"
+        jvmTarget = libs.versions.jvmTarget.get()
     }
     java {
-        toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+        toolchain.languageVersion.set(JavaLanguageVersion.of(libs.versions.jvmTarget.get().toInt()))
     }
     kotlin {
         sourceSets {
