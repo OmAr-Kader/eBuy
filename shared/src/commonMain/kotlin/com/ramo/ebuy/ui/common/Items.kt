@@ -22,7 +22,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -570,7 +570,7 @@ fun GridCatoItem(
             overflow = TextOverflow.Ellipsis,
         )
         if (!isLast) {
-            Divider(modifier = Modifier.padding(10.dp))
+            HorizontalDivider(modifier = Modifier.padding(10.dp))
         }
     }
 }

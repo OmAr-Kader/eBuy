@@ -21,7 +21,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
@@ -235,7 +235,7 @@ fun ProfileSubScreen(
                     }
                 }
                 if (i == 0 || i == 6) {
-                    Divider(color = theme.textColor, modifier = Modifier.padding(horizontal = 30.dp))
+                    HorizontalDivider(color = theme.textColor, modifier = Modifier.padding(horizontal = 30.dp))
                 }
             }
         }
