@@ -1,6 +1,6 @@
 # eBuy Demo "Clone App"
 
-E-commerce application built using Kotlin Multiplatform Mobile (KMM) and Supabase. It leverages Supabase's authentication, real-time capabilities, database, and storage to provide a seamless shopping experience.
+E-commerce application built using Compose Multiplatform (CMP) and Supabase. It leverages Supabase's authentication, real-time capabilities, database, and storage to provide a seamless shopping experience.
 
 # Agile Scrum
 ## Epic 1: User Management
