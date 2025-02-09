@@ -2,6 +2,12 @@
 
 E-commerce application built using Compose Multiplatform (CMP) and Supabase. It leverages Supabase's authentication, real-time capabilities, database, and storage to provide a seamless shopping experience.
 
+## 🤩 Support Me
+
+<a href="https://www.buymeacoffee.com/omar_kader">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-red.png" width="200" height="70" alt="Buy Me a Coffee">
+</a>
+
 # Agile Scrum
 ## Epic 1: User Management
 ### Story 1.1: User Registration
